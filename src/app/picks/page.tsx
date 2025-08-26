@@ -46,11 +46,9 @@ export default function PicksPage() {
     });
   }, [router]);
 
-  // Evento de fútbol activo
+  // Evento destacado (sin usar x.sport, que no existe en EventItem)
   const event: EventItem | undefined = useMemo(() => {
-    const e = EVENTS.find(
-      (x) => (x.sport?.toLowerCase?.() === "futbol") || (x.league?.toLowerCase?.() !== "boxeo")
-    );
+    const e = EVENTS.find(x => x.league?.toLowerCase?.() !== "boxeo");
     return e ?? EVENTS[0];
   }, []);
 
