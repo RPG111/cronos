@@ -1,62 +1,58 @@
-// src/components/BottomNav.tsx
 "use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+// 👇 Cambia estos emojis si quieres afinar el look
+const EMOJI_Q = "⟠"; // usa el que tenías antes para Quinielas
+const EMOJI_HOME = "🏠";
+const EMOJI_USER = "👤";
+
 export default function BottomNav() {
   const path = usePathname();
+  const is = (p: string) => (path === p || path?.startsWith(p));
 
-  const Item = (href: string, emoji: string, label: string) => {
-    const active = path?.startsWith(href);
-    return (
-      <Link
-        href={href}
-        className={[
-          "flex items-center gap-2 rounded-full px-4 py-2 text-sm transition",
-          active
-            ? "bg-emerald-600/90 text-white shadow"
-            : "bg-white/10 text-white/85 hover:bg-white/15"
-        ].join(" ")}
-      >
-        <span className="text-base leading-none">{emoji}</span>
-        <span className="font-medium">{label}</span>
-      </Link>
-    );
-  };
+  const Item = (href: string, emoji: string, label: string, active: boolean) => (
+    <Link
+      href={href}
+      className={[
+        "flex w-full flex-col items-center justify-center rounded-[20px] px-5 py-4 transition",
+        active
+          ? "bg-emerald-800/50 ring-2 ring-emerald-500/50 text-emerald-200"
+          : "text-white"
+      ].join(" ")}
+    >
+      <span className="text-xl leading-none">{emoji}</span>
+      <span className="mt-1 text-[15px] font-medium">{label}</span>
+    </Link>
+  );
 
   return (
     <>
       {/* separador para que el contenido no quede debajo del nav */}
       <div className="h-28" />
 
-      {/* barra flotante tipo “pastilla” centrada */}
+      {/* barra tipo tarjeta grande, centrada y con “vidrio” */}
       <nav
         className="
-          fixed bottom-3 inset-x-0 z-40
-          flex justify-center pointer-events-none
+          fixed bottom-4 left-1/2 z-40 -translate-x-1/2
+          w-[min(92%,780px)]
+          rounded-[28px] border border-white/15
+          bg-black/55 backdrop-blur-md
+          shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]
+          px-3 py-3
         "
         aria-label="Navegación inferior"
       >
-        <div
-          className="
-            pointer-events-auto
-            flex items-center gap-2
-            rounded-full border border-white/15
-            bg-black/35 backdrop-blur-md
-            shadow-[0_10px_30px_-10px_rgba(0,0,0,0.6)]
-            px-3 py-2
-          "
-          // ancho contenido (no ocupa toda la pantalla)
-        >
-          {Item("/picks", "🎫", "Quinielas")}
-          {Item("/home", "🏠", "Home")}
-          {Item("/profile", "👤", "Perfil")}
+        <div className="grid grid-cols-3 gap-3">
+          {Item("/picks", EMOJI_Q, "Quinielas", is("/picks"))}
+          {Item("/home", EMOJI_HOME, "Home", is("/home") || path === "/")}
+          {Item("/profile", EMOJI_USER, "Perfil", is("/profile"))}
         </div>
-
-        {/* safe area para iPhone */}
-        <div className="h-[env(safe-area-inset-bottom)]" />
       </nav>
+
+      {/* safe area para iPhone */}
+      <div className="h-[env(safe-area-inset-bottom)]" />
     </>
   );
 }
