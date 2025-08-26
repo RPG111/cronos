@@ -46,11 +46,12 @@ export default function PicksPage() {
     });
   }, [router]);
 
-  // Evento destacado (sin usar x.sport, que no existe en EventItem)
-  const event: EventItem | undefined = useMemo(() => {
-    const e = EVENTS.find(x => x.league?.toLowerCase?.() !== "boxeo");
-    return e ?? EVENTS[0];
-  }, []);
+ // Evento destacado (sin usar x.sport, que NO existe en EventItem)
+const event: EventItem | undefined = useMemo(() => {
+  const e = EVENTS.find(x => x.league?.toLowerCase?.() !== "boxeo");
+  return e ?? EVENTS[0];
+}, []);
+
 
   const [winner, setWinner] = useState("");
   const [goals, setGoals] = useState<string | number>("");
