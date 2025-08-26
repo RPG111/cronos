@@ -6,62 +6,38 @@ import { usePathname } from "next/navigation";
 import { Home, User, CircleDollarSign } from "lucide-react";
 
 export default function BottomNav() {
-  const path = usePathname();
-  const isActive = (p: string) => path === p || path?.startsWith(p);
+  const pathname = usePathname();
 
-  function Item(props: {
-    href: string;
-    label: string;
-    active: boolean;
-    Icon: React.ComponentType<{ size?: number; strokeWidth?: number; className?: string }>;
-  }) {
-    const { href, label, active, Icon } = props;
-    return (
-      <Link
-        href={href}
-        className={[
-          "flex w-full flex-col items-center justify-center rounded-[20px] px-5 py-4 transition",
-          active
-            ? "bg-emerald-800/50 ring-2 ring-emerald-500/50 text-emerald-200"
-            : "text-white"
-        ].join(" ")}
-      >
-        <Icon
-          size={24}
-          strokeWidth={2.25}
-          className={active ? "text-emerald-200" : "text-white/90"}
-        />
-        <span className="mt-1 text-[15px] font-medium">{label}</span>
-      </Link>
-    );
-  }
+  const links = [
+    { href: "/picks", label: "Quinielas", icon: CircleDollarSign },
+    { href: "/home", label: "Home", icon: Home },
+    { href: "/profile", label: "Perfil", icon: User },
+  ];
 
   return (
-    <>
-      {/* separador para que el contenido no quede debajo del nav */}
-      <div className="h-28" />
-
-      {/* tarjeta/pastilla centrada con vidrio */}
-      <nav
-        className="
-          fixed bottom-4 left-1/2 z-40 -translate-x-1/2
-          w-[min(92%,780px)]
-          rounded-[28px] border border-white/15
-          bg-black/55 backdrop-blur-md
-          shadow-[0_20px_60px_-20px_rgba(0,0,0,0.6)]
-          px-3 py-3
-        "
-        aria-label="Navegación inferior"
-      >
-        <div className="grid grid-cols-3 gap-3">
-          <Item href="/picks" label="Quinielas" active={isActive("/picks")} Icon={CircleDollarSign} />
-          <Item href="/home" label="Home" active={isActive("/home") || path === "/"} Icon={Home} />
-          <Item href="/profile" label="Perfil" active={isActive("/profile")} Icon={User} />
-        </div>
-      </nav>
-
-      {/* safe area iPhone */}
-      <div className="h-[env(safe-area-inset-bottom)]" />
-    </>
+    <nav className="fixed bottom-4 left-1/2 z-50 w-[90%] max-w-md -translate-x-1/2">
+      <div className="flex justify-around rounded-2xl border border-white/10 bg-black/60 backdrop-blur-md shadow-lg">
+        {links.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition ${
+                active
+                  ? "bg-emerald-600/20 text-emerald-400"
+                  : "text-white/70 hover:text-white"
+              }`}
+            >
+              <Icon
+                size={18} // 🔹 25% más chico que antes (antes estaba en ~24)
+                strokeWidth={2}
+              />
+              <span className="text-[11px] font-medium">{label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
