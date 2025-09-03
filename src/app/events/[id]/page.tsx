@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState, use } from "react"; // 👈 agregamos use
+import { useEffect, useMemo, useState, use } from "react";
 import { EVENTS, type EventItem, fmtDateLong } from "../../../lib/events";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
@@ -31,9 +31,10 @@ function mapsLinks(ev: EventItem) {
 export default function EventDetails({
   params,
 }: {
-  params: Promise<{ id: string }>; // 👈 ahora es Promise
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params); // 👈 desempaquetamos el Promise
+  // Desempaquetamos params (App Router 15)
+  const { id } = use(params);
   const ev = useMemo(() => EVENTS.find((e) => e.id === id), [id]);
 
   if (!ev) {
@@ -48,16 +49,11 @@ export default function EventDetails({
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
           <div className="relative z-10">
             <div className="mx-auto w-full max-w-xl px-5 py-8 text-white">
-              <Link
-                href="/home"
-                className="text-emerald-400 hover:text-emerald-300"
-              >
+              <Link href="/home" className="text-emerald-400 hover:text-emerald-300">
                 ← Volver
               </Link>
               <h1 className="mt-4 text-2xl font-bold">Evento no encontrado</h1>
-              <p className="mt-2 text-zinc-300">
-                Verifica el enlace o regresa al inicio.
-              </p>
+              <p className="mt-2 text-zinc-300">Verifica el enlace o regresa al inicio.</p>
             </div>
           </div>
         </div>
@@ -79,6 +75,9 @@ function EventDetailsContent({ ev }: { ev: EventItem }) {
 
   type Attendee = { id: string; team: string; name?: string; phone?: string };
   const [attendees, setAttendees] = useState<Attendee[]>([]);
+  const [cancelling, setCancelling] = useState(false);
+
+  // Live attendees
   useEffect(() => {
     const db = getFirestore(firebaseApp);
     const colRef = collection(db, "events", ev.id, "attendees");
@@ -97,12 +96,25 @@ function EventDetailsContent({ ev }: { ev: EventItem }) {
 
   async function handleCancel() {
     if (!uid) return;
+    const ok = window.confirm("¿Seguro que quieres cancelar tu reserva?");
+    if (!ok) return;
+
+    setCancelling(true);
     try {
       const db = getFirestore(firebaseApp);
       await deleteDoc(doc(db, "events", ev.id, "attendees", uid));
-    } catch (e) {
+      alert("Tu reserva fue cancelada.");
+      // No necesitamos actualizar el estado manual: onSnapshot refresca.
+    } catch (e: any) {
       console.error(e);
-      alert("No se pudo cancelar tu reserva. Intenta de nuevo.");
+      // Mensaje más claro para permisos
+      const msg =
+        e?.code === "permission-denied"
+          ? "No tienes permiso para cancelar esta reserva (parece ser otro usuario/otra sesión). Inicia sesión con el mismo teléfono/cuenta que reservó."
+          : "No se pudo cancelar tu reserva. Intenta de nuevo.";
+      alert(msg);
+    } finally {
+      setCancelling(false);
     }
   }
 
@@ -145,9 +157,7 @@ function EventDetailsContent({ ev }: { ev: EventItem }) {
 
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-4">
               <div className="text-lg font-bold text-white">Asistentes</div>
-              <div className="mt-1 text-zinc-400 text-sm">
-                En tiempo real (Firestore)
-              </div>
+              <div className="mt-1 text-sm text-zinc-400">En tiempo real (Firestore)</div>
 
               <div className="mt-4 grid grid-cols-3 gap-3 text-center">
                 <div className="rounded-xl bg-zinc-800 p-4 text-white">
@@ -169,10 +179,14 @@ function EventDetailsContent({ ev }: { ev: EventItem }) {
               <div className="mt-4">
                 <button
                   onClick={handleCancel}
-                  className="w-full rounded-xl border border-red-400/40 bg-red-500/20 px-4 py-3 font-semibold text-red-200 hover:bg-red-500/30 transition"
+                  disabled={cancelling}
+                  className="w-full rounded-xl border border-red-400/40 bg-red-500/20 px-4 py-3 font-semibold text-red-200 hover:bg-red-500/30 transition disabled:opacity-60"
                 >
-                  Cancelar mi reserva
+                  {cancelling ? "Cancelando…" : "Cancelar mi reserva"}
                 </button>
+                <p className="mt-2 text-center text-xs text-white/60">
+                  * Solo puedes cancelar la reserva creada con esta misma sesión/cuenta.
+                </p>
               </div>
             )}
 
