@@ -90,8 +90,6 @@ export async function POST(req: Request) {
   try {
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     const TO = process.env.LEADS_EMAIL_TO;
-    const FROM = process.env.LEADS_EMAIL_FROM || "leads@cronosapp.com";
-
     if (!RESEND_API_KEY || !TO) {
       // Email not configured — lead already saved in Firestore by the client, so return ok.
       console.warn("[leads/email] RESEND_API_KEY or LEADS_EMAIL_TO not set — skipping email.");
@@ -110,7 +108,7 @@ export async function POST(req: Request) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: FROM,
+        from: 'Cronos <hola@cronosports.app>',
         to: TO,
         subject,
         text,
