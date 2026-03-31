@@ -90,11 +90,10 @@ export async function POST(req: Request) {
   try {
     console.log('RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY);
     console.log('LEADS_EMAIL_TO:', process.env.LEADS_EMAIL_TO);
-    const RESEND_API_KEY = process.env.RESEND_API_KEY;
-    const TO = process.env.LEADS_EMAIL_TO;
+    const RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
+    const TO = process.env.LEADS_EMAIL_TO ?? '';
     if (!RESEND_API_KEY || !TO) {
-      // Email not configured — lead already saved in Firestore by the client, so return ok.
-      console.warn("[leads/email] RESEND_API_KEY or LEADS_EMAIL_TO not set — skipping email.");
+      console.warn('[leads/email] vars missing — RESEND:', RESEND_API_KEY?.slice(0,8), 'TO:', TO);
       return NextResponse.json({ ok: true, skipped: true });
     }
 
