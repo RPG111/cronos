@@ -88,6 +88,8 @@ function row(label: string, value: string) {
 
 export async function POST(req: Request) {
   try {
+    console.log('RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY);
+    console.log('LEADS_EMAIL_TO:', process.env.LEADS_EMAIL_TO);
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     const TO = process.env.LEADS_EMAIL_TO;
     if (!RESEND_API_KEY || !TO) {
