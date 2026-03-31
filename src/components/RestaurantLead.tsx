@@ -91,6 +91,7 @@ export default function RestaurantLead({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
+    console.log('Submit iniciado', lead);
 
     // Validation
     if (!lead.restaurantName.trim()) { setErrorMsg("El nombre del restaurante es obligatorio."); return; }
@@ -116,9 +117,11 @@ export default function RestaurantLead({
       };
 
       // 1. Save to Firestore
-      await addDoc(collection(db, "leads_restaurants"), payload);
+      const docRef = await addDoc(collection(db, "leads_restaurants"), payload);
+      console.log('Firestore OK', docRef);
 
       // 2. Notify via email (fire-and-forget — don't block UX on email failure)
+      console.log('Llamando a email API');
       fetch("/api/leads/email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -133,6 +136,8 @@ export default function RestaurantLead({
           message:        payload.message,
           uid:            payload.uid,
         }),
+      }).then(async (emailResp) => {
+        console.log('Email API response', emailResp.status, await emailResp.text());
       }).catch((err) => console.warn("Email notification failed (non-blocking):", err));
 
       // 3. Show success and auto-close
@@ -141,7 +146,7 @@ export default function RestaurantLead({
         onClose();
       }, 2000);
     } catch (err: any) {
-      console.error(err);
+      console.error('Error en submit', err);
       setErrorMsg("No se pudo enviar. Intenta más tarde.");
     } finally {
       setSaving(false);
