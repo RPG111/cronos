@@ -101,7 +101,15 @@ export async function POST(req: Request) {
     const TO = process.env.LEADS_EMAIL_TO ?? '';
     if (!RESEND_API_KEY || !TO) {
       console.warn('[leads/email] vars missing — RESEND:', RESEND_API_KEY?.slice(0,8), 'TO:', TO);
-      return NextResponse.json({ ok: true, skipped: true });
+      return NextResponse.json({
+        ok: true,
+        skipped: true,
+        _debug: {
+          hasResend: !!RESEND_API_KEY,
+          hasEmail: !!TO,
+          nodeEnv: process.env.NODE_ENV,
+        },
+      });
     }
 
     const body = (await req.json()) as LeadPayload;
