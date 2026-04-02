@@ -47,7 +47,7 @@ function Modal({
       <div className="relative z-10 w-[92%] max-w-md rounded-2xl border border-white/10 bg-zinc-900/95 p-5 text-white shadow-2xl">
         <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-bold">{title}</h3>
-          <button onClick={onClose} className="rounded-lg bg-zinc-800 px-2 py-1 text-sm hover:bg-zinc-700">✕</button>
+          <button onClick={onClose} className="rounded-lg bg-zinc-800 px-2 py-1 text-sm hover:bg-zinc-700">&#x2715;</button>
         </div>
         {children}
       </div>
@@ -55,7 +55,7 @@ function Modal({
   );
 }
 
-/** 🔠 Util: genera un slug estable para IDs (equipo → teams/{slug}) */
+/** Util: genera un slug estable para IDs (equipo -> teams/{slug}) */
 function slugifyName(s: string) {
   return s
     .toLowerCase()
@@ -75,7 +75,7 @@ export default function HomePage() {
 
   const [profileName, setProfileName] = useState("");
   const [profilePhone, setProfilePhone] = useState("");
-  const [profileFav, setProfileFav] = useState(""); // equipo favorito guardado
+  const [profileFav, setProfileFav] = useState("");
 
   const [myAttendance, setMyAttendance] = useState<MyAttendanceMap>({});
 
@@ -86,18 +86,14 @@ export default function HomePage() {
   const [teamChoice, setTeamChoice] = useState<"A" | "B" | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Modal “Soy restaurante”
   const [leadOpen, setLeadOpen] = useState(false);
 
-  // Modal QR
   const [qrOpen, setQrOpen] = useState(false);
   const [qrData, setQrData] = useState<QRData | null>(null);
 
-  // 🔵 Segundo modal para pedir equipo favorito si el usuario no tiene cuenta
   const [favOpen, setFavOpen] = useState(false);
   const [favTeam, setFavTeam] = useState("");
 
-  // 🔁 Guarda o actualiza un equipo libre en la colección `teams`
   async function upsertTeamIfNew(nameRaw: string) {
     const name = (nameRaw || "").trim();
     if (!name) return;
@@ -163,8 +159,8 @@ export default function HomePage() {
         snap.forEach((d) => {
           total += 1;
           const team = (d.data().team as string) || "";
-          if (team === ev.split.aLabel) a += 1;
-          else if (team === ev.split.bLabel) b += 1;
+          if (team === (ev.split?.aLabel || ev.homeTeam)) a += 1;
+          else if (team === (ev.split?.bLabel || ev.awayTeam)) b += 1;
         });
         setCounts((prev) => ({ ...prev, [ev.id]: { total, a, b } }));
       });
@@ -214,10 +210,11 @@ export default function HomePage() {
   async function createOrUpdateProfileAndReserve(activeUid: string) {
     if (!selected) return;
     const db = getFirestore(firebaseApp);
-    const team = teamChoice === "A" ? selected.split?.aLabel : selected.split?.bLabel;
+    const team = teamChoice === "A"
+      ? (selected.split?.aLabel || selected.homeTeam || "")
+      : (selected.split?.bLabel || selected.awayTeam || "");
     const reserveCode = genCode6();
 
-    // Perfil (incluye favoriteTeam si lo tenemos)
     await setDoc(
       doc(db, "users", activeUid),
       {
@@ -230,7 +227,6 @@ export default function HomePage() {
       { merge: true }
     );
 
-    // Asistencia
     await setDoc(
       doc(db, "events", selected.id, "attendees", activeUid),
       {
@@ -245,13 +241,12 @@ export default function HomePage() {
       { merge: true }
     );
 
-    // SMS
     await fetch("/api/sms/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         to: phone.trim(),
-        message: `Cronos: tu código de reserva para "${selected.title}" es ${reserveCode}.`,
+        message: "Cronos: tu codigo de reserva para \"" + selected.title + "\" es " + reserveCode + ".",
       }),
     });
   }
@@ -259,22 +254,20 @@ export default function HomePage() {
   async function confirmReserve() {
     if (!selected) return;
     if (!teamChoice) { alert("Elige un bando para continuar."); return; }
-    if (!name.trim() || !phone.trim()) { alert("Confirma nombre y teléfono."); return; }
+    if (!name.trim() || !phone.trim()) { alert("Confirma nombre y telefono."); return; }
 
-    // Validación de cupo (solo si no tiene ya reserva en este evento)
     const currentCount = counts[selected.id];
     if (!myAttendance[selected.id] && currentCount && currentCount.total >= selected.capacity) {
-      alert("Lo sentimos, este evento ya está lleno.");
+      alert("Lo sentimos, este evento ya esta lleno.");
       return;
     }
 
-    // Caso 1: el usuario YA está logueado → reservar directo
     if (uid) {
       setSaving(true);
       try {
         await createOrUpdateProfileAndReserve(uid);
         setOpen(false);
-        alert("Reserva confirmada. Te enviamos tu código por SMS.");
+        alert("Reserva confirmada. Te enviamos tu codigo por SMS.");
       } catch (e) {
         console.error(e);
         alert("No se pudo guardar/enviar tu reserva. Intenta de nuevo.");
@@ -284,11 +277,9 @@ export default function HomePage() {
       return;
     }
 
-    // Caso 2: NO hay sesión → pedimos equipo favorito (si no lo tenemos)
     setFavOpen(true);
   }
 
-  // 🔧 AJUSTADO: primero sesión (anónima si hace falta), luego teams, luego perfil+reserva
   async function handleFavSubmit() {
     if (!favTeam.trim()) {
       alert("Selecciona o escribe tu equipo favorito.");
@@ -298,23 +289,19 @@ export default function HomePage() {
     try {
       const auth = getAuth(firebaseApp);
 
-      // 1) Asegura sesión
       let activeUid = uid;
       if (!activeUid) {
         const cred = await signInAnonymously(auth);
         activeUid = cred.user?.uid || null;
-        if (!activeUid) throw new Error("No se pudo iniciar sesión anónima.");
+        if (!activeUid) throw new Error("No se pudo iniciar sesion anonima.");
       }
 
-      // 2) Ahora sí: guardar/actualizar el equipo en 'teams' (ya autenticado)
       await upsertTeamIfNew(favTeam);
-
-      // 3) Perfil + reserva + SMS
       await createOrUpdateProfileAndReserve(activeUid);
 
       setFavOpen(false);
       setOpen(false);
-      alert("Reserva confirmada. Te enviamos tu código por SMS.");
+      alert("Reserva confirmada. Te enviamos tu codigo por SMS.");
     } catch (e) {
       console.error(e);
       alert("No se pudo terminar la reserva. Intenta de nuevo.");
@@ -329,128 +316,177 @@ export default function HomePage() {
       window.location.href = "/auth/login";
     } catch (e) {
       console.error(e);
-      alert("No se pudo cerrar sesión.");
+      alert("No se pudo cerrar sesion.");
     }
   }
 
   return (
-    <main>
-      <div className="relative min-h-dvh w-full">
-        <img src="/images/stadium.jpg" alt="" className="absolute inset-0 h-full w-full object-cover blur-sm" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+    <main style={{ minHeight: "100dvh", background: "#080c14" }}>
+      <Header
+        onOpenLead={() => setLeadOpen(true)}
+        isLoggedIn={!!uid}
+        onLogout={handleSignOut}
+      />
 
-        <div className="relative z-10">
-          {/* Header */}
-          <Header
-            onOpenLead={() => setLeadOpen(true)}
-            isLoggedIn={!!uid}
-            onLogout={handleSignOut}
-          />
+      <RestaurantLead open={leadOpen} onClose={() => setLeadOpen(false)} />
 
-          {/* Modal “Soy restaurante” */}
-          <RestaurantLead open={leadOpen} onClose={() => setLeadOpen(false)} />
+      <div style={{ maxWidth: "520px", margin: "0 auto", padding: "24px 16px" }}>
+        <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>
+          Proximos eventos
+        </h2>
+        <p style={{ color: "#3a5070", marginTop: "4px", fontSize: "13px" }}>
+          Elige un lugar para ver tu proximo evento.
+        </p>
 
-          <div className="mx-auto w-full max-w-xl px-5 py-6">
-            <h2 className="text-4xl font-extrabold tracking-tight text-white">Próximos eventos</h2>
-            <p className="mt-2 text-zinc-300">Elige un lugar para ver tu próximo evento.</p>
+        <div style={{ marginTop: "20px" }}>
+          {events.map((ev) => {
+            const c = counts[ev.id] || { total: ev.attendees ?? 0, a: ev.split?.aCount ?? 0, b: ev.split?.bCount ?? 0 };
+            const mine = myAttendance[ev.id];
+            const going = !!mine;
+            const myLabel =
+              mine?.team === ev.split?.aLabel ? ev.split?.aLabel :
+              mine?.team === ev.split?.bLabel ? ev.split?.bLabel : null;
+            const remaining = ev.capacity - c.total;
+            const isFull = c.total >= ev.capacity;
 
-            <div className="mt-6 space-y-5">
-              {events.map((ev) => {
-                const c = counts[ev.id] || { total: ev.attendees ?? 0, a: ev.split?.aCount ?? 0, b: ev.split?.bCount ?? 0 };
-                const mine = myAttendance[ev.id];
-                const going = !!mine;
-                const myLabel =
-                  mine?.team === ev.split?.aLabel ? ev.split?.aLabel :
-                  mine?.team === ev.split?.bLabel ? ev.split?.bLabel : null;
-                const remaining = ev.capacity - c.total;
-                const isFull = c.total >= ev.capacity;
-                const isUrgent = !isFull && remaining <= 3;
-
-                return (
-                  <div key={ev.id} className="rounded-2xl border border-white/10 bg-black/50 p-4 shadow-xl backdrop-blur-md">
-                    <div className="flex items-start justify-between">
-                      <div className="pr-3">
-                        <div className="text-xs uppercase tracking-widest text-zinc-400">{ev.league}</div>
-                        <div className="mt-1 text-xl font-bold text-white">{ev.title}</div>
-                        {going && myLabel && (
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/30">
-                              Vas — {myLabel}
-                            </span>
-                            {mine?.reserveCode && (
-                              <button
-                                onClick={() => {
-                                  setQrData({
-                                    code: mine.reserveCode!,
-                                    eventTitle: ev.title,
-                                    userName: mine.name || profileName || undefined,
-                                    team: myLabel,
-                                  });
-                                  setQrOpen(true);
-                                }}
-                                className="rounded-full border border-white/20 bg-zinc-800/70 px-2 py-1 text-xs text-white hover:bg-zinc-700 transition"
-                              >
-                                Ver QR
-                              </button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right text-sm text-zinc-300">
-                        <div className="font-medium">{ev.venueName}</div>
-                        <div className="text-zinc-400">{ev.address}<br />{ev.city}</div>
-                      </div>
-                    </div>
-
-                    <div className="mt-3 text-sm text-zinc-300">{fmtDateShort(ev.dateISO)}</div>
-
-                    <div className={`mt-1 text-xs font-medium ${isFull ? "text-red-400" : isUrgent ? "text-amber-400" : "text-zinc-400"}`}>
-                      {c.total} / {ev.capacity} lugares{isFull ? " — Lleno" : isUrgent ? " — ¡Últimos lugares!" : ""}
-                    </div>
-
-                    {/* Contadores */}
-                    <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                      <div className="rounded-lg bg-zinc-800/70 p-2 text-white">
-                        <div className="text-lg font-bold">{c.total}</div>
-                        <div className="text-[11px] text-zinc-300">Total</div>
-                      </div>
-                      <div className="rounded-lg bg-zinc-800/70 p-2 text-white">
-                        <div className="text-lg font-bold">{c.a}</div>
-                        <div className="text-[11px] text-zinc-300">{ev.split?.aLabel}</div>
-                      </div>
-                      <div className="rounded-lg bg-zinc-800/70 p-2 text-white">
-                        <div className="text-lg font-bold">{c.b}</div>
-                        <div className="text-[11px] text-zinc-300">{ev.split?.bLabel}</div>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 flex items-center gap-3">
-                      <button
-                        onClick={() => openReserveModal(ev)}
-                        disabled={isFull && !going}
-                        className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-center font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {going ? "Editar reserva" : isFull ? "Evento lleno" : "Reservar"}
-                      </button>
-                      <Link
-                        href={`/events/${ev.id}`}
-                        className="rounded-xl border border-white/15 bg-zinc-800 px-4 py-3 text-white hover:bg-zinc-700 transition"
-                      >
-                        Detalles
-                      </Link>
-                    </div>
+            return (
+              <div
+                key={ev.id}
+                style={{
+                  background: "#0a1220",
+                  border: "1px solid #142035",
+                  borderRadius: "18px",
+                  overflow: "hidden",
+                  marginBottom: "12px",
+                }}
+              >
+                {/* Top: liga + venue pill */}
+                <div style={{ padding: "14px 14px 8px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#00c9ff", fontWeight: 700, textTransform: "uppercase" }}>
+                    {ev.league}
                   </div>
-                );
-              })}
-            </div>
+                  <div style={{ background: "#0d1528", border: "1px solid #142035", borderRadius: "10px", padding: "4px 10px", textAlign: "right" }}>
+                    <div style={{ color: "#00c9ff", fontSize: "12px", fontWeight: 600 }}>{ev.venueName}</div>
+                    <div style={{ color: "#3a5070", fontSize: "10px" }}>{ev.city}</div>
+                  </div>
+                </div>
 
-            <div className="h-24" />
-          </div>
+                {/* Titulo */}
+                <div style={{ fontSize: "17px", fontWeight: 700, color: "#e8f0ff", padding: "0 14px 10px" }}>
+                  {ev.title}
+                </div>
+
+                {/* Badge going + Ver QR */}
+                {going && myLabel && (
+                  <div style={{ padding: "0 14px 8px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ background: "rgba(0,255,157,0.08)", border: "1px solid rgba(0,255,157,0.25)", color: "#00ff9d", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "20px" }}>
+                      Vas &mdash; {myLabel}
+                    </span>
+                    {mine?.reserveCode && (
+                      <button
+                        onClick={() => {
+                          setQrData({
+                            code: mine.reserveCode!,
+                            eventTitle: ev.title,
+                            userName: mine.name || profileName || undefined,
+                            team: myLabel,
+                          });
+                          setQrOpen(true);
+                        }}
+                        style={{ background: "#0d1528", border: "1px solid #1e3050", color: "#c8d8f0", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "20px", cursor: "pointer" }}
+                      >
+                        Ver QR
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Fecha */}
+                <div style={{ fontSize: "11px", color: "#3a5070", padding: "0 14px 8px" }}>
+                  {fmtDateShort(ev.dateISO)}
+                </div>
+
+                {/* Barra de capacidad */}
+                <div style={{ margin: "0 14px 4px", background: "#0d1a2e", borderRadius: "3px", height: "3px" }}>
+                  <div style={{
+                    background: "linear-gradient(90deg, #00ff9d, #00c9ff)",
+                    width: Math.min((c.total / ev.capacity) * 100, 100) + "%",
+                    height: "100%",
+                    borderRadius: "3px",
+                  }} />
+                </div>
+
+                {/* Texto capacidad */}
+                <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 14px 10px" }}>
+                  <span style={{ color: "#3a5070", fontSize: "11px" }}>{c.total} / {ev.capacity} lugares</span>
+                  {isFull ? (
+                    <span style={{ color: "#3a5070", fontSize: "11px" }}>Lleno</span>
+                  ) : remaining <= 5 ? (
+                    <span style={{ color: "#00ff9d", fontSize: "11px" }}>{remaining} restantes</span>
+                  ) : (
+                    <span style={{ color: "#3a5070", fontSize: "11px" }}>Disponible</span>
+                  )}
+                </div>
+
+                {/* Contadores de equipos */}
+                {(() => {
+                  const aLabel = ev.split?.aLabel || ev.homeTeam || "Local";
+                  const bLabel = ev.split?.bLabel || ev.awayTeam || "Visitante";
+                  return (
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 32px 1fr", alignItems: "center", padding: "10px 14px", borderTop: "1px solid #142035" }}>
+                      <div style={{ textAlign: "left" }}>
+                        <div style={{ color: "#c8d8f0", fontSize: "12px" }}>{aLabel}</div>
+                        <div style={{ color: "#00ff9d", fontSize: "22px", fontWeight: 700 }}>{c.a}</div>
+                      </div>
+                      <div style={{ textAlign: "center", color: "#2a3a50", fontSize: "10px", fontWeight: 700 }}>VS</div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ color: "#c8d8f0", fontSize: "12px" }}>{bLabel}</div>
+                        <div style={{ color: "#00c9ff", fontSize: "22px", fontWeight: 700 }}>{c.b}</div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Botones */}
+                <div style={{ display: "flex", gap: "8px", padding: "0 14px 14px" }}>
+                  <button
+                    onClick={() => {
+                      if (going && mine?.reserveCode) {
+                        setQrData({
+                          code: mine.reserveCode!,
+                          eventTitle: ev.title,
+                          userName: mine.name || profileName || undefined,
+                          team: myLabel || undefined,
+                        });
+                        setQrOpen(true);
+                      } else {
+                        openReserveModal(ev);
+                      }
+                    }}
+                    disabled={isFull && !going}
+                    className="btn-primary-cronos"
+                    style={{ flex: 1, opacity: (isFull && !going) ? 0.5 : 1, cursor: (isFull && !going) ? "not-allowed" : "pointer" }}
+                  >
+                    {isFull && !going ? "Evento lleno" : going && mine?.reserveCode ? "Ver mi QR" : "Reservar lugar"}
+                  </button>
+                  <Link
+                    href={"/events/" + ev.id}
+                    className="btn-ghost-cronos"
+                    style={{ textAlign: "center", textDecoration: "none" }}
+                  >
+                    Detalles
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
         </div>
+
+        <div style={{ height: "80px" }} />
       </div>
 
       {/* Modal reserva */}
-      <Modal open={open} onClose={() => setOpen(false)} title={selected ? `Confirmar reserva — ${selected.title}` : "Confirmar reserva"}>
+      <Modal open={open} onClose={() => setOpen(false)} title={selected ? "Confirmar reserva" : "Confirmar reserva"}>
         {selected && (
           <div className="space-y-4">
             <div>
@@ -459,23 +495,29 @@ export default function HomePage() {
                      className="mt-1 w-full rounded-lg border border-white/10 bg-zinc-900/70 px-3 py-2 text-white outline-none focus:border-emerald-500" />
             </div>
             <div>
-              <label className="block text-xs tracking-widest text-white/70">TELÉFONO</label>
+              <label className="block text-xs tracking-widest text-white/70">TELEFONO</label>
               <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 415 555 1234"
                      className="mt-1 w-full rounded-lg border border-white/10 bg-zinc-900/70 px-3 py-2 text-white outline-none focus:border-emerald-500" />
             </div>
 
             <div>
               <span className="block text-xs tracking-widest text-white/70">BANDO</span>
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-800/60 p-3">
-                  <input type="radio" name="teamHome" checked={teamChoice === "A"} onChange={() => setTeamChoice("A")} />
-                  <span>{selected?.split?.aLabel}</span>
-                </label>
-                <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-800/60 p-3">
-                  <input type="radio" name="teamHome" checked={teamChoice === "B"} onChange={() => setTeamChoice("B")} />
-                  <span>{selected?.split?.bLabel}</span>
-                </label>
-              </div>
+              {(() => {
+                const aLabel = selected.split?.aLabel || selected.homeTeam || "Local";
+                const bLabel = selected.split?.bLabel || selected.awayTeam || "Visitante";
+                return (
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-800/60 p-3">
+                      <input type="radio" name="teamHome" checked={teamChoice === "A"} onChange={() => setTeamChoice("A")} />
+                      <span>{aLabel}</span>
+                    </label>
+                    <label className="flex items-center gap-2 rounded-lg border border-white/10 bg-zinc-800/60 p-3">
+                      <input type="radio" name="teamHome" checked={teamChoice === "B"} onChange={() => setTeamChoice("B")} />
+                      <span>{bLabel}</span>
+                    </label>
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="flex gap-3 pt-2">
@@ -487,21 +529,21 @@ export default function HomePage() {
               </button>
             </div>
 
-            <p className="pt-1 text-center text-xs text-white/60">* Te enviaremos tu código de reserva por SMS.</p>
+            <p className="pt-1 text-center text-xs text-white/60">* Te enviaremos tu codigo de reserva por SMS.</p>
           </div>
         )}
       </Modal>
 
-      {/* Modal equipo favorito (solo si no hay sesión) */}
+      {/* Modal equipo favorito */}
       <Modal open={favOpen} onClose={() => setFavOpen(false)} title="Tu equipo favorito">
         <div className="space-y-4">
           <p className="text-sm text-zinc-300">
-            Para completar tu reserva, dinos cuál es tu <strong>equipo favorito</strong>.
+            Para completar tu reserva, dinos cual es tu <strong>equipo favorito</strong>.
           </p>
           <TeamsAutocomplete value={favTeam} onChange={setFavTeam} />
           <div className="flex gap-3 pt-2">
             <button onClick={() => setFavOpen(false)} className="flex-1 rounded-xl border border-white/15 bg-zinc-800 px-4 py-3 text-white hover:bg-zinc-700 transition" disabled={saving}>
-              Atrás
+              Atras
             </button>
             <button onClick={handleFavSubmit} className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-60" disabled={saving}>
               {saving ? "Guardando..." : "Confirmar"}

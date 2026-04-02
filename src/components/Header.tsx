@@ -8,8 +8,8 @@ import { useEffect, useState } from "react";
 import { app } from "@/lib/firebase";
 
 type Props = {
-  onOpenLead?: () => void;      // abre modal “Soy restaurante”
-  isLoggedIn?: boolean;         // si ya pasas este prop desde la página, se usa
+  onOpenLead?: () => void;
+  isLoggedIn?: boolean;
   onLogout?: () => Promise<void> | void;
 };
 
@@ -35,48 +35,43 @@ export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
     }
   }
 
+  const pillStyle: React.CSSProperties = {
+    background: "#0d1528",
+    border: "1px solid #1e3050",
+    color: "#c8d8f0",
+    fontSize: "11px",
+    fontWeight: 600,
+    padding: "6px 12px",
+    borderRadius: "20px",
+    cursor: "pointer",
+    whiteSpace: "nowrap",
+  };
+
   return (
-    <header
-      className="
-        sticky top-0 z-50
-        border-b border-white/10
-        bg-black/70 backdrop-blur
-        supports-[backdrop-filter]:bg-black/50
-      "
-    >
-      {/* alto fijo: 56px; así no se “sube” el contenido debajo */}
-      <div className="mx-auto h-14 max-w-xl px-4 grid grid-cols-3 items-center gap-2">
+    <header style={{ background: "#080c14", borderBottom: "1px solid #142035" }} className="sticky top-0 z-50">
+      <div className="mx-auto grid h-14 max-w-xl grid-cols-3 items-center gap-2 px-4">
         {/* Izquierda: Soy restaurante */}
         <div className="justify-self-start">
-          <button
-            onClick={() => onOpenLead?.()}
-            className="rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/15"
-          >
+          <button onClick={() => onOpenLead?.()} style={pillStyle}>
             Soy restaurante
           </button>
         </div>
 
-        {/* Centro: logo/título */}
+        {/* Centro: logo */}
         <div className="justify-self-center">
-          <Link href="/home" className="select-none text-lg font-extrabold tracking-tight text-white">
-            Cronos
+          <Link href="/home" className="logo-cronos select-none">
+            CRONOS
           </Link>
         </div>
 
         {/* Derecha: login/logout */}
         <div className="justify-self-end">
           {logged ? (
-            <button
-              onClick={handleLogout}
-              className="rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/15"
-            >
+            <button onClick={handleLogout} style={pillStyle}>
               Cerrar sesión
             </button>
           ) : (
-            <Link
-              href="/auth/login"
-              className="rounded-xl bg-white/10 px-3 py-2 text-sm font-medium text-white hover:bg-white/15"
-            >
+            <Link href="/auth/login" style={pillStyle}>
               Iniciar sesión
             </Link>
           )}
