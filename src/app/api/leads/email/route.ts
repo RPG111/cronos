@@ -88,6 +88,13 @@ function row(label: string, value: string) {
 
 export async function POST(req: Request) {
   try {
+    console.log('ENV CHECK:', {
+      hasResend: !!process.env.RESEND_API_KEY,
+      resendFirst8: process.env.RESEND_API_KEY?.slice(0,8),
+      hasEmail: !!process.env.LEADS_EMAIL_TO,
+      email: process.env.LEADS_EMAIL_TO,
+      nodeEnv: process.env.NODE_ENV,
+    });
     console.log('RESEND_API_KEY exists:', !!process.env.RESEND_API_KEY);
     console.log('LEADS_EMAIL_TO:', process.env.LEADS_EMAIL_TO);
     const RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
