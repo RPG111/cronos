@@ -15,6 +15,16 @@ import TeamsAutocomplete from "@/components/TeamsAutocomplete";
 
 type AuthType = "login" | "register";
 
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "10px",
+  letterSpacing: "2px",
+  color: "#3a5070",
+  fontWeight: 700,
+  textTransform: "uppercase",
+  marginBottom: "6px",
+};
+
 export default function AuthCard({ type }: { type: AuthType }) {
   const router = useRouter();
   const [step, setStep] = useState<"form" | "otp">("form");
@@ -128,89 +138,123 @@ export default function AuthCard({ type }: { type: AuthType }) {
     <>
       <div id="recaptcha-container" className="absolute left-[-9999px] top-[-9999px]" />
 
-      <div className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-md shadow-xl p-8 text-white">
-        <h1
-          className={`text-4xl font-extrabold text-center text-emerald-400 ${
-            type === "register" ? "mb-2" : "mb-8"
-          }`}
-        >
-          {type === "login" ? "Cronos" : "Crear cuenta"}
-        </h1>
+      <div style={{
+        background: "#0a1220",
+        border: "1px solid #142035",
+        borderRadius: "24px",
+        padding: "32px 28px",
+        maxWidth: "420px",
+        width: "92%",
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: "6px" }}>
+          <span className="logo-cronos select-none" style={{ fontSize: "32px" }} />
+        </div>
 
-        {type === "register" && (
-          <p className="mb-6 text-center text-sm text-white/80">
-            Eventos Deportivos en vivo cerca de ti
-          </p>
-        )}
+        {/* Subtítulo */}
+        <p style={{
+          textAlign: "center",
+          color: "#3a5070",
+          fontSize: "12px",
+          letterSpacing: "2px",
+          textTransform: "uppercase",
+          marginBottom: "28px",
+        }}>
+          Eventos deportivos · Bay Area
+        </p>
 
         {step === "form" ? (
-          <form onSubmit={handleSendCode} className="space-y-6">
+          <form onSubmit={handleSendCode} style={{ display: "grid", gap: "18px" }}>
             {type === "register" && (
-              <div className="space-y-2">
-                <span className="block text-xs tracking-widest text-white/70">NOMBRE</span>
+              <div>
+                <label style={labelStyle}>Nombre</label>
                 <Input
                   placeholder="Tu nombre"
                   value={name}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                  className="input-cronos"
                 />
               </div>
             )}
 
-            <div className="space-y-2">
-              <span className="block text-xs tracking-widest text-white/70">TELÉFONO</span>
+            <div>
+              <label style={labelStyle}>Teléfono</label>
               <Input
                 placeholder="+1 415 555 1234"
                 value={phone}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+                className="input-cronos"
               />
-              <p className="text-[11px] text-white/60">Formato E.164 (ej. +15005550006).</p>
+              <p style={{ fontSize: "11px", color: "#3a5070", marginTop: "4px" }}>
+                Formato E.164 (ej. +15005550006).
+              </p>
             </div>
 
             {type === "register" && (
-              <div className="space-y-2">
-                <span className="block text-xs tracking-widest text-white/70">EQUIPO FAVORITO</span>
+              <div>
+                <label style={labelStyle}>Equipo favorito</label>
                 <TeamsAutocomplete value={team} onChange={setTeam} />
               </div>
             )}
 
-            <Button
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl shadow-lg"
-              disabled={sending}
-            >
+            <Button className="btn-primary-cronos w-full py-3 rounded-xl" disabled={sending}>
               {sending ? "Enviando…" : type === "login" ? "Enviar código" : "Crear cuenta"}
             </Button>
 
-            <p className="text-center text-white/80 text-sm">
+            {type === "register" && (
+              <p style={{fontSize: '12px', color: '#3a5070', textAlign: 'center', marginTop: '12px'}}>
+                Al crear tu cuenta aceptas nuestros{' '}
+                <a href="/terms" style={{color: '#00c9ff'}}>términos y condiciones</a>
+                , incluyendo el consentimiento para ser grabado en eventos de Cronos.
+              </p>
+            )}
+
+            <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0" }}>
               {type === "login" ? (
-                <>¿No tienes cuenta? <a className="underline" href="/auth/register">Crea una</a></>
+                <>¿No tienes cuenta?{" "}
+                  <a href="/auth/register" style={{ color: "#00c9ff", textDecoration: "none" }}>
+                    Crea una
+                  </a>
+                </>
               ) : (
-                <>¿Ya tienes cuenta? <a className="underline" href="/auth/login">Inicia sesión</a></>
+                <>¿Ya tienes cuenta?{" "}
+                  <a href="/auth/login" style={{ color: "#00c9ff", textDecoration: "none" }}>
+                    Inicia sesión
+                  </a>
+                </>
               )}
             </p>
           </form>
         ) : (
-          <form onSubmit={handleVerify} className="space-y-6">
-            <div className="space-y-2">
-              <span className="block text-xs tracking-widest text-white/70">CÓDIGO SMS</span>
+          <form onSubmit={handleVerify} style={{ display: "grid", gap: "18px" }}>
+            <div>
+              <label style={labelStyle}>Código SMS</label>
               <Input
                 placeholder="Ingresa el código de 6 dígitos"
                 value={otp}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setOtp(e.target.value)}
                 inputMode="numeric"
+                className="input-cronos"
               />
             </div>
 
-            <Button
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-3 rounded-xl shadow-lg"
-              disabled={verifying}
-            >
+            <Button className="btn-primary-cronos w-full py-3 rounded-xl" disabled={verifying}>
               {verifying ? "Verificando…" : "Verificar código"}
             </Button>
 
             <button
               type="button"
               onClick={() => setStep("form")}
-              className="w-full rounded-xl border border-white/20 bg-black/40 py-3 font-semibold text-white hover:bg-black/50"
+              style={{
+                width: "100%",
+                borderRadius: "14px",
+                border: "1px solid #142035",
+                background: "transparent",
+                padding: "12px",
+                fontWeight: 600,
+                color: "#8a9ab0",
+                cursor: "pointer",
+              }}
             >
               Cambiar teléfono
             </button>
