@@ -3,8 +3,9 @@
 
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState, use } from "react";
-import { EVENTS, type EventItem, fmtDateLong } from "../../../lib/events";
+import { useEffect, useState, use } from "react";
+import { fmtDateLong } from "../../../lib/events";
+import { getEventById, type CronosEvent } from "../../../lib/firestore/events";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   getFirestore,
@@ -18,7 +19,7 @@ import BottomNav from "../../../components/BottomNav";
 
 const MapView = dynamic(() => import("./map-view"), { ssr: false });
 
-function mapsLinks(ev: EventItem) {
+function mapsLinks(ev: CronosEvent) {
   const q = encodeURIComponent(`${ev.venueName}, ${ev.address}, ${ev.city}`);
   const latlng = `${ev.lat},${ev.lng}`;
   return {
@@ -27,15 +28,40 @@ function mapsLinks(ev: EventItem) {
   };
 }
 
-/** Envoltura: busca evento por id */
 export default function EventDetails({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  // Desempaquetamos params (App Router 15)
   const { id } = use(params);
-  const ev = useMemo(() => EVENTS.find((e) => e.id === id), [id]);
+  const [ev, setEv] = useState<CronosEvent | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getEventById(id).then((data) => {
+      setEv(data);
+      setLoading(false);
+    });
+  }, [id]);
+
+  if (loading) {
+    return (
+      <main>
+        <div className="relative min-h-dvh w-full">
+          <img
+            src="/images/stadium.jpg"
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover blur-sm"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
+          <div className="relative z-10 flex min-h-dvh items-center justify-center">
+            <div className="text-white/60 text-sm tracking-widest uppercase">Cargando…</div>
+          </div>
+        </div>
+        <BottomNav />
+      </main>
+    );
+  }
 
   if (!ev) {
     return (
@@ -66,7 +92,7 @@ export default function EventDetails({
 }
 
 /** Contenido con Firestore + cancelar reserva (detalles) */
-function EventDetailsContent({ ev }: { ev: EventItem }) {
+function EventDetailsContent({ ev }: { ev: CronosEvent }) {
   const [uid, setUid] = useState<string | null>(null);
   useEffect(() => {
     const auth = getAuth(firebaseApp);
@@ -90,8 +116,8 @@ function EventDetailsContent({ ev }: { ev: EventItem }) {
   }, [ev.id]);
 
   const total = attendees.length;
-  const aCount = attendees.filter((x) => x.team === ev.split.aLabel).length;
-  const bCount = attendees.filter((x) => x.team === ev.split.bLabel).length;
+  const aCount = attendees.filter((x) => x.team === ev.split?.aLabel).length;
+  const bCount = attendees.filter((x) => x.team === ev.split?.bLabel).length;
   const iAmIn = uid ? attendees.some((x) => x.id === uid) : false;
 
   async function handleCancel() {
@@ -107,7 +133,6 @@ function EventDetailsContent({ ev }: { ev: EventItem }) {
       // No necesitamos actualizar el estado manual: onSnapshot refresca.
     } catch (e: any) {
       console.error(e);
-      // Mensaje más claro para permisos
       const msg =
         e?.code === "permission-denied"
           ? "No tienes permiso para cancelar esta reserva (parece ser otro usuario/otra sesión). Inicia sesión con el mismo teléfono/cuenta que reservó."
@@ -151,9 +176,11 @@ function EventDetailsContent({ ev }: { ev: EventItem }) {
               {ev.address}, {ev.city}
             </div>
 
-            <div className="mt-5 overflow-hidden rounded-2xl border border-white/10">
-              <MapView lat={ev.lat} lng={ev.lng} title={ev.venueName} />
-            </div>
+            {ev.lat && ev.lng && (
+              <div className="mt-5 overflow-hidden rounded-2xl border border-white/10">
+                <MapView lat={ev.lat} lng={ev.lng} title={ev.venueName} />
+              </div>
+            )}
 
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/50 p-4">
               <div className="text-lg font-bold text-white">Asistentes</div>
@@ -166,11 +193,11 @@ function EventDetailsContent({ ev }: { ev: EventItem }) {
                 </div>
                 <div className="rounded-xl bg-zinc-800 p-4 text-white">
                   <div className="text-2xl font-extrabold">{aCount}</div>
-                  <div className="text-xs text-zinc-300">{ev.split.aLabel}</div>
+                  <div className="text-xs text-zinc-300">{ev.split?.aLabel}</div>
                 </div>
                 <div className="rounded-xl bg-zinc-800 p-4 text-white">
                   <div className="text-2xl font-extrabold">{bCount}</div>
-                  <div className="text-xs text-zinc-300">{ev.split.bLabel}</div>
+                  <div className="text-xs text-zinc-300">{ev.split?.bLabel}</div>
                 </div>
               </div>
             </div>

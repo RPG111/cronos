@@ -28,6 +28,8 @@ type AdminEvent = {
   venueName: string;
   address: string;
   city: string;
+  lat: number;
+  lng: number;
   capacity: number;
   status: EventStatus;
   attendeeCount: number;
@@ -51,6 +53,8 @@ type EventForm = {
   venueName: string;
   address: string;
   city: string;
+  lat: number;
+  lng: number;
   capacity: number;
   status: EventStatus;
 };
@@ -91,7 +95,7 @@ function fmtDate(iso: string): string {
 const EMPTY_FORM: EventForm = {
   title: "", league: "", homeTeam: "", awayTeam: "",
   dateLocal: "", venueName: "", address: "", city: "",
-  capacity: 20, status: "draft",
+  lat: 0, lng: 0, capacity: 20, status: "draft",
 };
 
 // ─── Event Modal ─────────────────────────────────────────────────────────────
@@ -134,6 +138,8 @@ function EventModal({
         venueName: form.venueName.trim(),
         address:   form.address.trim(),
         city:      form.city.trim(),
+        lat:       Number(form.lat) || 0,
+        lng:       Number(form.lng) || 0,
         capacity:  Number(form.capacity) || 20,
         status:    form.status,
         updatedAt: serverTimestamp(),
@@ -203,6 +209,16 @@ function EventModal({
             <div>
               <label className={labelCls}>CIUDAD</label>
               <input className={inputCls} value={form.city} onChange={(e) => set("city", e.target.value)} placeholder="Oakland, CA" />
+            </div>
+            <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'10px'}} className="col-span-2">
+              <div>
+                <label className={labelCls}>LATITUD</label>
+                <input type="number" step="any" className={inputCls} value={form.lat} onChange={e => set("lat", parseFloat(e.target.value))} placeholder="37.8044" />
+              </div>
+              <div>
+                <label className={labelCls}>LONGITUD</label>
+                <input type="number" step="any" className={inputCls} value={form.lng} onChange={e => set("lng", parseFloat(e.target.value))} placeholder="-122.2712" />
+              </div>
             </div>
             <div>
               <label className={labelCls}>CAPACIDAD</label>
@@ -391,6 +407,8 @@ export default function AdminPage() {
             venueName: data.venueName || "",
             address:   data.address || "",
             city:      data.city || "",
+            lat:       data.lat ?? 0,
+            lng:       data.lng ?? 0,
             capacity:  data.capacity ?? 20,
             status:    (data.status as EventStatus) || "draft",
             attendeeCount: attSnap.size,
@@ -432,6 +450,8 @@ export default function AdminPage() {
       venueName: ev.venueName,
       address:   ev.address,
       city:      ev.city,
+      lat:       ev.lat,
+      lng:       ev.lng,
       capacity:  ev.capacity,
       status:    ev.status,
     });
