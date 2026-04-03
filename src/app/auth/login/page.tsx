@@ -11,6 +11,16 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  fontSize: "10px",
+  letterSpacing: "2px",
+  color: "#3a5070",
+  fontWeight: 700,
+  textTransform: "uppercase",
+  marginBottom: "6px",
+};
+
 export default function LoginPage() {
   const router = useRouter();
   const [phone, setPhone] = useState("");
@@ -32,13 +42,9 @@ export default function LoginPage() {
   // Inicializa reCAPTCHA invisible UNA sola vez
   useEffect(() => {
     if (recaptchaReadyRef.current) return;
-    // Contenedor "virtual": el SDK lo maneja invisible
     try {
-      // @ts-expect-error guardamos en window para que signIn lo reutilice si recargan
+      // @ts-expect-error
       if (!window.recaptchaVerifier) {
-        // Nota: el primer arg ahora puede ser el objeto auth con el App Router
-        // y un "container" que puede ser string id o undefined para invisible.
-        // Usamos id real para evitar errores.
         const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
           size: "invisible",
         });
@@ -53,7 +59,6 @@ export default function LoginPage() {
 
   async function handleSendCode(e: React.FormEvent) {
     e.preventDefault();
-    // Validación simple del teléfono
     const raw = phone.trim();
     if (!raw.startsWith("+") || raw.length < 8) {
       alert("Escribe tu teléfono con + y lada, ej. +14155551234");
@@ -73,7 +78,6 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error(err);
       alert(err?.message || "No se pudo enviar el código.");
-      // Resetea el captcha si falló
       try {
         // @ts-expect-error
         window.recaptchaVerifier?.clear();
@@ -110,74 +114,138 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative min-h-dvh w-full">
-      {/* Fondo y degradado (como en login original) */}
-      <img src="/images/stadium.jpg" alt="" className="absolute inset-0 h-full w-full object-cover blur-sm" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
-      {/* Contenedor del captcha invisible */}
+    <main style={{
+      position: "relative",
+      minHeight: "100dvh",
+      width: "100%",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "#080c14",
+    }}>
+      {/* Fondo */}
+      <img
+        src="/images/stadium.jpg"
+        alt=""
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          filter: "blur(4px)",
+        }}
+      />
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        background: "rgba(8, 12, 20, 0.85)",
+      }} />
+
+      {/* Captcha invisible */}
       <div id="recaptcha-container" className="absolute left-[-9999px] top-[-9999px]" />
 
-      <div className="relative z-10 mx-auto grid min-h-dvh w-full max-w-xl place-items-center px-5">
-        <div className="w-full max-w-md rounded-2xl bg-white/10 backdrop-blur-md shadow-xl p-8 text-white">
-          <h1 className="mb-2 text-center text-4xl font-extrabold text-emerald-400">Cronos</h1>
-          <p className="mb-8 text-center text-white/80">Eventos deportivos en vivo cerca de ti</p>
-
-          {step === "form" ? (
-            <form onSubmit={handleSendCode} className="space-y-6">
-              <div>
-                <span className="block text-xs tracking-widest text-white/70">TELÉFONO</span>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1 415 555 1234"
-                  className="mt-2 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white outline-none focus:border-emerald-500"
-                />
-                <p className="mt-1 text-[11px] text-white/60">Formato E.164 (ej. +15005550006)</p>
-              </div>
-
-              <button
-                type="submit"
-                disabled={sending}
-                className="w-full rounded-xl bg-emerald-500 py-3 font-semibold text-white hover:bg-emerald-600 disabled:opacity-60"
-              >
-                {sending ? "Enviando…" : "Enviar código"}
-              </button>
-
-              <p className="text-center text-sm text-white/80">
-                ¿No tienes cuenta? <a className="underline" href="/auth/register">Crea una</a>
-              </p>
-            </form>
-          ) : (
-            <form onSubmit={handleVerify} className="space-y-6">
-              <div>
-                <span className="block text-xs tracking-widest text-white/70">CÓDIGO SMS</span>
-                <input
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  inputMode="numeric"
-                  placeholder="Ingresa el código de 6 dígitos"
-                  className="mt-2 w-full rounded-xl border border-white/20 bg-black/40 px-4 py-3 text-white outline-none focus:border-emerald-500"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={verifying}
-                className="w-full rounded-xl bg-emerald-500 py-3 font-semibold text-white hover:bg-emerald-600 disabled:opacity-60"
-              >
-                {verifying ? "Verificando…" : "Entrar"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStep("form")}
-                className="w-full rounded-xl border border-white/20 bg-black/40 py-3 font-semibold text-white hover:bg-black/50"
-              >
-                Cambiar teléfono
-              </button>
-            </form>
-          )}
+      {/* Card */}
+      <div style={{
+        position: "relative",
+        zIndex: 10,
+        background: "#0a1220",
+        border: "1px solid #142035",
+        borderRadius: "24px",
+        padding: "32px 28px",
+        maxWidth: "420px",
+        width: "92%",
+      }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: "6px" }}>
+          <span className="logo-cronos select-none" style={{ fontSize: "32px" }} />
         </div>
+
+        {/* Subtítulo */}
+        <p style={{
+          textAlign: "center",
+          color: "#3a5070",
+          fontSize: "12px",
+          letterSpacing: "2px",
+          textTransform: "uppercase",
+          marginBottom: "28px",
+        }}>
+          eventos deportivos · bay area
+        </p>
+
+        {step === "form" ? (
+          <form onSubmit={handleSendCode} style={{ display: "grid", gap: "18px" }}>
+            <div>
+              <label style={labelStyle}>teléfono</label>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 415 555 1234"
+                className="input-cronos"
+                style={{ width: "100%" }}
+              />
+              <p style={{ fontSize: "11px", color: "#3a5070", marginTop: "4px" }}>
+                formato +1 415 555 1234
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={sending}
+              className="btn-primary-cronos"
+              style={{ width: "100%", padding: "12px", borderRadius: "14px" }}
+            >
+              {sending ? "Enviando…" : "enviar código"}
+            </button>
+
+            <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0" }}>
+              ¿no tienes cuenta?{" "}
+              <a href="/auth/register" style={{ color: "#00c9ff", textDecoration: "none" }}>
+                créala
+              </a>
+            </p>
+          </form>
+        ) : (
+          <form onSubmit={handleVerify} style={{ display: "grid", gap: "18px" }}>
+            <div>
+              <label style={labelStyle}>código sms</label>
+              <input
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                inputMode="numeric"
+                placeholder="Ingresa el código de 6 dígitos"
+                className="input-cronos"
+                style={{ width: "100%" }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={verifying}
+              className="btn-primary-cronos"
+              style={{ width: "100%", padding: "12px", borderRadius: "14px" }}
+            >
+              {verifying ? "Verificando…" : "entrar"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setStep("form")}
+              style={{
+                width: "100%",
+                borderRadius: "14px",
+                border: "1px solid #142035",
+                background: "#0d1528",
+                padding: "12px",
+                fontWeight: 600,
+                color: "#c8d8f0",
+                cursor: "pointer",
+              }}
+            >
+              cambiar teléfono
+            </button>
+          </form>
+        )}
       </div>
     </main>
   );
