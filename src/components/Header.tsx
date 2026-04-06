@@ -35,24 +35,12 @@ export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
     }
   }
 
-  const pillStyle: React.CSSProperties = {
-    background: "#0d1528",
-    border: "1px solid #1e3050",
-    color: "#c8d8f0",
-    fontSize: "11px",
-    fontWeight: 600,
-    padding: "6px 12px",
-    borderRadius: "20px",
-    cursor: "pointer",
-    whiteSpace: "nowrap",
-  };
-
   return (
     <header style={{ background: "#080c14", borderBottom: "1px solid #142035" }} className="sticky top-0 z-50">
       <div className="mx-auto grid h-14 max-w-xl grid-cols-3 items-center gap-2 px-4">
         {/* Izquierda: Soy restaurante */}
         <div className="justify-self-start">
-          <button onClick={() => onOpenLead?.()} style={pillStyle}>
+          <button onClick={() => onOpenLead?.()} className="btn-ghost-cronos">
             Soy restaurante
           </button>
         </div>
@@ -67,11 +55,11 @@ export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
         {/* Derecha: login/logout */}
         <div className="justify-self-end">
           {logged ? (
-            <button onClick={handleLogout} style={pillStyle}>
+            <button onClick={handleLogout} className="btn-ghost-cronos">
               Cerrar sesión
             </button>
           ) : (
-            <Link href="/auth/login" style={pillStyle}>
+            <Link href="/auth/login" className="btn-ghost-cronos">
               Iniciar sesión
             </Link>
           )}

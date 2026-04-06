@@ -20,7 +20,7 @@ export default function BottomNav() {
         className="flex justify-around backdrop-blur-md shadow-lg"
         style={{
           background: "#060a10",
-          borderTop: "1px solid #0d1528",
+          borderTop: "1px solid #142035",
           borderRadius: "20px",
         }}
       >
@@ -31,7 +31,7 @@ export default function BottomNav() {
               key={href}
               href={href}
               className="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition"
-              style={{ color: active ? "#00ff9d" : "#3a5070" }}
+              style={{ color: active ? "#ff8c00" : "#8899bb" }}
             >
               <Icon size={18} strokeWidth={2} />
               <span className="text-[11px] font-medium">{label}</span>
@@ -41,7 +41,7 @@ export default function BottomNav() {
                     width: "4px",
                     height: "4px",
                     borderRadius: "50%",
-                    background: "#00ff9d",
+                    background: "#ff8c00",
                   }}
                 />
               )}

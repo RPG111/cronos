@@ -25,7 +25,7 @@ export default function MapPage() {
         top: 0,
         zIndex: 40,
         background: "#060a10",
-        borderBottom: "1px solid #0d1528",
+        borderBottom: "1px solid #142035",
         padding: "12px 16px",
         display: "flex",
         alignItems: "center",
@@ -37,7 +37,7 @@ export default function MapPage() {
         <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>
           Mapa de eventos
         </h2>
-        <p style={{ color: "#3a5070", marginTop: "4px", fontSize: "13px" }}>
+        <p style={{ color: "#8899bb", marginTop: "4px", fontSize: "13px" }}>
           Encuentra eventos cerca de ti.
         </p>
 

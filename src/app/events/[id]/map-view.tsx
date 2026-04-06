@@ -23,6 +23,8 @@ export default function MapView({ lat, lng, title }: Props) {
     delete L.Icon.Default.prototype._getIconUrl;
   }, []);
 
+  if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
+
   return (
     <div className="h-72">
       <MapContainer center={[lat, lng]} zoom={15} scrollWheelZoom={false} className="h-full w-full">

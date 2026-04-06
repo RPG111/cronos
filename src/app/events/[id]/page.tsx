@@ -67,7 +67,7 @@ export default function EventDetails({
     return (
       <main style={pageBg}>
         <div style={{ maxWidth: "560px", margin: "0 auto", padding: "32px 20px" }}>
-          <Link href="/home" style={{ color: "#00c9ff", textDecoration: "none" }}>
+          <Link href="/home" style={{ color: "#ff8c00", textDecoration: "none" }}>
             ← Volver
           </Link>
           <h1 style={{ marginTop: "16px", fontSize: "24px", fontWeight: 700, color: "#e8f0ff" }}>
@@ -141,30 +141,28 @@ function EventDetailsContent({ ev }: { ev: CronosEvent }) {
   return (
     <main style={pageBg}>
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "32px 20px" }}>
-        <Link
-          href="/home"
-          style={{ color: "#00c9ff", textDecoration: "none", display: "inline-flex", alignItems: "center", marginBottom: "16px" }}
-        >
-          ← Volver
+        <Link href="/home" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px", marginBottom: "16px" }}>
+          <span style={{ color: "#ff8c00" }}>←</span>
+          <span style={{ color: "#8899bb" }}>Volver</span>
         </Link>
 
         <h1 style={{ fontSize: "28px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>
           {ev.title}
         </h1>
-        <div style={{ marginTop: "6px", fontSize: "11px", letterSpacing: "2px", textTransform: "uppercase", color: "#00c9ff" }}>
+        <div style={{ marginTop: "6px", fontSize: "11px", letterSpacing: "2px", textTransform: "uppercase", color: "#ff8c00" }}>
           {ev.league}
         </div>
 
-        <div style={{ marginTop: "12px", color: "#c8d8f0" }}>{fmtDateLong(ev.dateISO)}</div>
-        <div style={{ marginTop: "4px", color: "#c8d8f0" }}>
-          <span style={{ fontWeight: 600 }}>{ev.venueName}</span>
+        <div style={{ marginTop: "12px", color: "#8899bb" }}>{fmtDateLong(ev.dateISO)}</div>
+        <div style={{ marginTop: "4px", color: "#8899bb" }}>
+          <span style={{ fontWeight: 600, color: "#ff8c00" }}>{ev.venueName}</span>
           <br />
           {ev.address}, {ev.city}
         </div>
 
-        {ev.lat && ev.lng && (
+        {ev?.lat && ev?.lng && !isNaN(ev.lat) && !isNaN(ev.lng) && (
           <div style={{ marginTop: "20px", overflow: "hidden", borderRadius: "16px", border: "1px solid #142035" }}>
-            <MapView lat={ev.lat} lng={ev.lng} title={ev.venueName} />
+            <MapView lat={ev.lat} lng={ev.lng} title={ev.venueName ?? ""} />
           </div>
         )}
 
@@ -177,20 +175,20 @@ function EventDetailsContent({ ev }: { ev: CronosEvent }) {
           padding: "16px",
         }}>
           <div style={{ fontSize: "16px", fontWeight: 700, color: "#e8f0ff" }}>Asistentes</div>
-          <div style={{ marginTop: "4px", fontSize: "12px", color: "#3a5070" }}>En tiempo real (Firestore)</div>
+          <div style={{ marginTop: "4px", fontSize: "12px", color: "#8899bb" }}>En tiempo real (Firestore)</div>
 
           <div style={{ marginTop: "16px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", textAlign: "center" }}>
             <div style={{ background: "#0d1528", borderRadius: "12px", padding: "16px" }}>
               <div style={{ fontSize: "24px", fontWeight: 800, color: "#e8f0ff" }}>{total}</div>
-              <div style={{ fontSize: "11px", color: "#3a5070", marginTop: "4px" }}>Total</div>
+              <div style={{ fontSize: "11px", color: "#8899bb", marginTop: "4px" }}>Total</div>
             </div>
             <div style={{ background: "#0d1528", borderRadius: "12px", padding: "16px" }}>
-              <div style={{ fontSize: "24px", fontWeight: 800, color: "#00ff9d" }}>{aCount}</div>
-              <div style={{ fontSize: "11px", color: "#3a5070", marginTop: "4px" }}>{aLabel}</div>
+              <div style={{ fontSize: "24px", fontWeight: 800, color: "#e8f0ff" }}>{aCount}</div>
+              <div style={{ fontSize: "11px", color: "#8899bb", marginTop: "4px" }}>{aLabel}</div>
             </div>
             <div style={{ background: "#0d1528", borderRadius: "12px", padding: "16px" }}>
-              <div style={{ fontSize: "24px", fontWeight: 800, color: "#00c9ff" }}>{bCount}</div>
-              <div style={{ fontSize: "11px", color: "#3a5070", marginTop: "4px" }}>{bLabel}</div>
+              <div style={{ fontSize: "24px", fontWeight: 800, color: "#e8f0ff" }}>{bCount}</div>
+              <div style={{ fontSize: "11px", color: "#8899bb", marginTop: "4px" }}>{bLabel}</div>
             </div>
           </div>
         </div>
@@ -202,40 +200,36 @@ function EventDetailsContent({ ev }: { ev: CronosEvent }) {
               disabled={cancelling}
               style={{
                 width: "100%",
-                borderRadius: "14px",
-                border: "1px solid rgba(255,60,60,0.3)",
-                background: "rgba(255,60,60,0.15)",
-                padding: "12px",
+                background: "#0a1220",
+                border: "1px solid #142035",
+                borderRadius: "16px",
+                padding: "14px",
+                color: "rgba(232,240,255,0.5)",
+                fontSize: "14px",
                 fontWeight: 600,
-                color: "#ff6b6b",
                 cursor: "pointer",
-                opacity: cancelling ? 0.6 : 1,
+                transition: "all 0.3s ease",
               }}
             >
               {cancelling ? "Cancelando…" : "Cancelar mi reserva"}
             </button>
-            <p style={{ marginTop: "8px", textAlign: "center", fontSize: "11px", color: "#3a5070" }}>
-              * Solo puedes cancelar la reserva creada con esta misma sesión/cuenta.
-            </p>
           </div>
         )}
 
         <div style={{ marginTop: "24px", display: "flex", gap: "12px" }}>
           <a
-            className="btn-primary-cronos"
             href={links.google}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ flex: 1, textAlign: "center", padding: "12px", borderRadius: "14px", textDecoration: "none" }}
+            style={{ flex: 1, textAlign: "center", padding: "14px", borderRadius: "24px", textDecoration: "none", background: "linear-gradient(135deg, #ff6b00, #ff8c00)", color: "#fff", fontWeight: 800, border: "none", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
           >
             Google Maps
           </a>
           <a
-            className="btn-ghost-cronos"
             href={links.apple}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ flex: 1, textAlign: "center", padding: "12px", borderRadius: "14px", textDecoration: "none" }}
+            style={{ flex: 1, textAlign: "center", padding: "14px", borderRadius: "24px", textDecoration: "none", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#e8f0ff", fontWeight: 600, display: "inline-flex", alignItems: "center", justifyContent: "center" }}
           >
             Apple Maps
           </a>

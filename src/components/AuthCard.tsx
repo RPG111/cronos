@@ -9,7 +9,6 @@ import {
   onAuthStateChanged,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import TeamsAutocomplete from "@/components/TeamsAutocomplete";
 
@@ -19,7 +18,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "10px",
   letterSpacing: "2px",
-  color: "#3a5070",
+  color: "#8899bb",
   fontWeight: 700,
   textTransform: "uppercase",
   marginBottom: "6px",
@@ -154,7 +153,7 @@ export default function AuthCard({ type }: { type: AuthType }) {
         {/* Subtítulo */}
         <p style={{
           textAlign: "center",
-          color: "#3a5070",
+          color: "#8899bb",
           fontSize: "12px",
           letterSpacing: "2px",
           textTransform: "uppercase",
@@ -197,9 +196,13 @@ export default function AuthCard({ type }: { type: AuthType }) {
               </div>
             )}
 
-            <Button className="btn-primary-cronos w-full py-3 rounded-xl" disabled={sending}>
+            <button
+              type="submit"
+              disabled={sending}
+              style={{ width: "100%", padding: "14px", borderRadius: "24px", background: "linear-gradient(135deg, #ff6b00, #ff8c00)", color: "#fff", border: "none", fontWeight: 800, fontSize: "14px", cursor: "pointer", opacity: sending ? 0.7 : 1 }}
+            >
               {sending ? "Enviando…" : type === "login" ? "Enviar código" : "Crear cuenta"}
-            </Button>
+            </button>
 
             {type === "register" && (
               <p style={{fontSize: '12px', color: '#3a5070', textAlign: 'center', marginTop: '12px'}}>
@@ -212,13 +215,13 @@ export default function AuthCard({ type }: { type: AuthType }) {
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0" }}>
               {type === "login" ? (
                 <>¿No tienes cuenta?{" "}
-                  <a href="/auth/register" style={{ color: "#00c9ff", textDecoration: "none" }}>
+                  <a href="/auth/register" style={{ color: "#ff8c00", textDecoration: "none" }}>
                     Crea una
                   </a>
                 </>
               ) : (
                 <>¿Ya tienes cuenta?{" "}
-                  <a href="/auth/login" style={{ color: "#00c9ff", textDecoration: "none" }}>
+                  <a href="/auth/login" style={{ color: "#ff8c00", textDecoration: "none" }}>
                     Inicia sesión
                   </a>
                 </>
@@ -238,9 +241,13 @@ export default function AuthCard({ type }: { type: AuthType }) {
               />
             </div>
 
-            <Button className="btn-primary-cronos w-full py-3 rounded-xl" disabled={verifying}>
+            <button
+              type="submit"
+              disabled={verifying}
+              style={{ width: "100%", padding: "14px", borderRadius: "24px", background: "linear-gradient(135deg, #ff6b00, #ff8c00)", color: "#fff", border: "none", fontWeight: 800, fontSize: "14px", cursor: "pointer", opacity: verifying ? 0.7 : 1 }}
+            >
               {verifying ? "Verificando…" : "Verificar código"}
-            </Button>
+            </button>
 
             <button
               type="button"

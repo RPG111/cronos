@@ -15,7 +15,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "10px",
   letterSpacing: "2px",
-  color: "#3a5070",
+  color: "#8899bb",
   fontWeight: 700,
   textTransform: "uppercase",
   marginBottom: "6px",
@@ -164,7 +164,7 @@ export default function LoginPage() {
         {/* Subtítulo */}
         <p style={{
           textAlign: "center",
-          color: "#3a5070",
+          color: "#8899bb",
           fontSize: "12px",
           letterSpacing: "2px",
           textTransform: "uppercase",
@@ -192,15 +192,14 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={sending}
-              className="btn-primary-cronos"
-              style={{ width: "100%", padding: "12px", borderRadius: "14px" }}
+              style={{ width: "100%", padding: "14px", borderRadius: "24px", background: "linear-gradient(135deg, #ff6b00, #ff8c00)", color: "#fff", border: "none", fontWeight: 800, fontSize: "14px", cursor: "pointer", opacity: sending ? 0.7 : 1 }}
             >
               {sending ? "Enviando…" : "enviar código"}
             </button>
 
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0" }}>
               ¿no tienes cuenta?{" "}
-              <a href="/auth/register" style={{ color: "#00c9ff", textDecoration: "none" }}>
+              <a href="/auth/register" style={{ color: "#ff8c00", textDecoration: "none" }}>
                 créala
               </a>
             </p>
@@ -222,8 +221,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={verifying}
-              className="btn-primary-cronos"
-              style={{ width: "100%", padding: "12px", borderRadius: "14px" }}
+              style={{ width: "100%", padding: "14px", borderRadius: "24px", background: "linear-gradient(135deg, #ff6b00, #ff8c00)", color: "#fff", border: "none", fontWeight: 800, fontSize: "14px", cursor: "pointer", opacity: verifying ? 0.7 : 1 }}
             >
               {verifying ? "Verificando…" : "entrar"}
             </button>
@@ -231,16 +229,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setStep("form")}
-              style={{
-                width: "100%",
-                borderRadius: "14px",
-                border: "1px solid #142035",
-                background: "#0d1528",
-                padding: "12px",
-                fontWeight: 600,
-                color: "#c8d8f0",
-                cursor: "pointer",
-              }}
+              style={{ width: "100%", padding: "14px", borderRadius: "24px", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#e8f0ff", fontWeight: 600, fontSize: "14px", cursor: "pointer" }}
             >
               cambiar teléfono
             </button>

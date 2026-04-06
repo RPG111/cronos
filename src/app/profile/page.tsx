@@ -56,66 +56,66 @@ export default function ProfilePage() {
   }, [uid, events]);
 
   return (
-    <main>
-      <div className="relative min-h-dvh w-full">
-        <img src="/images/stadium.jpg" alt="" className="absolute inset-0 h-full w-full object-cover blur-sm" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70" />
-        <div className="relative z-10">
-          <div className="mx-auto w-full max-w-xl px-5 py-8">
-            <h1 className="text-3xl font-extrabold text-white">Mi perfil</h1>
-            <p className="mt-2 text-zinc-300">Tus reservas confirmadas.</p>
+    <main style={{ minHeight: "100dvh", background: "#080c14" }}>
+      <div style={{ maxWidth: "560px", margin: "0 auto", padding: "32px 20px" }}>
+        <h1 style={{ fontSize: "28px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>Mi perfil</h1>
+        <p style={{ marginTop: "6px", color: "#8899bb", fontSize: "13px" }}>Tus reservas confirmadas.</p>
 
-            <div className="mt-6 space-y-4">
-              {loading ? (
-                <div className="rounded-2xl border border-white/10 bg-black/50 p-4 text-zinc-300">Cargando…</div>
-              ) : items.length === 0 ? (
-                <div className="rounded-2xl border border-white/10 bg-black/50 p-4 text-zinc-300">Aún no tienes reservas.</div>
-              ) : (
-                items.map((it) => (
-                  <div key={it.event.id} className="rounded-2xl border border-white/10 bg-black/50 p-4">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <div className="text-xs uppercase tracking-widest text-zinc-400">{it.event.league}</div>
-                        <div className="mt-1 text-xl font-bold text-white">{it.event.title}</div>
-                        <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-400/30">
-                          Vas — {it.team}
-                        </span>
-                      </div>
-                      <div className="text-right text-sm text-zinc-300">
-                        <div className="font-medium">{it.event.venueName}</div>
-                        <div className="text-zinc-400">{it.event.address}<br />{it.event.city}</div>
-                      </div>
+        <div style={{ marginTop: "24px", display: "grid", gap: "12px" }}>
+          {loading ? (
+            <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", color: "#8899bb", fontSize: "13px" }}>Cargando…</div>
+          ) : items.length === 0 ? (
+            <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", color: "#8899bb", fontSize: "13px" }}>Aún no tienes reservas.</div>
+          ) : (
+            items.map((it) => (
+              <div key={it.event.id} className="card-chrome-wrap">
+                <div style={{ background: "#0a1220", borderRadius: "18px", padding: "16px" }}>
+                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
+                    <div>
+                      <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#ff8c00", fontWeight: 700, textTransform: "uppercase" }}>{it.event.league}</div>
+                      <div style={{ marginTop: "4px", fontSize: "18px", fontWeight: 700, color: "#e8f0ff" }}>{it.event.title}</div>
+                      <span style={{ marginTop: "8px", display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,140,0,0.12)", border: "1px solid rgba(255,140,0,0.3)", color: "#ff8c00", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "20px" }}>
+                        Vas — {it.team}
+                      </span>
                     </div>
-                    <div className="mt-2 text-sm text-zinc-300">{fmtDateShort(it.event.dateISO)}</div>
-                    <div className="mt-3 flex gap-3">
-                      <Link href={`/events/${it.event.id}`} className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-center font-semibold text-white hover:bg-emerald-600 transition">
-                        Ver / Cancelar
-                      </Link>
-                      {it.reserveCode && (
-                        <button
-                          onClick={() => {
-                            setQrData({
-                              code: it.reserveCode!,
-                              eventTitle: it.event.title,
-                              userName: it.name,
-                              team: it.team,
-                            });
-                            setQrOpen(true);
-                          }}
-                          className="rounded-xl border border-white/15 bg-zinc-800 px-4 py-3 text-white hover:bg-zinc-700 transition"
-                        >
-                          Ver QR
-                        </button>
-                      )}
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <div style={{ fontSize: "13px", fontWeight: 600, color: "#ff8c00" }}>{it.event.venueName}</div>
+                      <div style={{ fontSize: "11px", color: "#8899bb", marginTop: "2px" }}>{it.event.address}<br />{it.event.city}</div>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-
-            <div className="h-24" />
-          </div>
+                  <div style={{ marginTop: "10px", fontSize: "12px", color: "#8899bb" }}>{fmtDateShort(it.event.dateISO)}</div>
+                  <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
+                    <Link
+                      href={`/events/${it.event.id}`}
+                      className="btn-primary-cronos"
+                      style={{ flex: 1, textAlign: "center", textDecoration: "none", padding: "11px 16px", borderRadius: "24px" }}
+                    >
+                      Ver / Cancelar
+                    </Link>
+                    {it.reserveCode && (
+                      <button
+                        onClick={() => {
+                          setQrData({
+                            code: it.reserveCode!,
+                            eventTitle: it.event.title,
+                            userName: it.name,
+                            team: it.team,
+                          });
+                          setQrOpen(true);
+                        }}
+                        style={{ position: "relative", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#c8d8f0", fontSize: "14px", fontWeight: 600, padding: "11px 16px", borderRadius: "24px", cursor: "pointer", overflow: "hidden", whiteSpace: "nowrap" }}
+                      >
+                        Ver QR
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
+
+        <div style={{ height: "96px" }} />
       </div>
       <QRModal open={qrOpen} onClose={() => setQrOpen(false)} data={qrData} />
       <BottomNav />
