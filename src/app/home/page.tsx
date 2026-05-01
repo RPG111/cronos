@@ -176,7 +176,7 @@ function FanZoneCard({
         {/* Fechas + entrada */}
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "10px" }}>
           <span style={{ fontSize: "12px", color: "#8899bb" }}>
-            📅 {zone.datesOpen}
+            📅 {translateField(zone.datesOpen, lang)}
           </span>
           <span style={{ fontSize: "12px", color: entryColor, fontWeight: 600 }}>
             🎟 {translateField(zone.entry, lang)}
