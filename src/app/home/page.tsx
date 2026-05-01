@@ -228,7 +228,21 @@ function FanZoneCard({
           >
             Cómo llegar
           </a>
-          {zone.officialUrl && (
+          {zone.registrationUrl ? (
+            <a
+              href={zone.registrationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "#ffffff",
+                fontSize: "11px",
+                textDecoration: "underline",
+                padding: "4px 0",
+              }}
+            >
+              Regístrate aquí
+            </a>
+          ) : zone.officialUrl ? (
             <a
               href={zone.officialUrl}
               target="_blank"
@@ -242,7 +256,7 @@ function FanZoneCard({
             >
               Sitio oficial
             </a>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
