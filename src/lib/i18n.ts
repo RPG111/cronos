@@ -157,3 +157,51 @@ export function useTranslation(): Translations {
   }, [setLang]);
   return translations[lang];
 }
+
+export function translateField(text: string, lang: Lang): string {
+  if (lang === "es") return text;
+
+  const dict: Record<string, string> = {
+    // Entry
+    "Gratuita": "Free",
+    "Gratuita, sin registro requerido": "Free, no registration required",
+    "Gratuita, requiere registro anticipado": "Free, advance registration required",
+    "Gratuita, requiere ticket anticipado (Live Nation)": "Free, advance ticket required (Live Nation)",
+    "Gratuita, sin alcohol": "Free, no alcohol",
+    "Gratuita (partidos) / Ticketed (conciertos)": "Free (matches) / Ticketed (concerts)",
+    "Gratuita (sujeto a cambio)": "Free (subject to change)",
+    "Gratuita, requiere pase digital anticipado": "Free, advance digital pass required",
+    "Requiere registro anticipado": "Advance registration required",
+    "Ticketada ($12.50)": "Ticketed ($12.50)",
+    "Desde $10 (niños 12 y menor gratis)": "From $10 (children 12 and under free)",
+    "Requiere pase gratuito anticipado en kansascityfwc26.com": "Free advance pass required at kansascityfwc26.com",
+    "Gratuita (asientos reservados en anfiteatro ticketados)": "Free (reserved amphitheater seats ticketed)",
+    "TBC": "TBC",
+
+    // Notes comunes
+    "Sede completa. Transmite todos los partidos del torneo.": "Full venue. Broadcasts all tournament matches.",
+    "Sede parcial. Transmite partidos de México y encuentros destacados.": "Partial venue. Broadcasts Mexico matches and featured games.",
+    "Sede parcial. Ubicación exacta por confirmar. Más info pronto.": "Partial venue. Exact location to be confirmed. More info soon.",
+    "Capacidad 8,000 personas. Organizado por gobierno de Zapopan.": "Capacity 8,000 people. Organized by Zapopan local government.",
+    "Capacidad 10,000 personas. Organizado por gobierno de Zapopan.": "Capacity 10,000 people. Organized by Zapopan local government.",
+    "Organizado por Bay Area Host Committee": "Organized by Bay Area Host Committee",
+    "Organizado por ciudad de Bellingham": "Organized by City of Bellingham",
+    "Organizado por ciudad de Everett": "Organized by City of Everett",
+    "Organizado por ciudad de Spokane": "Organized by City of Spokane",
+    "Organizado por Port of Olympia": "Organized by Port of Olympia",
+    "Organizado por Puyallup Tribe y ciudad de Tacoma": "Organized by Puyallup Tribe and City of Tacoma",
+    "Organizado por Yakima Host Committee": "Organized by Yakima Host Committee",
+    "Anfiteatro de 10,000 personas. Conciertos: Mötley Crüe y Kx5 (Deadmau5 + Kaskade) en julio.": "10,000-person amphitheater. Concerts: Mötley Crüe and Kx5 (Deadmau5 + Kaskade) in July.",
+    "Asociación FIFA y Telemundo. La pista de patinaje se convierte en campo de fútbol con pantallas gigantes.": "FIFA and Telemundo partnership. The ice rink becomes a soccer field with giant screens.",
+    "Venues específicos por confirmar.": "Specific venues to be confirmed.",
+    "16 zonas adicionales en las alcaldías de CDMX": "16 additional zones in CDMX districts",
+    "Espacios adicionales en las alcaldías de CDMX": "Additional spaces in CDMX districts",
+    "Plaza de la Liberación. 39 días, 104 partidos. Acceso libre y gratuito. Fan Zones adicionales en Zapopan confirmados.": "Plaza de la Liberación. 39 days, 104 matches. Free access. Additional Fan Zones confirmed in Zapopan.",
+  };
+
+  // Buscar traducción exacta primero
+  if (dict[text]) return dict[text];
+
+  // Si no hay traducción exacta, devolver el texto original
+  return text;
+}

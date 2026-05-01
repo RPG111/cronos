@@ -12,8 +12,8 @@ import {
   distanceKm,
   type FanZone,
 } from "../../lib/firestore/fanzones";
-import { useGeoStore } from "../../lib/store";
-import { useTranslation, type Translations } from "../../lib/i18n";
+import { useGeoStore, useLangStore } from "../../lib/store";
+import { useTranslation, translateField, type Translations } from "../../lib/i18n";
 import BottomNav from "../../components/BottomNav";
 import Header from "@/components/Header";
 import RestaurantLead from "@/components/RestaurantLead";
@@ -105,6 +105,7 @@ function FanZoneCard({
   userLng: number | null;
 }) {
   const t = useTranslation();
+  const { lang } = useLangStore();
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(zone.address)}`;
   const dist =
     userLat != null && userLng != null
@@ -178,14 +179,14 @@ function FanZoneCard({
             📅 {zone.datesOpen}
           </span>
           <span style={{ fontSize: "12px", color: entryColor, fontWeight: 600 }}>
-            🎟 {zone.entry}
+            🎟 {translateField(zone.entry, lang)}
           </span>
         </div>
 
         {/* Notas */}
         {zone.notes && (
           <div style={{ fontSize: "11px", color: "#6677aa", fontStyle: "italic", marginBottom: "10px" }}>
-            {zone.notes}
+            {translateField(zone.notes, lang)}
           </div>
         )}
 
