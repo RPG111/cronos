@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useEffect, useState } from "react";
 import { app } from "@/lib/firebase";
+import { useTranslation } from "@/lib/i18n";
 
 type Props = {
   onOpenLead?: () => void;
@@ -16,6 +17,7 @@ type Props = {
 export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
   const router = useRouter();
   const [logged, setLogged] = useState<boolean>(!!isLoggedIn);
+  const t = useTranslation();
 
   useEffect(() => {
     if (typeof isLoggedIn === "boolean") { setLogged(isLoggedIn); return; }
@@ -41,7 +43,7 @@ export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
         {/* Izquierda: Soy restaurante */}
         <div className="justify-self-start">
           <button onClick={() => onOpenLead?.()} className="btn-ghost-cronos" style={{ fontSize: "0.75rem", padding: "6px 12px", whiteSpace: "nowrap" }}>
-            Soy restaurante
+            {t.header.restaurant}
           </button>
         </div>
 
@@ -60,11 +62,11 @@ export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
         <div className="justify-self-end">
           {logged ? (
             <button onClick={handleLogout} className="btn-ghost-cronos" style={{ fontSize: "0.75rem", padding: "6px 12px", whiteSpace: "nowrap" }}>
-              Cerrar sesión
+              {t.header.logout}
             </button>
           ) : (
             <Link href="/auth/login" className="btn-ghost-cronos" style={{ fontSize: "0.75rem", padding: "6px 12px", whiteSpace: "nowrap" }}>
-              Iniciar sesión
+              {t.header.login}
             </Link>
           )}
         </div>

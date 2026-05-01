@@ -62,6 +62,19 @@ export const useAppStore = create<AppState>((set) => ({
   },
 }));
 
+// Idioma — detectado automáticamente por navigator.language
+export type Lang = "es" | "en";
+
+interface LangState {
+  lang: Lang;
+  setLang: (l: Lang) => void;
+}
+
+export const useLangStore = create<LangState>((set) => ({
+  lang: "es", // default SSR-safe; el hook useTranslation() actualiza en mount
+  setLang: (l) => set({ lang: l }),
+}));
+
 // UI loading state (mantener compatibilidad)
 interface UIState {
   loading: boolean;

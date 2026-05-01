@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getActiveFanZones, type FanZone } from "../../lib/firestore/fanzones";
 import { useGeoStore } from "../../lib/store";
+import { useTranslation } from "../../lib/i18n";
 import BottomNav from "../../components/BottomNav";
 
 const MapWC2026 = dynamic(() => import("./map-wc2026-inner"), { ssr: false });
@@ -13,6 +14,7 @@ const MapWC2026 = dynamic(() => import("./map-wc2026-inner"), { ssr: false });
 export default function MapPage() {
   const [zones, setZones] = useState<FanZone[]>([]);
   const { userLat, userLng } = useGeoStore();
+  const t = useTranslation();
 
   useEffect(() => {
     getActiveFanZones().then(setZones).catch(console.error);
@@ -35,12 +37,10 @@ export default function MapPage() {
 
       <div style={{ maxWidth: "520px", margin: "0 auto", padding: "24px 16px" }}>
         <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>
-          Fan Zones — Mundial 2026
+          {t.map.title}
         </h2>
         <p style={{ color: "#8899bb", marginTop: "4px", fontSize: "13px" }}>
-          {userLat != null
-            ? "Mostrando eventos cerca de tu ubicación."
-            : "USA, Canadá y México. Toca un pin para ver detalles."}
+          {userLat != null ? t.map.nearYou : t.map.worldwide}
         </p>
 
         <div style={{ marginTop: "20px", borderRadius: "18px", overflow: "hidden", border: "1px solid #142035", height: "500px" }}>

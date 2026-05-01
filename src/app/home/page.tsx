@@ -13,6 +13,7 @@ import {
   type FanZone,
 } from "../../lib/firestore/fanzones";
 import { useGeoStore } from "../../lib/store";
+import { useTranslation, type Translations } from "../../lib/i18n";
 import BottomNav from "../../components/BottomNav";
 import Header from "@/components/Header";
 import RestaurantLead from "@/components/RestaurantLead";
@@ -24,12 +25,6 @@ const COUNTRY_FLAG: Record<string, string> = {
   usa: "🇺🇸",
   canada: "🇨🇦",
   mexico: "🇲🇽",
-};
-
-const COUNTRY_NAME: Record<string, string> = {
-  usa: "EE.UU.",
-  canada: "Canadá",
-  mexico: "México",
 };
 
 const COUNTRY_ORDER = ["usa", "canada", "mexico"];
@@ -57,7 +52,7 @@ function useCountdown() {
 
 // ── Type badge ───────────────────────────────────────────────────────────────
 
-function TypeBadge({ type }: { type: FanZone["type"] }) {
+function TypeBadge({ type, t }: { type: FanZone["type"]; t: Translations }) {
   if (type === "fan_festival") {
     return (
       <span style={{
@@ -72,7 +67,7 @@ function TypeBadge({ type }: { type: FanZone["type"] }) {
         borderRadius: "20px",
         whiteSpace: "nowrap",
       }}>
-        FIFA Fan Festival oficial
+        {t.home.fanFestivalBadge}
       </span>
     );
   }
@@ -89,7 +84,7 @@ function TypeBadge({ type }: { type: FanZone["type"] }) {
       borderRadius: "20px",
       whiteSpace: "nowrap",
     }}>
-      Fan Zone
+      {t.home.fanZoneBadge}
     </span>
   );
 }
@@ -109,29 +104,34 @@ function FanZoneCard({
   userLat: number | null;
   userLng: number | null;
 }) {
+  const t = useTranslation();
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(zone.address)}`;
   const dist =
     userLat != null && userLng != null
       ? distanceKm(userLat, userLng, zone.lat, zone.lng)
       : null;
 
-  const entryColor = zone.entry.toLowerCase().startsWith("gratuita")
+  const entryColor = zone.entry.toLowerCase().startsWith("gratuita") || zone.entry.toLowerCase().startsWith("free")
     ? "#00c97a"
     : "#f59e0b";
 
   const registrationLabel =
-    zone.entry.toLowerCase().includes("registro") ? "Registrarse" : "Más info";
+    zone.entry.toLowerCase().includes("registro") || zone.entry.toLowerCase().includes("register")
+      ? t.home.register
+      : t.home.moreInfo;
+
+  const countryName = t.home.countries[zone.country as keyof typeof t.home.countries] ?? zone.country;
 
   return (
     <div className="card-chrome-wrap" style={{ marginBottom: "12px" }}>
       <div style={{ background: "#0a1220", borderRadius: "18px", padding: "14px" }}>
         {/* Top: badge + estrella */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px", marginBottom: "8px" }}>
-          <TypeBadge type={zone.type} />
+          <TypeBadge type={zone.type} t={t} />
           <button
             onClick={() => onToggleSave(zone.id)}
             style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 0", flexShrink: 0, lineHeight: 1 }}
-            aria-label={isSaved ? "Quitar de favoritos" : "Guardar en favoritos"}
+            aria-label={isSaved ? t.home.ariaFavRemove : t.home.ariaFavAdd}
           >
             <Star
               size={17}
@@ -150,7 +150,7 @@ function FanZoneCard({
         {/* Ciudad + país + distancia */}
         <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
           <span style={{ fontSize: "13px", color: "#8899bb" }}>
-            {COUNTRY_FLAG[zone.country]} {zone.city}, {COUNTRY_NAME[zone.country]}
+            {COUNTRY_FLAG[zone.country]} {zone.city}, {countryName}
           </span>
           {dist != null && (
             <span style={{
@@ -226,7 +226,7 @@ function FanZoneCard({
               whiteSpace: "nowrap",
             }}
           >
-            Cómo llegar
+            {t.home.howToGet}
           </a>
           {zone.registrationUrl ? (
             <a
@@ -240,7 +240,7 @@ function FanZoneCard({
                 padding: "4px 0",
               }}
             >
-              Regístrate aquí
+              {t.home.registerHere}
             </a>
           ) : zone.officialUrl ? (
             <a
@@ -254,7 +254,7 @@ function FanZoneCard({
                 padding: "4px 0",
               }}
             >
-              Sitio oficial
+              {t.home.officialSite}
             </a>
           ) : null}
         </div>
@@ -278,6 +278,7 @@ export default function HomePage() {
   const { userLat, userLng } = useGeoStore();
   const countdown = useCountdown();
   const [mounted, setMounted] = useState(false);
+  const t = useTranslation();
 
   useEffect(() => setMounted(true), []);
 
@@ -372,10 +373,10 @@ export default function HomePage() {
         {/* ── Sección 1: Banner ── */}
         <div style={{ marginBottom: "28px" }}>
           <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#e8f0ff", margin: 0, lineHeight: 1.3 }}>
-            Encuentra dónde ver el Mundial 2026 cerca de ti.
+            {t.home.bannerTitle}
           </h2>
           <p style={{ color: "#8899bb", marginTop: "6px", fontSize: "13px" }}>
-            Fan Zones y Fan Festivals oficiales en USA, Canadá y México.
+            {t.home.bannerSubtitle}
           </p>
 
           {mounted && countdown && (
@@ -389,12 +390,12 @@ export default function HomePage() {
               borderRadius: "12px",
               padding: "6px 12px",
             }}>
-              <span style={{ fontSize: "11px", color: "#8899bb", marginRight: "6px" }}>⏱ Faltan</span>
+              <span style={{ fontSize: "11px", color: "#8899bb", marginRight: "6px" }}>{t.home.countdownLabel}</span>
               {[
-                { v: countdown.days, l: "d" },
-                { v: countdown.hours, l: "h" },
-                { v: countdown.mins, l: "m" },
-                { v: countdown.secs, l: "s" },
+                { v: countdown.days, l: t.home.countdownUnits.days },
+                { v: countdown.hours, l: t.home.countdownUnits.hours },
+                { v: countdown.mins, l: t.home.countdownUnits.mins },
+                { v: countdown.secs, l: t.home.countdownUnits.secs },
               ].map(({ v, l }) => (
                 <span key={l} style={{ fontSize: "13px", color: "#ff8c00", fontWeight: 700, fontVariantNumeric: "tabular-nums", marginRight: "4px" }}>
                   {String(v).padStart(2, "0")}{l}
@@ -432,7 +433,7 @@ export default function HomePage() {
               whiteSpace: "nowrap",
             }}
           >
-            Todos
+            {t.home.filterAll}
           </button>
 
           {/* Fan Festival */}
@@ -452,7 +453,7 @@ export default function HomePage() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Fan Festival
+                {t.home.filterFanFestival}
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setTooltip(tooltip === "fan_festival" ? null : "fan_festival"); }}
@@ -466,7 +467,7 @@ export default function HomePage() {
                   lineHeight: 1,
                   flexShrink: 0,
                 }}
-                aria-label="Información sobre Fan Festival"
+                aria-label={t.home.ariaInfoFestival}
               >
                 ⓘ
               </button>
@@ -487,7 +488,7 @@ export default function HomePage() {
                 width: "240px",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
               }}>
-                Evento oficial organizado por FIFA. Pantallas gigantes, conciertos y activaciones. Algunos requieren registro anticipado.
+                {t.home.tooltipFanFestival}
               </div>
             )}
           </div>
@@ -509,7 +510,7 @@ export default function HomePage() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Fan Zone
+                {t.home.filterFanZone}
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); setTooltip(tooltip === "fan_zone" ? null : "fan_zone"); }}
@@ -523,7 +524,7 @@ export default function HomePage() {
                   lineHeight: 1,
                   flexShrink: 0,
                 }}
-                aria-label="Información sobre Fan Zone"
+                aria-label={t.home.ariaInfoZone}
               >
                 ⓘ
               </button>
@@ -544,7 +545,7 @@ export default function HomePage() {
                 width: "240px",
                 boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
               }}>
-                Espacio local organizado por la comunidad para ver los partidos. Generalmente de entrada libre.
+                {t.home.tooltipFanZone}
               </div>
             )}
           </div>
@@ -554,9 +555,9 @@ export default function HomePage() {
         {/* Fila 2: filtro por país */}
         <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
           {([
-            { key: "mexico", label: "🇲🇽 México" },
-            { key: "usa",    label: "🇺🇸 USA" },
-            { key: "canada", label: "🇨🇦 Canadá" },
+            { key: "mexico", label: t.home.countryMexico },
+            { key: "usa",    label: t.home.countryUSA },
+            { key: "canada", label: t.home.countryCanada },
           ] as const).map(({ key, label }) => {
             const active = countryFilter === key;
             return (
@@ -583,11 +584,11 @@ export default function HomePage() {
 
         {loading ? (
           <div style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>
-            Cargando eventos…
+            {t.home.loading}
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>
-            No hay eventos disponibles.
+            {t.home.noEvents}
           </div>
         ) : (
           filtered.map((zone) => (
