@@ -47,8 +47,39 @@ export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
 
         {/* Centro: logo */}
         <div className="justify-self-center">
-          <Link href="/home" className="logo-cronos select-none">
-            CRONOS
+          <Link href="/home" className="select-none" style={{ textDecoration: "none" }}>
+            <span style={{
+              fontFamily: "'Arial Black', 'Impact', sans-serif",
+              fontWeight: 900,
+              fontSize: "1.35rem",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              background: "linear-gradient(180deg, #ffffff 0%, #a8c0d6 25%, #c8d8e8 45%, #6888aa 60%, #9ab0c8 75%, #d0e0f0 88%, #7890a8 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              filter: "drop-shadow(0 0 6px rgba(160,200,255,0.5)) drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+              display: "inline-block",
+              lineHeight: 1,
+            }}>
+              CRONOS
+            </span>
+            <span style={{
+              display: "block",
+              textAlign: "center",
+              fontFamily: "'Arial', sans-serif",
+              fontWeight: 400,
+              fontSize: "0.55rem",
+              letterSpacing: "0.25em",
+              textTransform: "uppercase",
+              background: "linear-gradient(180deg, #b0c8e0 0%, #7090b0 50%, #90aac8 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              marginTop: "-2px",
+            }}>
+              SPORTS
+            </span>
           </Link>
         </div>
 

@@ -72,3 +72,31 @@ export const useUI = create<UIState>((set) => ({
   loading: false,
   setLoading: (v) => set({ loading: v }),
 }));
+
+// Geolocalización — se pide una sola vez al entrar al sitio
+interface GeoState {
+  userLat: number | null;
+  userLng: number | null;
+  locationRequested: boolean;
+  requestLocation: () => void;
+}
+
+export const useGeoStore = create<GeoState>((set, get) => ({
+  userLat: null,
+  userLng: null,
+  locationRequested: false,
+  requestLocation: () => {
+    if (get().locationRequested) return;
+    set({ locationRequested: true });
+    if (typeof navigator === "undefined" || !navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        set({ userLat: pos.coords.latitude, userLng: pos.coords.longitude });
+      },
+      () => {
+        // Rechazado o error — continuar sin coordenadas, sin mensaje al usuario
+      },
+      { timeout: 8000 }
+    );
+  },
+}));

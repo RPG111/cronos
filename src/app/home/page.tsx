@@ -1,312 +1,337 @@
 // src/app/home/page.tsx
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { fmtDateShort } from "../../lib/events";
-import { subscribeToEvents, type CronosEvent } from "../../lib/firestore/events";
+import { useEffect, useState, useMemo } from "react";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { app as firebaseApp } from "../../lib/firebase";
 import {
-  getFirestore,
-  collection,
-  onSnapshot,
-  doc,
-  setDoc,
-  serverTimestamp,
-  getDoc,
-  onSnapshot as onDocSnapshot,
-} from "firebase/firestore";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signOut,
-  signInAnonymously,
-} from "firebase/auth";
+  getActiveFanZones,
+  saveFanZoneForUser,
+  removeFanZoneForUser,
+  getSavedFanZoneIds,
+  distanceKm,
+  type FanZone,
+} from "../../lib/firestore/fanzones";
+import { useGeoStore } from "../../lib/store";
 import BottomNav from "../../components/BottomNav";
 import Header from "@/components/Header";
 import RestaurantLead from "@/components/RestaurantLead";
-import TeamsAutocomplete from "@/components/TeamsAutocomplete";
-import QRModal, { type QRData } from "@/components/QRModal";
+import { Star } from "lucide-react";
 
-/* Modal simple reutilizable */
-function Modal({
-  open,
-  onClose,
-  title,
-  children,
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  children: React.ReactNode;
-}) {
-  if (!open) return null;
+// ── Country helpers ──────────────────────────────────────────────────────────
+
+const COUNTRY_FLAG: Record<string, string> = {
+  usa: "🇺🇸",
+  canada: "🇨🇦",
+  mexico: "🇲🇽",
+};
+
+const COUNTRY_NAME: Record<string, string> = {
+  usa: "EE.UU.",
+  canada: "Canadá",
+  mexico: "México",
+};
+
+const COUNTRY_ORDER = ["usa", "canada", "mexico"];
+
+// ── Countdown ────────────────────────────────────────────────────────────────
+
+const WC_START = new Date("2026-06-11T00:00:00Z").getTime();
+
+function useCountdown() {
+  const [diff, setDiff] = useState(WC_START - Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setDiff(WC_START - Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (diff <= 0) return null;
+  return {
+    days: Math.floor(diff / 86400000),
+    hours: Math.floor((diff % 86400000) / 3600000),
+    mins: Math.floor((diff % 3600000) / 60000),
+    secs: Math.floor((diff % 60000) / 1000),
+  };
+}
+
+// ── Type badge ───────────────────────────────────────────────────────────────
+
+function TypeBadge({ type }: { type: FanZone["type"] }) {
+  if (type === "fan_festival") {
+    return (
+      <span style={{
+        display: "inline-block",
+        background: "rgba(245,158,11,0.15)",
+        border: "1px solid rgba(245,158,11,0.4)",
+        color: "#f59e0b",
+        fontSize: "10px",
+        fontWeight: 700,
+        letterSpacing: "0.5px",
+        padding: "3px 9px",
+        borderRadius: "20px",
+        whiteSpace: "nowrap",
+      }}>
+        FIFA Fan Festival oficial
+      </span>
+    );
+  }
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" aria-modal="true" role="dialog">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div style={{ position: "relative", zIndex: 10, width: "92%", maxWidth: "448px", borderRadius: "20px", border: "1px solid #142035", background: "#0a1220", padding: "20px", boxShadow: "0 24px 48px rgba(0,0,0,0.6)" }}>
-        <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "#0d1528", border: "1px solid #142035", color: "#8899bb", borderRadius: "8px", padding: "4px 8px", fontSize: "14px", cursor: "pointer" }}>&#x2715;</button>
+    <span style={{
+      display: "inline-block",
+      background: "rgba(59,130,246,0.15)",
+      border: "1px solid rgba(59,130,246,0.4)",
+      color: "#60a5fa",
+      fontSize: "10px",
+      fontWeight: 700,
+      letterSpacing: "0.5px",
+      padding: "3px 9px",
+      borderRadius: "20px",
+      whiteSpace: "nowrap",
+    }}>
+      Fan Zone
+    </span>
+  );
+}
+
+// ── Fan Zone Card ────────────────────────────────────────────────────────────
+
+function FanZoneCard({
+  zone,
+  isSaved,
+  onToggleSave,
+  userLat,
+  userLng,
+}: {
+  zone: FanZone;
+  isSaved: boolean;
+  onToggleSave: (id: string) => void;
+  userLat: number | null;
+  userLng: number | null;
+}) {
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(zone.address)}`;
+  const dist =
+    userLat != null && userLng != null
+      ? distanceKm(userLat, userLng, zone.lat, zone.lng)
+      : null;
+
+  const entryColor = zone.entry.toLowerCase().startsWith("gratuita")
+    ? "#00c97a"
+    : "#f59e0b";
+
+  const registrationLabel =
+    zone.entry.toLowerCase().includes("registro") ? "Registrarse" : "Más info";
+
+  return (
+    <div className="card-chrome-wrap" style={{ marginBottom: "12px" }}>
+      <div style={{ background: "#0a1220", borderRadius: "18px", padding: "14px" }}>
+        {/* Top: badge + estrella */}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px", marginBottom: "8px" }}>
+          <TypeBadge type={zone.type} />
+          <button
+            onClick={() => onToggleSave(zone.id)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 0", flexShrink: 0, lineHeight: 1 }}
+            aria-label={isSaved ? "Quitar de favoritos" : "Guardar en favoritos"}
+          >
+            <Star
+              size={17}
+              strokeWidth={1.5}
+              fill={isSaved ? "#f59e0b" : "none"}
+              stroke={isSaved ? "#f59e0b" : "#8899bb"}
+            />
+          </button>
         </div>
-        {children}
+
+        {/* Nombre */}
+        <div style={{ fontSize: "16px", fontWeight: 700, color: "#e8f0ff", marginBottom: "4px", lineHeight: 1.3 }}>
+          {zone.name}
+        </div>
+
+        {/* Ciudad + país + distancia */}
+        <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
+          <span style={{ fontSize: "13px", color: "#8899bb" }}>
+            {COUNTRY_FLAG[zone.country]} {zone.city}, {COUNTRY_NAME[zone.country]}
+          </span>
+          {dist != null && (
+            <span style={{
+              fontSize: "11px",
+              color: "#ff8c00",
+              background: "rgba(255,140,0,0.1)",
+              borderRadius: "10px",
+              padding: "1px 7px",
+            }}>
+              {dist < 10 ? dist.toFixed(1) : Math.round(dist)} km
+            </span>
+          )}
+        </div>
+
+        {/* Venue + dirección */}
+        <div style={{ fontSize: "12px", color: "#6677aa", marginBottom: "2px" }}>{zone.venue}</div>
+        <div style={{ fontSize: "11px", color: "#4a5a7a", marginBottom: "10px" }}>{zone.address}</div>
+
+        {/* Divisor */}
+        <div style={{ height: "1px", background: "#142035", marginBottom: "10px" }} />
+
+        {/* Fechas + entrada */}
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "10px" }}>
+          <span style={{ fontSize: "12px", color: "#8899bb" }}>
+            📅 {zone.datesOpen}
+          </span>
+          <span style={{ fontSize: "12px", color: entryColor, fontWeight: 600 }}>
+            🎟 {zone.entry}
+          </span>
+        </div>
+
+        {/* Notas */}
+        {zone.notes && (
+          <div style={{ fontSize: "11px", color: "#6677aa", fontStyle: "italic", marginBottom: "10px" }}>
+            {zone.notes}
+          </div>
+        )}
+
+        {/* Botones */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          {zone.registrationUrl && (
+            <a
+              href={zone.registrationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                background: "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                color: "#fff",
+                fontSize: "12px",
+                fontWeight: 700,
+                padding: "8px 14px",
+                borderRadius: "20px",
+                textDecoration: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {registrationLabel}
+            </a>
+          )}
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              background: "rgba(192,192,192,0.07)",
+              border: "1px solid rgba(192,192,192,0.2)",
+              color: "#c8d8f0",
+              fontSize: "12px",
+              fontWeight: 600,
+              padding: "8px 14px",
+              borderRadius: "20px",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Cómo llegar
+          </a>
+          {zone.officialUrl && (
+            <a
+              href={zone.officialUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "#8899bb",
+                fontSize: "11px",
+                textDecoration: "underline",
+                padding: "4px 0",
+              }}
+            >
+              Sitio oficial
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-/** Util: genera un slug estable para IDs (equipo -> teams/{slug}) */
-function slugifyName(s: string) {
-  return s
-    .toLowerCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
-type Counts = { total: number; a: number; b: number };
-type CountsMap = Record<string, Counts>;
-type MyAttendanceMap = Record<string, { team: string; reserveCode?: string; name?: string } | null>;
+// ── Main Page ────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
-  const [events, setEvents] = useState<CronosEvent[]>([]);
-  const [counts, setCounts] = useState<CountsMap>({});
+  const [zones, setZones] = useState<FanZone[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico">("mexico");
+  const [typeFilter, setTypeFilter] = useState<"all" | "fan_festival" | "fan_zone">("all");
+  const [tooltip, setTooltip] = useState<"fan_festival" | "fan_zone" | null>(null);
   const [uid, setUid] = useState<string | null>(null);
-
-  const [profileName, setProfileName] = useState("");
-  const [profilePhone, setProfilePhone] = useState("");
-  const [profileFav, setProfileFav] = useState("");
-
-  const [myAttendance, setMyAttendance] = useState<MyAttendanceMap>({});
-
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<CronosEvent | null>(null);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [teamChoice, setTeamChoice] = useState<"A" | "B" | null>(null);
-  const [saving, setSaving] = useState(false);
-
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [leadOpen, setLeadOpen] = useState(false);
 
-  const [qrOpen, setQrOpen] = useState(false);
-  const [qrData, setQrData] = useState<QRData | null>(null);
+  const { userLat, userLng } = useGeoStore();
+  const countdown = useCountdown();
+  const [mounted, setMounted] = useState(false);
 
-  const [favOpen, setFavOpen] = useState(false);
-  const [favTeam, setFavTeam] = useState("");
+  useEffect(() => setMounted(true), []);
 
-  async function upsertTeamIfNew(nameRaw: string) {
-    const name = (nameRaw || "").trim();
-    if (!name) return;
-    const db = getFirestore(firebaseApp);
-    const slug = slugifyName(name);
-    try {
-      await setDoc(
-        doc(db, "teams", slug),
-        {
-          name,
-          slug,
-          source: "user_input",
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      );
-    } catch (e) {
-      console.error("No se pudo guardar equipo:", e);
-    }
-  }
-
-  useEffect(() => {
-    return subscribeToEvents(setEvents);
-  }, []);
-
+  // Auth — solo para favoritos
   useEffect(() => {
     const auth = getAuth(firebaseApp);
-    const unsub = onAuthStateChanged(auth, async (u) => {
-      setUid(u ? u.uid : null);
-
+    return onAuthStateChanged(auth, async (u) => {
+      setUid(u?.uid ?? null);
       if (u) {
         try {
-          const db = getFirestore(firebaseApp);
-          const userDoc = await getDoc(doc(db, "users", u.uid));
-          if (userDoc.exists()) {
-            const d = userDoc.data() as any;
-            setProfileName((d?.name as string) || u.displayName || "");
-            setProfilePhone((d?.phone as string) || (u.phoneNumber ?? ""));
-            setProfileFav((d?.favoriteTeam as string) || "");
-            return;
-          }
+          const ids = await getSavedFanZoneIds(u.uid);
+          setSavedIds(new Set(ids));
         } catch {}
-        setProfileName(u.displayName || "");
-        setProfilePhone(u.phoneNumber || "");
-        setProfileFav("");
       } else {
-        setProfileName("");
-        setProfilePhone("");
-        setProfileFav("");
+        setSavedIds(new Set());
       }
     });
-    return () => unsub();
   }, []);
 
+  // Cargar fan zones una vez
   useEffect(() => {
-    const db = getFirestore(firebaseApp);
-    const unsubs: Array<() => void> = [];
-    events.forEach((ev) => {
-      const colRef = collection(db, "events", ev.id, "attendees");
-      const unsub = onSnapshot(colRef, (snap) => {
-        let total = 0, a = 0, b = 0;
-        snap.forEach((d) => {
-          total += 1;
-          const team = (d.data().team as string) || "";
-          if (team === (ev.split?.aLabel || ev.homeTeam)) a += 1;
-          else if (team === (ev.split?.bLabel || ev.awayTeam)) b += 1;
-        });
-        setCounts((prev) => ({ ...prev, [ev.id]: { total, a, b } }));
-      });
-      unsubs.push(unsub);
-    });
-    return () => unsubs.forEach((u) => u());
-  }, [events]);
+    getActiveFanZones()
+      .then(setZones)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
-  useEffect(() => {
-    if (!uid) { setMyAttendance({}); return; }
-    const db = getFirestore(firebaseApp);
-    const unsubs: Array<() => void> = [];
-    events.forEach((ev) => {
-      const myDocRef = doc(db, "events", ev.id, "attendees", uid);
-      const unsub = onDocSnapshot(myDocRef, (d) => {
-        setMyAttendance((prev) => ({
-          ...prev,
-          [ev.id]: d.exists()
-            ? {
-                team: (d.data()?.team as string) || "",
-                reserveCode: (d.data()?.reserveCode as string) || undefined,
-                name: (d.data()?.name as string) || undefined,
-              }
-            : null,
-        }));
-      });
-      unsubs.push(unsub);
-    });
-    return () => unsubs.forEach((u) => u());
-  }, [events, uid]);
-
-  function openReserveModal(ev: CronosEvent) {
-    setSelected(ev);
-    setName(profileName);
-    setPhone(profilePhone);
-    const mine = myAttendance[ev.id];
-    if (mine?.team === ev.split?.aLabel) setTeamChoice("A");
-    else if (mine?.team === ev.split?.bLabel) setTeamChoice("B");
-    else setTeamChoice(null);
-    setOpen(true);
-  }
-
-  function genCode6() {
-    return String(Math.floor(100000 + Math.random() * 900000));
-  }
-
-  async function createOrUpdateProfileAndReserve(activeUid: string) {
-    if (!selected) return;
-    const db = getFirestore(firebaseApp);
-    const team = teamChoice === "A"
-      ? (selected.split?.aLabel || selected.homeTeam || "")
-      : (selected.split?.bLabel || selected.awayTeam || "");
-    const reserveCode = genCode6();
-
-    await setDoc(
-      doc(db, "users", activeUid),
-      {
-        name: name.trim(),
-        phone: phone.trim(),
-        favoriteTeam: (profileFav || favTeam || "").trim(),
-        updatedAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
-
-    await setDoc(
-      doc(db, "events", selected.id, "attendees", activeUid),
-      {
-        team,
-        name: name.trim(),
-        phone: phone.trim(),
-        ts: serverTimestamp(),
-        reserveCode,
-        codeSentAt: serverTimestamp(),
-        smsStatus: "sent",
-      },
-      { merge: true }
-    );
-
-    await fetch("/api/sms/send", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        to: phone.trim(),
-        message: "Cronos: tu codigo de reserva para \"" + selected.title + "\" es " + reserveCode + ".",
-      }),
-    });
-  }
-
-  async function confirmReserve() {
-    if (!selected) return;
-    if (!teamChoice) { alert("Elige un bando para continuar."); return; }
-    if (!name.trim() || !phone.trim()) { alert("Confirma nombre y telefono."); return; }
-
-    const currentCount = counts[selected.id];
-    if (!myAttendance[selected.id] && currentCount && currentCount.total >= selected.capacity) {
-      alert("Lo sentimos, este evento ya esta lleno.");
-      return;
+  // Ordenar client-side (reacciona a ubicación)
+  const sorted = useMemo(() => {
+    if (!zones.length) return [];
+    if (userLat != null && userLng != null) {
+      return [...zones].sort(
+        (a, b) =>
+          distanceKm(userLat, userLng, a.lat, a.lng) -
+          distanceKm(userLat, userLng, b.lat, b.lng)
+      );
     }
+    return [...zones].sort((a, b) => {
+      const ci =
+        COUNTRY_ORDER.indexOf(a.country) - COUNTRY_ORDER.indexOf(b.country);
+      if (ci !== 0) return ci;
+      return a.city.localeCompare(b.city);
+    });
+  }, [zones, userLat, userLng]);
 
-    if (uid) {
-      setSaving(true);
-      try {
-        await createOrUpdateProfileAndReserve(uid);
-        setOpen(false);
-        alert("Reserva confirmada. Te enviamos tu codigo por SMS.");
-      } catch (e) {
-        console.error(e);
-        alert("No se pudo guardar/enviar tu reserva. Intenta de nuevo.");
-      } finally {
-        setSaving(false);
-      }
-      return;
-    }
+  // Filtro por país + tipo
+  const filtered = useMemo(() => {
+    return sorted.filter((z) => {
+      if (z.country !== countryFilter) return false;
+      if (typeFilter !== "all" && z.type !== typeFilter) return false;
+      return true;
+    });
+  }, [sorted, countryFilter, typeFilter]);
 
-    setFavOpen(true);
-  }
-
-  async function handleFavSubmit() {
-    if (!favTeam.trim()) {
-      alert("Selecciona o escribe tu equipo favorito.");
-      return;
-    }
-    setSaving(true);
+  async function handleToggleSave(id: string) {
+    if (!uid) return; // sin auth: no hacer nada
+    const next = new Set(savedIds);
+    const wasSaved = next.has(id);
+    // Optimistic update
+    if (wasSaved) next.delete(id);
+    else next.add(id);
+    setSavedIds(next);
     try {
-      const auth = getAuth(firebaseApp);
-
-      let activeUid = uid;
-      if (!activeUid) {
-        const cred = await signInAnonymously(auth);
-        activeUid = cred.user?.uid || null;
-        if (!activeUid) throw new Error("No se pudo iniciar sesion anonima.");
-      }
-
-      await upsertTeamIfNew(favTeam);
-      await createOrUpdateProfileAndReserve(activeUid);
-
-      setFavOpen(false);
-      setOpen(false);
-      alert("Reserva confirmada. Te enviamos tu codigo por SMS.");
+      if (wasSaved) await removeFanZoneForUser(uid, id);
+      else await saveFanZoneForUser(uid, id);
     } catch (e) {
+      setSavedIds(savedIds); // revertir
       console.error(e);
-      alert("No se pudo terminar la reserva. Intenta de nuevo.");
-    } finally {
-      setSaving(false);
     }
   }
 
@@ -316,7 +341,6 @@ export default function HomePage() {
       window.location.href = "/auth/login";
     } catch (e) {
       console.error(e);
-      alert("No se pudo cerrar sesion.");
     }
   }
 
@@ -327,214 +351,245 @@ export default function HomePage() {
         isLoggedIn={!!uid}
         onLogout={handleSignOut}
       />
-
       <RestaurantLead open={leadOpen} onClose={() => setLeadOpen(false)} />
 
       <div style={{ maxWidth: "520px", margin: "0 auto", padding: "24px 16px" }}>
-        <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>
-          Proximos eventos
-        </h2>
-        <p style={{ color: "#8899bb", marginTop: "4px", fontSize: "13px" }}>
-          Elige un lugar para ver tu proximo evento.
-        </p>
 
-        <div style={{ marginTop: "20px" }}>
-          {events.map((ev) => {
-            const c = counts[ev.id] || { total: ev.attendees ?? 0, a: ev.split?.aCount ?? 0, b: ev.split?.bCount ?? 0 };
-            const mine = myAttendance[ev.id];
-            const going = !!mine;
-            const myLabel =
-              mine?.team === ev.split?.aLabel ? ev.split?.aLabel :
-              mine?.team === ev.split?.bLabel ? ev.split?.bLabel : null;
-            const remaining = ev.capacity - c.total;
-            const isFull = c.total >= ev.capacity;
+        {/* ── Sección 1: Banner ── */}
+        <div style={{ marginBottom: "28px" }}>
+          <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#e8f0ff", margin: 0, lineHeight: 1.3 }}>
+            Encuentra dónde ver el Mundial 2026 cerca de ti.
+          </h2>
+          <p style={{ color: "#8899bb", marginTop: "6px", fontSize: "13px" }}>
+            Fan Zones y Fan Festivals oficiales en USA, Canadá y México.
+          </p>
 
+          {mounted && countdown && (
+            <div style={{
+              marginTop: "12px",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "2px",
+              background: "rgba(255,140,0,0.08)",
+              border: "1px solid rgba(255,140,0,0.2)",
+              borderRadius: "12px",
+              padding: "6px 12px",
+            }}>
+              <span style={{ fontSize: "11px", color: "#8899bb", marginRight: "6px" }}>⏱ Faltan</span>
+              {[
+                { v: countdown.days, l: "d" },
+                { v: countdown.hours, l: "h" },
+                { v: countdown.mins, l: "m" },
+                { v: countdown.secs, l: "s" },
+              ].map(({ v, l }) => (
+                <span key={l} style={{ fontSize: "13px", color: "#ff8c00", fontWeight: 700, fontVariantNumeric: "tabular-nums", marginRight: "4px" }}>
+                  {String(v).padStart(2, "0")}{l}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── Sección 2: Filtros + Lista ── */}
+
+        {/* Fila 1: filtro por tipo */}
+        <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap", position: "relative" }}>
+
+          {/* Overlay para cerrar tooltip al tocar fuera */}
+          {tooltip && (
+            <div
+              onClick={() => setTooltip(null)}
+              style={{ position: "fixed", inset: 0, zIndex: 90 }}
+            />
+          )}
+
+          {/* Todos */}
+          <button
+            onClick={() => setTypeFilter("all")}
+            style={{
+              background: typeFilter === "all" ? "#ff8c00" : "#0a1220",
+              border: `1px solid ${typeFilter === "all" ? "#ff8c00" : "#142035"}`,
+              color: typeFilter === "all" ? "#fff" : "#8899bb",
+              borderRadius: "20px",
+              padding: "7px 16px",
+              fontSize: "13px",
+              fontWeight: typeFilter === "all" ? 700 : 400,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+          >
+            Todos
+          </button>
+
+          {/* Fan Festival */}
+          <div style={{ position: "relative", zIndex: tooltip === "fan_festival" ? 100 : "auto" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <button
+                onClick={() => setTypeFilter("fan_festival")}
+                style={{
+                  background: typeFilter === "fan_festival" ? "#ff8c00" : "#0a1220",
+                  border: `1px solid ${typeFilter === "fan_festival" ? "#ff8c00" : "#142035"}`,
+                  color: typeFilter === "fan_festival" ? "#fff" : "#8899bb",
+                  borderRadius: "20px",
+                  padding: "7px 16px",
+                  fontSize: "13px",
+                  fontWeight: typeFilter === "fan_festival" ? 700 : 400,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Fan Festival
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setTooltip(tooltip === "fan_festival" ? null : "fan_festival"); }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#6677aa",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  padding: "2px",
+                  lineHeight: 1,
+                  flexShrink: 0,
+                }}
+                aria-label="Información sobre Fan Festival"
+              >
+                ⓘ
+              </button>
+            </div>
+            {tooltip === "fan_festival" && (
+              <div style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                left: 0,
+                zIndex: 100,
+                background: "#0e1a2e",
+                border: "1px solid #1e3050",
+                borderRadius: "12px",
+                padding: "12px 14px",
+                fontSize: "12px",
+                color: "#c8d8f0",
+                lineHeight: 1.5,
+                width: "240px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+              }}>
+                Evento oficial organizado por FIFA. Pantallas gigantes, conciertos y activaciones. Algunos requieren registro anticipado.
+              </div>
+            )}
+          </div>
+
+          {/* Fan Zone */}
+          <div style={{ position: "relative", zIndex: tooltip === "fan_zone" ? 100 : "auto" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <button
+                onClick={() => setTypeFilter("fan_zone")}
+                style={{
+                  background: typeFilter === "fan_zone" ? "#ff8c00" : "#0a1220",
+                  border: `1px solid ${typeFilter === "fan_zone" ? "#ff8c00" : "#142035"}`,
+                  color: typeFilter === "fan_zone" ? "#fff" : "#8899bb",
+                  borderRadius: "20px",
+                  padding: "7px 16px",
+                  fontSize: "13px",
+                  fontWeight: typeFilter === "fan_zone" ? 700 : 400,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Fan Zone
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setTooltip(tooltip === "fan_zone" ? null : "fan_zone"); }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#6677aa",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  padding: "2px",
+                  lineHeight: 1,
+                  flexShrink: 0,
+                }}
+                aria-label="Información sobre Fan Zone"
+              >
+                ⓘ
+              </button>
+            </div>
+            {tooltip === "fan_zone" && (
+              <div style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                left: 0,
+                zIndex: 100,
+                background: "#0e1a2e",
+                border: "1px solid #1e3050",
+                borderRadius: "12px",
+                padding: "12px 14px",
+                fontSize: "12px",
+                color: "#c8d8f0",
+                lineHeight: 1.5,
+                width: "240px",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+              }}>
+                Espacio local organizado por la comunidad para ver los partidos. Generalmente de entrada libre.
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* Fila 2: filtro por país */}
+        <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
+          {([
+            { key: "mexico", label: "🇲🇽 México" },
+            { key: "usa",    label: "🇺🇸 USA" },
+            { key: "canada", label: "🇨🇦 Canadá" },
+          ] as const).map(({ key, label }) => {
+            const active = countryFilter === key;
             return (
-              <div key={ev.id} className="card-chrome-wrap" style={{ marginBottom: "12px" }}>
-              <div style={{ background: "#0a1220", borderRadius: "18px", overflow: "hidden" }}>
-                {/* Top: liga + venue pill */}
-                <div style={{ padding: "14px 14px 8px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#ff8c00", fontWeight: 700, textTransform: "uppercase" }}>
-                    {ev.league}
-                  </div>
-                  <div style={{ background: "#0d1528", border: "1px solid #142035", borderRadius: "10px", padding: "4px 10px", textAlign: "right" }}>
-                    <div style={{ color: "#ff6b00", fontSize: "12px", fontWeight: 600 }}>{ev.venueName}</div>
-                    <div style={{ color: "#8899bb", fontSize: "10px" }}>{ev.city}</div>
-                  </div>
-                </div>
-
-                {/* Titulo */}
-                <div style={{ fontSize: "17px", fontWeight: 700, color: "#e8f0ff", padding: "0 14px 10px" }}>
-                  {ev.title}
-                </div>
-
-
-                {/* Fecha */}
-                <div style={{ fontSize: "11px", color: "#8899bb", padding: "0 14px 8px" }}>
-                  {fmtDateShort(ev.dateISO)}
-                </div>
-
-                {/* Barra de capacidad */}
-                <div style={{ margin: "0 14px 4px", background: "#0d1a2e", borderRadius: "3px", height: "3px" }}>
-                  <div style={{
-                    background: "linear-gradient(90deg, #ff6b00, #ff8c00)",
-                    width: Math.min((c.total / ev.capacity) * 100, 100) + "%",
-                    height: "100%",
-                    borderRadius: "3px",
-                  }} />
-                </div>
-
-                {/* Texto capacidad */}
-                <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 14px 10px" }}>
-                  <span style={{ color: "#8899bb", fontSize: "11px" }}>{c.total} / {ev.capacity} lugares</span>
-                  {isFull ? (
-                    <span style={{ color: "#3a5070", fontSize: "11px" }}>Lleno</span>
-                  ) : remaining <= 5 ? (
-                    <span style={{ color: "#00ff9d", fontSize: "11px" }}>{remaining} restantes</span>
-                  ) : (
-                    <span style={{ color: "#8899bb", fontSize: "11px" }}>Disponible</span>
-                  )}
-                </div>
-
-                {/* Divisor */}
-                <div style={{height:'1px', background:'#142035', margin:'8px 14px'}} />
-
-                {/* Contadores de equipos */}
-                {(() => {
-                  const aLabel = ev.split?.aLabel || ev.homeTeam || "Local";
-                  const bLabel = ev.split?.bLabel || ev.awayTeam || "Visitante";
-                  return (
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 32px 1fr", alignItems: "center", padding: "10px 14px" }}>
-                      <div style={{ textAlign: "left" }}>
-                        <div style={{ color: "#e8f0ff", fontSize: "12px" }}>{aLabel}</div>
-                        <div style={{ color: "#ff8c00", fontSize: "22px", fontWeight: 700 }}>{c.a}</div>
-                      </div>
-                      <div style={{ textAlign: "center", color: "#8899bb", fontSize: "10px", fontWeight: 700 }}>VS</div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ color: "#e8f0ff", fontSize: "12px" }}>{bLabel}</div>
-                        <div style={{ color: "#ff8c00", fontSize: "22px", fontWeight: 700 }}>{c.b}</div>
-                      </div>
-                    </div>
-                  );
-                })()}
-
-                {/* Botones */}
-                <div style={{ padding: "0 14px 14px" }}>
-                  {!going ? (
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px" }}>
-                      <button
-                        onClick={() => openReserveModal(ev)}
-                        style={{ background: "linear-gradient(135deg, #ff6b00, #ff8c00)", border: "none", color: "#fff", fontSize: "17px", fontWeight: 800, padding: "12px", borderRadius: "24px", cursor: "pointer", width: "100%" }}
-                      >
-                        Reservar lugar
-                      </button>
-                      <Link href={`/events/${ev.id}`} style={{ position: "relative", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#c8d8f0", fontSize: "15px", fontWeight: 600, padding: "12px 16px", borderRadius: "24px", cursor: "pointer", overflow: "hidden", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", transition: "all 0.5s ease", textDecoration: "none" }} className="group">
-                        <span style={{ position: "absolute", top: 0, left: "12.5%", width: "75%", height: "1px", background: "linear-gradient(90deg,transparent,rgba(220,220,220,0.9),transparent)", opacity: 0, transition: "opacity 0.5s ease" }} className="neon-top" />
-                        Detalles
-                        <span style={{ position: "absolute", bottom: 0, left: "12.5%", width: "75%", height: "1px", background: "linear-gradient(90deg,transparent,rgba(220,220,220,0.7),transparent)", opacity: 0.3, transition: "opacity 0.5s ease" }} className="neon-bottom" />
-                      </Link>
-                    </div>
-                  ) : (
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px" }}>
-                      <Link href={`/events/${ev.id}`} style={{ position: "relative", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#c8d8f0", fontSize: "19px", fontWeight: 800, letterSpacing: "2px", padding: "12px 16px", borderRadius: "24px", cursor: "pointer", overflow: "hidden", whiteSpace: "nowrap", display: "inline-flex", alignItems: "center", justifyContent: "center", transition: "all 0.5s ease", textDecoration: "none", width: "100%" }} className="group">
-                        <span style={{ position: "absolute", top: 0, left: "12.5%", width: "75%", height: "1px", background: "linear-gradient(90deg,transparent,rgba(220,220,220,0.9),transparent)", opacity: 0, transition: "opacity 0.5s ease" }} className="neon-top" />
-                        Detalles
-                        <span style={{ position: "absolute", bottom: 0, left: "12.5%", width: "75%", height: "1px", background: "linear-gradient(90deg,transparent,rgba(220,220,220,0.7),transparent)", opacity: 0.3, transition: "opacity 0.5s ease" }} className="neon-bottom" />
-                      </Link>
-                      <button
-                        onClick={() => {
-                          setQrData({
-                            code: mine?.reserveCode!,
-                            eventTitle: ev.title,
-                            userName: mine?.name || profileName || undefined,
-                            team: myLabel || undefined,
-                          });
-                          setQrOpen(true);
-                        }}
-                        style={{ background: "linear-gradient(135deg, #ff6b00, #ff8c00)", border: "none", color: "#fff", fontSize: "15px", fontWeight: 800, padding: "12px 24px", borderRadius: "24px", cursor: "pointer", whiteSpace: "nowrap" }}
-                      >
-                        Ver QR
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-              </div>
+              <button
+                key={key}
+                onClick={() => setCountryFilter(key)}
+                style={{
+                  background: active ? "#ff8c00" : "#0a1220",
+                  border: `1px solid ${active ? "#ff8c00" : "#142035"}`,
+                  color: active ? "#fff" : "#8899bb",
+                  borderRadius: "20px",
+                  padding: "7px 16px",
+                  fontSize: "13px",
+                  fontWeight: active ? 700 : 400,
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {label}
+              </button>
             );
           })}
         </div>
 
+        {loading ? (
+          <div style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>
+            Cargando eventos…
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>
+            No hay eventos disponibles.
+          </div>
+        ) : (
+          filtered.map((zone) => (
+            <FanZoneCard
+              key={zone.id}
+              zone={zone}
+              isSaved={savedIds.has(zone.id)}
+              onToggleSave={handleToggleSave}
+              userLat={userLat}
+              userLng={userLng}
+            />
+          ))
+        )}
+
         <div style={{ height: "80px" }} />
       </div>
-
-      {/* Modal reserva */}
-      <Modal open={open} onClose={() => setOpen(false)} title={selected ? "Confirmar reserva" : "Confirmar reserva"}>
-        {selected && (
-          <div style={{ display: "grid", gap: "16px" }}>
-            <div>
-              <label style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8899bb", fontWeight: 700, textTransform: "uppercase", marginBottom: "6px" }}>NOMBRE</label>
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre"
-                     style={{ width: "100%", background: "#0d1528", border: "1px solid #142035", color: "#e8f0ff", borderRadius: "11px", padding: "12px 14px", fontSize: "14px", outline: "none", boxSizing: "border-box" }} />
-            </div>
-            <div>
-              <label style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8899bb", fontWeight: 700, textTransform: "uppercase", marginBottom: "6px" }}>TELÉFONO</label>
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 415 555 1234"
-                     style={{ width: "100%", background: "#0d1528", border: "1px solid #142035", color: "#e8f0ff", borderRadius: "11px", padding: "12px 14px", fontSize: "14px", outline: "none", boxSizing: "border-box" }} />
-            </div>
-
-            <div>
-              <span style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8899bb", fontWeight: 700, textTransform: "uppercase", marginBottom: "8px" }}>BANDO</span>
-              {(() => {
-                const aLabel = selected.split?.aLabel || selected.homeTeam || "Local";
-                const bLabel = selected.split?.bLabel || selected.awayTeam || "Visitante";
-                return (
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: "8px", background: "#0d1528", border: "1px solid #142035", color: "#e8f0ff", borderRadius: "11px", padding: "12px", cursor: "pointer" }}>
-                      <input type="radio" name="teamHome" checked={teamChoice === "A"} onChange={() => setTeamChoice("A")} />
-                      <span>{aLabel}</span>
-                    </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: "8px", background: "#0d1528", border: "1px solid #142035", color: "#e8f0ff", borderRadius: "11px", padding: "12px", cursor: "pointer" }}>
-                      <input type="radio" name="teamHome" checked={teamChoice === "B"} onChange={() => setTeamChoice("B")} />
-                      <span>{bLabel}</span>
-                    </label>
-                  </div>
-                );
-              })()}
-            </div>
-
-            <div style={{ display: "flex", gap: "12px", paddingTop: "4px" }}>
-              <button onClick={() => setOpen(false)} disabled={saving} style={{ flex: 1, position: "relative", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#e8f0ff", fontSize: "14px", fontWeight: 600, padding: "12px", borderRadius: "24px", cursor: "pointer", overflow: "hidden", whiteSpace: "nowrap" }}>
-                Cancelar
-              </button>
-              <button onClick={confirmReserve} disabled={saving} style={{ flex: 1, background: "linear-gradient(135deg, #ff6b00, #ff8c00)", color: "#fff", fontSize: "14px", fontWeight: 800, padding: "12px", borderRadius: "24px", border: "none", cursor: "pointer", opacity: saving ? 0.6 : 1 }}>
-                {saving ? "Guardando..." : "Confirmar reserva"}
-              </button>
-            </div>
-
-            <p style={{ textAlign: "center", fontSize: "12px", color: "#8899bb" }}>* Te enviaremos tu codigo de reserva por SMS.</p>
-          </div>
-        )}
-      </Modal>
-
-      {/* Modal equipo favorito */}
-      <Modal open={favOpen} onClose={() => setFavOpen(false)} title="Tu equipo favorito">
-        <div className="space-y-4">
-          <p className="text-sm text-zinc-300">
-            Para completar tu reserva, dinos cual es tu <strong>equipo favorito</strong>.
-          </p>
-          <TeamsAutocomplete value={favTeam} onChange={setFavTeam} />
-          <div className="flex gap-3 pt-2">
-            <button onClick={() => setFavOpen(false)} className="flex-1 rounded-xl border border-white/15 bg-zinc-800 px-4 py-3 text-white hover:bg-zinc-700 transition" disabled={saving}>
-              Atras
-            </button>
-            <button onClick={handleFavSubmit} className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-60" disabled={saving}>
-              {saving ? "Guardando..." : "Confirmar"}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      <QRModal open={qrOpen} onClose={() => setQrOpen(false)} data={qrData} />
 
       <BottomNav />
     </main>

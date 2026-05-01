@@ -1,25 +1,26 @@
-// src/app/map/page.tsx
+// src/app/map/map-backup.tsx
+// BACKUP del map original (eventos Cronos) — no modificar
 "use client";
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getActiveFanZones, type FanZone } from "../../lib/firestore/fanzones";
-import { useGeoStore } from "../../lib/store";
+import { getPublishedEvents, type CronosEvent } from "../../lib/firestore/events";
+import { fmtDateShort } from "../../lib/events";
 import BottomNav from "../../components/BottomNav";
 
-const MapWC2026 = dynamic(() => import("./map-wc2026-inner"), { ssr: false });
+const MapWithNoSSR = dynamic(() => import("./map-inner"), { ssr: false });
 
 export default function MapPage() {
-  const [zones, setZones] = useState<FanZone[]>([]);
-  const { userLat, userLng } = useGeoStore();
+  const [events, setEvents] = useState<CronosEvent[]>([]);
 
   useEffect(() => {
-    getActiveFanZones().then(setZones).catch(console.error);
+    getPublishedEvents().then(setEvents);
   }, []);
 
   return (
     <main style={{ minHeight: "100dvh", background: "#080c14" }}>
+      {/* Header */}
       <header style={{
         position: "sticky",
         top: 0,
@@ -35,16 +36,14 @@ export default function MapPage() {
 
       <div style={{ maxWidth: "520px", margin: "0 auto", padding: "24px 16px" }}>
         <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>
-          Fan Zones — Mundial 2026
+          Mapa de eventos
         </h2>
         <p style={{ color: "#8899bb", marginTop: "4px", fontSize: "13px" }}>
-          {userLat != null
-            ? "Mostrando eventos cerca de tu ubicación."
-            : "USA, Canadá y México. Toca un pin para ver detalles."}
+          Encuentra eventos cerca de ti.
         </p>
 
         <div style={{ marginTop: "20px", borderRadius: "18px", overflow: "hidden", border: "1px solid #142035", height: "500px" }}>
-          <MapWC2026 zones={zones} userLat={userLat} userLng={userLng} />
+          <MapWithNoSSR events={events} />
         </div>
 
         <div style={{ height: "80px" }} />

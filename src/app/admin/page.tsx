@@ -4,7 +4,15 @@ import { useEffect, useMemo, useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
-import { seedEvents } from "@/lib/firestore/seed";
+
+import {
+  getAllFanZones,
+  createFanZone,
+  updateFanZone,
+  type FanZone,
+  type FanZoneType,
+  type FanZoneCountry,
+} from "@/lib/firestore/fanzones";
 import {
   collection,
   doc,
@@ -96,6 +104,42 @@ const EMPTY_FORM: EventForm = {
   title: "", league: "", homeTeam: "", awayTeam: "",
   dateLocal: "", venueName: "", address: "", city: "",
   lat: 0, lng: 0, capacity: 20, status: "draft",
+};
+
+// ─── Fan Zone Form ────────────────────────────────────────────────────────────
+
+type FanZoneForm = {
+  type: FanZoneType;
+  name: string;
+  city: string;
+  country: FanZoneCountry;
+  venue: string;
+  address: string;
+  lat: number;
+  lng: number;
+  entry: string;
+  datesOpen: string;
+  officialUrl: string;
+  registrationUrl: string;
+  notes: string;
+  active: boolean;
+};
+
+const EMPTY_FZ_FORM: FanZoneForm = {
+  type: "fan_zone",
+  name: "",
+  city: "",
+  country: "usa",
+  venue: "",
+  address: "",
+  lat: 0,
+  lng: 0,
+  entry: "Gratuita",
+  datesOpen: "",
+  officialUrl: "",
+  registrationUrl: "",
+  notes: "",
+  active: true,
 };
 
 // ─── Event Modal ─────────────────────────────────────────────────────────────
@@ -242,6 +286,209 @@ function EventModal({
   );
 }
 
+// ─── Fan Zone Modal ───────────────────────────────────────────────────────────
+
+function FanZoneModal({
+  open, onClose, initial, editId, onSaved,
+}: {
+  open: boolean;
+  onClose: () => void;
+  initial: FanZoneForm;
+  editId: string | null;
+  onSaved: () => void;
+}) {
+  const [form, setForm] = useState<FanZoneForm>(initial);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { setForm(initial); }, [initial]);
+
+  if (!open) return null;
+
+  function setF<K extends keyof FanZoneForm>(k: K, v: FanZoneForm[K]) {
+    setForm((p) => ({ ...p, [k]: v }));
+  }
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim()) { alert("El nombre es obligatorio."); return; }
+    setSaving(true);
+    try {
+      const payload = {
+        type: form.type,
+        name: form.name.trim(),
+        city: form.city.trim(),
+        country: form.country,
+        venue: form.venue.trim(),
+        address: form.address.trim(),
+        lat: Number(form.lat) || 0,
+        lng: Number(form.lng) || 0,
+        entry: form.entry.trim(),
+        datesOpen: form.datesOpen.trim(),
+        officialUrl: form.officialUrl.trim() || null,
+        registrationUrl: form.registrationUrl.trim() || null,
+        notes: form.notes.trim() || null,
+        active: form.active,
+      };
+      if (editId) {
+        await updateFanZone(editId, payload);
+      } else {
+        await createFanZone(payload);
+      }
+      onSaved();
+      onClose();
+    } catch (e: any) {
+      alert(`Error al guardar: ${e?.message ?? "desconocido"}`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const inp = "w-full rounded-lg border border-white/10 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500";
+  const lbl = "block text-xs tracking-widest text-white/60 mb-1";
+  const inpHighlight = "w-full rounded-lg border-2 border-yellow-400/60 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none focus:border-yellow-400";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-8 px-4" aria-modal="true">
+      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div className="relative z-10 w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-6 text-white shadow-2xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-bold">{editId ? "Editar Fan Zone" : "Nuevo Fan Zone"}</h3>
+          <button onClick={onClose} className="rounded-lg bg-zinc-800 px-2 py-1 text-sm hover:bg-zinc-700">✕</button>
+        </div>
+
+        <form onSubmit={handleSave} className="space-y-3">
+          <div className="grid grid-cols-2 gap-3">
+
+            {/* Tipo */}
+            <div>
+              <label className={lbl}>TIPO</label>
+              <select className={inp} value={form.type} onChange={(e) => setF("type", e.target.value as FanZoneType)}>
+                <option value="fan_festival">FIFA Fan Festival oficial</option>
+                <option value="fan_zone">Fan Zone</option>
+              </select>
+            </div>
+
+            {/* País */}
+            <div>
+              <label className={lbl}>PAÍS</label>
+              <select className={inp} value={form.country} onChange={(e) => setF("country", e.target.value as FanZoneCountry)}>
+                <option value="usa">🇺🇸 EE.UU.</option>
+                <option value="canada">🇨🇦 Canadá</option>
+                <option value="mexico">🇲🇽 México</option>
+              </select>
+            </div>
+
+            {/* Nombre */}
+            <div className="col-span-2">
+              <label className={lbl}>NOMBRE</label>
+              <input className={inp} value={form.name} onChange={(e) => setF("name", e.target.value)} placeholder="FIFA Fan Festival Dallas" />
+            </div>
+
+            {/* Ciudad */}
+            <div>
+              <label className={lbl}>CIUDAD</label>
+              <input className={inp} value={form.city} onChange={(e) => setF("city", e.target.value)} placeholder="Dallas" />
+            </div>
+
+            {/* Venue */}
+            <div>
+              <label className={lbl}>VENUE</label>
+              <input className={inp} value={form.venue} onChange={(e) => setF("venue", e.target.value)} placeholder="Fair Park" />
+            </div>
+
+            {/* Dirección */}
+            <div className="col-span-2">
+              <label className={lbl}>DIRECCIÓN</label>
+              <input className={inp} value={form.address} onChange={(e) => setF("address", e.target.value)} placeholder="3809 Grand Ave, Dallas, TX 75210" />
+            </div>
+
+            {/* Lat / Lng */}
+            <div>
+              <label className={lbl}>LATITUD</label>
+              <input type="number" step="any" className={inp} value={form.lat} onChange={(e) => setF("lat", parseFloat(e.target.value))} />
+            </div>
+            <div>
+              <label className={lbl}>LONGITUD</label>
+              <input type="number" step="any" className={inp} value={form.lng} onChange={(e) => setF("lng", parseFloat(e.target.value))} />
+            </div>
+
+            {/* Fechas */}
+            <div className="col-span-2">
+              <label className={lbl}>FECHAS DE OPERACIÓN</label>
+              <input className={inp} value={form.datesOpen} onChange={(e) => setF("datesOpen", e.target.value)} placeholder="11 jun – 19 jul 2026 (39 días)" />
+            </div>
+
+            {/* Entrada */}
+            <div className="col-span-2">
+              <label className={lbl}>ENTRADA</label>
+              <input className={inp} value={form.entry} onChange={(e) => setF("entry", e.target.value)} placeholder="Gratuita / Requiere registro / Ticketed" />
+            </div>
+
+            {/* Registration URL — destacado */}
+            <div className="col-span-2">
+              <label className="block text-xs tracking-widest text-yellow-400 mb-1 font-semibold">
+                URL DE REGISTRO ★
+              </label>
+              <input
+                className={inpHighlight}
+                value={form.registrationUrl}
+                onChange={(e) => setF("registrationUrl", e.target.value)}
+                placeholder="https://… (deja vacío si no aplica)"
+              />
+              <p className="mt-1 text-xs text-yellow-400/70">Activa el botón "Registrarse" en las cards públicas.</p>
+            </div>
+
+            {/* Official URL */}
+            <div className="col-span-2">
+              <label className={lbl}>SITIO OFICIAL (opcional)</label>
+              <input className={inp} value={form.officialUrl} onChange={(e) => setF("officialUrl", e.target.value)} placeholder="https://…" />
+            </div>
+
+            {/* Notes */}
+            <div className="col-span-2">
+              <label className={lbl}>NOTAS (opcional)</label>
+              <textarea
+                className={inp}
+                rows={2}
+                value={form.notes}
+                onChange={(e) => setF("notes", e.target.value)}
+                placeholder="Info adicional visible en la card…"
+              />
+            </div>
+
+            {/* Active toggle */}
+            <div className="col-span-2 flex items-center gap-3">
+              <label className="relative inline-flex cursor-pointer items-center">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={form.active}
+                  onChange={(e) => setF("active", e.target.checked)}
+                />
+                <div className="h-6 w-11 rounded-full bg-zinc-600 peer-checked:bg-emerald-500 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-5" />
+              </label>
+              <span className="text-sm text-white/80">
+                {form.active ? "Activo — visible en la página pública" : "Inactivo — oculto del público"}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} disabled={saving}
+              className="flex-1 rounded-xl border border-white/15 bg-zinc-800 px-4 py-2 text-sm text-white hover:bg-zinc-700 transition disabled:opacity-60">
+              Cancelar
+            </button>
+            <button type="submit" disabled={saving}
+              className="flex-1 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-60">
+              {saving ? "Guardando…" : "Guardar"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ─── Attendees Section ────────────────────────────────────────────────────────
 
 function AttendeesSection({ events }: { events: AdminEvent[] }) {
@@ -364,9 +611,6 @@ function AttendeesSection({ events }: { events: AdminEvent[] }) {
 export default function AdminPage() {
   const [uid, setUid] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [seeding, setSeeding] = useState(false);
-  const [seedMsg, setSeedMsg] = useState<string | null>(null);
-
   // Events list
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(false);
@@ -375,6 +619,15 @@ export default function AdminPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [modalInitial, setModalInitial] = useState<EventForm>(EMPTY_FORM);
+
+  // Fan Zones list
+  const [fanZones, setFanZones] = useState<FanZone[]>([]);
+  const [loadingFZ, setLoadingFZ] = useState(false);
+
+  // Fan Zone modal
+  const [fzModalOpen, setFzModalOpen] = useState(false);
+  const [fzEditId, setFzEditId] = useState<string | null>(null);
+  const [fzModalInitial, setFzModalInitial] = useState<FanZoneForm>(EMPTY_FZ_FORM);
 
   const admins = useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_ADMIN_UIDS || "";
@@ -430,8 +683,21 @@ export default function AdminPage() {
     if (uid && admins.includes(uid) && !eventsLoaded) {
       setEventsLoaded(true);
       fetchEvents();
+      fetchFanZones();
     }
   }, [uid, admins, eventsLoaded]);
+
+  async function fetchFanZones() {
+    setLoadingFZ(true);
+    try {
+      const list = await getAllFanZones();
+      setFanZones(list);
+    } catch (e: any) {
+      alert(`Error cargando Fan Zones: ${e?.message}`);
+    } finally {
+      setLoadingFZ(false);
+    }
+  }
 
   function openNew() {
     setEditId(null);
@@ -456,6 +722,33 @@ export default function AdminPage() {
       status:    ev.status,
     });
     setModalOpen(true);
+  }
+
+  function openFZNew() {
+    setFzEditId(null);
+    setFzModalInitial(EMPTY_FZ_FORM);
+    setFzModalOpen(true);
+  }
+
+  function openFZEdit(fz: FanZone) {
+    setFzEditId(fz.id);
+    setFzModalInitial({
+      type:            fz.type,
+      name:            fz.name,
+      city:            fz.city,
+      country:         fz.country,
+      venue:           fz.venue,
+      address:         fz.address,
+      lat:             fz.lat,
+      lng:             fz.lng,
+      entry:           fz.entry,
+      datesOpen:       fz.datesOpen,
+      officialUrl:     fz.officialUrl ?? "",
+      registrationUrl: fz.registrationUrl ?? "",
+      notes:           fz.notes ?? "",
+      active:          fz.active,
+    });
+    setFzModalOpen(true);
   }
 
   if (loading) {
@@ -499,32 +792,6 @@ export default function AdminPage() {
 
         <div className="mt-6 grid gap-4">
           <Link href="/home" className="underline text-emerald-300">Volver al Home</Link>
-
-          {/* ── Seed ── */}
-          <div className="rounded-xl border border-white/10 bg-black/50 p-4">
-            <div className="font-semibold text-white/90 mb-3">Datos iniciales</div>
-            <button
-              onClick={async () => {
-                setSeeding(true); setSeedMsg(null);
-                try {
-                  await seedEvents();
-                  setSeedMsg("✓ Eventos inicializados correctamente.");
-                  fetchEvents();
-                } catch (e: any) {
-                  setSeedMsg(`✗ Error: ${e?.message ?? "desconocido"}`);
-                } finally { setSeeding(false); }
-              }}
-              disabled={seeding}
-              className="rounded-xl bg-emerald-500 px-4 py-2 font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-60"
-            >
-              {seeding ? "Inicializando…" : "Inicializar eventos de prueba"}
-            </button>
-            {seedMsg && (
-              <p className={`mt-3 text-sm ${seedMsg.startsWith("✓") ? "text-emerald-300" : "text-red-400"}`}>
-                {seedMsg}
-              </p>
-            )}
-          </div>
 
           {/* ── Eventos ── */}
           <div className="rounded-xl border border-white/10 bg-black/50 p-4">
@@ -604,6 +871,103 @@ export default function AdminPage() {
 
           {/* ── Asistentes ── */}
           <AttendeesSection events={events} />
+
+          {/* ── Fan Zones & Festivales ── */}
+          <div className="rounded-xl border border-yellow-500/20 bg-black/50 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="font-semibold text-white/90">
+                Fan Zones &amp; Festivales — Mundial 2026
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={fetchFanZones}
+                  disabled={loadingFZ}
+                  className="rounded-lg border border-white/15 bg-zinc-800 px-3 py-1 text-xs text-white hover:bg-zinc-700 transition disabled:opacity-50"
+                >
+                  {loadingFZ ? "Cargando…" : "↺ Refrescar"}
+                </button>
+                <button
+                  onClick={openFZNew}
+                  className="rounded-lg bg-yellow-500 px-3 py-1 text-xs font-semibold text-black hover:bg-yellow-400 transition"
+                >
+                  + Nuevo
+                </button>
+              </div>
+            </div>
+
+            {loadingFZ ? (
+              <div className="text-sm text-zinc-400">Cargando…</div>
+            ) : fanZones.length === 0 ? (
+              <div className="text-sm text-zinc-400">
+                Sin Fan Zones. Usa "Inicializar Fan Zones" o crea uno nuevo.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-left text-xs text-zinc-400">
+                      <th className="pb-2 pr-3">Tipo</th>
+                      <th className="pb-2 pr-3">Nombre / Ciudad</th>
+                      <th className="pb-2 pr-3">Venue</th>
+                      <th className="pb-2 pr-3">Registro</th>
+                      <th className="pb-2 pr-3 text-center">Activo</th>
+                      <th className="pb-2" />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {fanZones.map((fz) => (
+                      <tr key={fz.id}>
+                        <td className="py-2 pr-3">
+                          {fz.type === "fan_festival" ? (
+                            <span className="rounded-full bg-yellow-500/20 px-2 py-0.5 text-xs font-semibold text-yellow-300 whitespace-nowrap">
+                              Fan Festival
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-semibold text-blue-300 whitespace-nowrap">
+                              Fan Zone
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2 pr-3">
+                          <div className="font-medium text-white">{fz.name}</div>
+                          <div className="text-xs text-zinc-400">
+                            {fz.city},{" "}
+                            {fz.country === "usa" ? "🇺🇸" : fz.country === "canada" ? "🇨🇦" : "🇲🇽"}
+                          </div>
+                        </td>
+                        <td className="py-2 pr-3 text-xs text-zinc-300 max-w-[140px] truncate">
+                          {fz.venue}
+                        </td>
+                        <td className="py-2 pr-3 text-xs">
+                          {fz.registrationUrl ? (
+                            <span className="text-yellow-300">✓ Sí</span>
+                          ) : (
+                            <span className="text-zinc-500">—</span>
+                          )}
+                        </td>
+                        <td className="py-2 pr-3 text-center text-xs">
+                          {fz.active ? (
+                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-emerald-300">Sí</span>
+                          ) : (
+                            <span className="rounded-full bg-zinc-700/80 px-2 py-0.5 text-zinc-400">No</span>
+                          )}
+                        </td>
+                        <td className="py-2 pl-3">
+                          <button
+                            onClick={() => openFZEdit(fz)}
+                            className="rounded-lg border border-white/15 bg-zinc-800 px-2 py-1 text-xs text-white hover:bg-zinc-700 transition"
+                          >
+                            Editar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 
@@ -614,6 +978,15 @@ export default function AdminPage() {
         initial={modalInitial}
         editId={editId}
         onSaved={fetchEvents}
+      />
+
+      {/* Modal crear/editar Fan Zone */}
+      <FanZoneModal
+        open={fzModalOpen}
+        onClose={() => setFzModalOpen(false)}
+        initial={fzModalInitial}
+        editId={fzEditId}
+        onSaved={fetchFanZones}
       />
     </main>
   );
