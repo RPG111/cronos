@@ -88,6 +88,12 @@ function row(label: string, value: string) {
 
 export async function POST(req: Request) {
   try {
+    console.log('[leads/email] START - env check:', {
+      hasResendKey: !!process.env.RESEND_API_KEY,
+      resendKeyPrefix: process.env.RESEND_API_KEY?.slice(0,10),
+      hasEmailTo: !!process.env.LEADS_EMAIL_TO,
+      emailTo: process.env.LEADS_EMAIL_TO,
+    })
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
     const TO = process.env.LEADS_EMAIL_TO ?? '';
     if (!RESEND_API_KEY || !TO) {
@@ -115,6 +121,7 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
       }),
     });
 
+    console.log('[leads/email] Resend response:', resp.status, resp.statusText)
     if (!resp.ok) {
       const errTxt = await resp.text();
       console.error("Resend error:", errTxt);
@@ -126,7 +133,7 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY ?? '';
 
     return NextResponse.json({ ok: true });
   } catch (e) {
-    console.error(e);
+    console.error('[leads/email] CATCH error:', e)
     return NextResponse.json({ ok: false, error: "Internal error" }, { status: 500 });
   }
 }
