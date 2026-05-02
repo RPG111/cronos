@@ -42,6 +42,9 @@ export const translations = {
       ariaFavRemove: "Quitar de favoritos",
       ariaInfoFestival: "Información sobre Fan Festival",
       ariaInfoZone: "Información sobre Fan Zone",
+      searchPlaceholder: "Buscar por ciudad o lugar...",
+      searchClear: "Limpiar",
+      loginToSave: "Inicia sesión para guardar tus favoritos",
     },
     map: {
       title: "Fan Zones — Mundial 2026",
@@ -71,6 +74,16 @@ export const translations = {
       registerLabel: "Registrarse",
       howToGet: "Cómo llegar",
       officialSite: "Sitio oficial",
+    },
+    detail: {
+      back: "← Volver",
+      notFound: "Fan Zone no encontrado",
+      notFoundBtn: "Volver al inicio",
+    },
+    nav: {
+      home: "Inicio",
+      map: "Mapa",
+      profile: "Perfil",
     },
   },
   en: {
@@ -110,6 +123,9 @@ export const translations = {
       ariaFavRemove: "Remove from favorites",
       ariaInfoFestival: "About Fan Festival",
       ariaInfoZone: "About Fan Zone",
+      searchPlaceholder: "Search by city or venue...",
+      searchClear: "Clear",
+      loginToSave: "Log in to save your favorites",
     },
     map: {
       title: "Fan Zones — World Cup 2026",
@@ -139,6 +155,16 @@ export const translations = {
       registerLabel: "Register",
       howToGet: "Directions",
       officialSite: "Official site",
+    },
+    detail: {
+      back: "← Back",
+      notFound: "Fan Zone not found",
+      notFoundBtn: "Back to home",
+    },
+    nav: {
+      home: "Home",
+      map: "Map",
+      profile: "Profile",
     },
   },
 };

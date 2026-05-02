@@ -4,14 +4,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, User, Map } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const t = useTranslation();
 
   const links = [
-    { href: "/map", label: "Mapa", icon: Map },
-    { href: "/home", label: "Home", icon: Home },
-    { href: "/profile", label: "Perfil", icon: User },
+    { href: "/map", label: t.nav.map, icon: Map },
+    { href: "/home", label: t.nav.home, icon: Home },
+    { href: "/profile", label: t.nav.profile, icon: User },
   ];
 
   return (

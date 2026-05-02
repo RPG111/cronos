@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { app as firebaseApp } from "../../lib/firebase";
 import {
@@ -95,12 +96,14 @@ function FanZoneCard({
   zone,
   isSaved,
   onToggleSave,
+  onCardClick,
   userLat,
   userLng,
 }: {
   zone: FanZone;
   isSaved: boolean;
   onToggleSave: (id: string) => void;
+  onCardClick: (id: string) => void;
   userLat: number | null;
   userLng: number | null;
 }) {
@@ -124,13 +127,17 @@ function FanZoneCard({
   const countryName = t.home.countries[zone.country as keyof typeof t.home.countries] ?? zone.country;
 
   return (
-    <div className="card-chrome-wrap" style={{ marginBottom: "12px" }}>
+    <div
+      className="card-chrome-wrap"
+      onClick={() => onCardClick(zone.id)}
+      style={{ marginBottom: "12px", cursor: "pointer" }}
+    >
       <div style={{ background: "#0a1220", borderRadius: "18px", padding: "14px" }}>
         {/* Top: badge + estrella */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px", marginBottom: "8px" }}>
           <TypeBadge type={zone.type} t={t} />
           <button
-            onClick={() => onToggleSave(zone.id)}
+            onClick={(e) => { e.stopPropagation(); onToggleSave(zone.id); }}
             style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 0", flexShrink: 0, lineHeight: 1 }}
             aria-label={isSaved ? t.home.ariaFavRemove : t.home.ariaFavAdd}
           >
@@ -197,6 +204,7 @@ function FanZoneCard({
               href={zone.registrationUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
               style={{
                 background: "linear-gradient(135deg, #ff6b00, #ff8c00)",
                 color: "#fff",
@@ -215,6 +223,7 @@ function FanZoneCard({
             href={mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
             style={{
               background: "rgba(192,192,192,0.07)",
               border: "1px solid rgba(192,192,192,0.2)",
@@ -234,6 +243,7 @@ function FanZoneCard({
               href={zone.registrationUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
               style={{
                 color: "#ffffff",
                 fontSize: "11px",
@@ -248,6 +258,7 @@ function FanZoneCard({
               href={zone.officialUrl}
               target="_blank"
               rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
               style={{
                 color: "#8899bb",
                 fontSize: "11px",
@@ -267,9 +278,11 @@ function FanZoneCard({
 // ── Main Page ────────────────────────────────────────────────────────────────
 
 export default function HomePage() {
+  const router = useRouter();
   const [zones, setZones] = useState<FanZone[]>([]);
   const [loading, setLoading] = useState(true);
-  const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico">("mexico");
+  const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico" | null>("mexico");
+  const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "fan_festival" | "fan_zone">("all");
   const [tooltip, setTooltip] = useState<"fan_festival" | "fan_zone" | null>(null);
   const [uid, setUid] = useState<string | null>(null);
@@ -325,17 +338,22 @@ export default function HomePage() {
     });
   }, [zones, userLat, userLng]);
 
-  // Filtro por país + tipo
+  // Filtro por país + tipo + búsqueda
   const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return sorted.filter((z) => {
-      if (z.country !== countryFilter) return false;
+      if (countryFilter !== null && z.country !== countryFilter) return false;
       if (typeFilter !== "all" && z.type !== typeFilter) return false;
+      if (q) {
+        const haystack = `${z.name} ${z.city} ${z.venue}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
       return true;
     });
-  }, [sorted, countryFilter, typeFilter]);
+  }, [sorted, countryFilter, typeFilter, searchQuery]);
 
   async function handleToggleSave(id: string) {
-    if (!uid) return; // sin auth: no hacer nada
+    if (!uid) { alert(t.home.loginToSave); return; }
     const next = new Set(savedIds);
     const wasSaved = next.has(id);
     // Optimistic update
@@ -407,6 +425,54 @@ export default function HomePage() {
         </div>
 
         {/* ── Sección 2: Filtros + Lista ── */}
+
+        {/* Buscador */}
+        <style>{`.fz-search::placeholder { color: #4a5a7a; }`}</style>
+        <div style={{ position: "relative", marginBottom: "12px" }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSearchQuery(val);
+              if (val.trim()) setCountryFilter(null);
+            }}
+            placeholder={t.home.searchPlaceholder}
+            className="fz-search"
+            style={{
+              width: "100%",
+              background: "#0a1220",
+              border: "1px solid #142035",
+              color: "#e8f0ff",
+              borderRadius: "12px",
+              padding: "10px 40px 10px 14px",
+              fontSize: "14px",
+              outline: "none",
+              boxSizing: "border-box",
+            }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              aria-label={t.home.searchClear}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                background: "none",
+                border: "none",
+                color: "#4a5a7a",
+                cursor: "pointer",
+                fontSize: "16px",
+                lineHeight: 1,
+                padding: "4px",
+              }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
 
         {/* Fila 1: filtro por tipo */}
         <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap", position: "relative" }}>
@@ -564,7 +630,7 @@ export default function HomePage() {
             return (
               <button
                 key={key}
-                onClick={() => setCountryFilter(key)}
+                onClick={() => { setCountryFilter(key); setSearchQuery(""); }}
                 style={{
                   background: active ? "#ff8c00" : "#0a1220",
                   border: `1px solid ${active ? "#ff8c00" : "#142035"}`,
@@ -598,6 +664,7 @@ export default function HomePage() {
               zone={zone}
               isSaved={savedIds.has(zone.id)}
               onToggleSave={handleToggleSave}
+              onCardClick={(id) => router.push(`/fanzones/${id}`)}
               userLat={userLat}
               userLng={userLng}
             />
