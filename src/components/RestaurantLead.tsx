@@ -40,7 +40,7 @@ type SelectedEvent = { id: string; title: string; dateISO: string };
 const sectionLabel: React.CSSProperties = {
   fontSize: "10px",
   letterSpacing: "2px",
-  color: "#00c9ff",
+  color: "#ff8c00",
   textTransform: "uppercase",
   fontWeight: 700,
   marginBottom: "12px",
@@ -50,7 +50,7 @@ const sectionLabel: React.CSSProperties = {
 const fieldLabel: React.CSSProperties = {
   fontSize: "10px",
   letterSpacing: "2px",
-  color: "#3a5070",
+  color: "#8899bb",
   textTransform: "uppercase",
   fontWeight: 700,
   marginBottom: "6px",
@@ -165,8 +165,8 @@ export default function RestaurantLead({
       // 2. Notify via email
       try {
         await emailjs.send(
-          'service_qj5u9fp',
-          'template_ctv1fca',
+          'service_w3ujlpt',
+          'template_jf0u95i',
           {
             restaurant_name: payload.restaurantName ?? '',
             contact_name:    payload.contactName ?? '',
@@ -174,6 +174,10 @@ export default function RestaurantLead({
             phone:           payload.phone ?? '',
             email:           payload.email ?? '',
             message:         payload.message ?? '',
+            selected_events: selectedEvents.length > 0
+              ? selectedEvents.map(e => e.title).join(', ')
+              : 'Ninguno seleccionado',
+            capacity:        payload.capacity ? String(payload.capacity) : 'No especificada',
           },
           '8IRx8bl9mN0Sv6W_M'
         );
@@ -235,7 +239,7 @@ export default function RestaurantLead({
           {success ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "32px 0", textAlign: "center" }}>
               <div style={{ fontSize: "48px" }}>🎉</div>
-              <p style={{ fontSize: "18px", fontWeight: 600, color: "#00ff9d" }}>¡Gracias! Te contactaremos pronto.</p>
+              <p style={{ fontSize: "18px", fontWeight: 600, color: "#ff8c00" }}>¡Gracias! Te contactaremos pronto.</p>
               <p style={{ fontSize: "13px", color: "#3a5070" }}>Cerrando…</p>
             </div>
           ) : (
@@ -332,7 +336,7 @@ export default function RestaurantLead({
                   style={{
                     width: "100%",
                     background: "#0d1528",
-                    border: `1px solid ${eventsOpen ? "#00c9ff50" : "#142035"}`,
+                    border: `1px solid ${eventsOpen ? "#ff8c0050" : "#142035"}`,
                     borderRadius: "11px",
                     padding: "12px 14px",
                     color: selectedEvents.length ? "#c8d8f0" : "#3a5070",
@@ -355,9 +359,9 @@ export default function RestaurantLead({
                 {selectedEvents.length > 0 && (
                   <div style={{ marginTop: "8px" }}>
                     <span style={{
-                      background: "rgba(0,255,157,0.1)",
-                      border: "1px solid rgba(0,255,157,0.25)",
-                      color: "#00ff9d",
+                      background: "rgba(255,140,0,0.1)",
+                      border: "1px solid rgba(255,140,0,0.25)",
+                      color: "#ff8c00",
                       fontSize: "11px",
                       fontWeight: 600,
                       padding: "4px 12px",
@@ -393,8 +397,8 @@ export default function RestaurantLead({
                           type="button"
                           onClick={() => toggleEvent(ev)}
                           style={{
-                            background: selected ? "#0a1a10" : "#0d1528",
-                            border: `1px solid ${selected ? "#00ff9d50" : "#142035"}`,
+                            background: selected ? "#1a1200" : "#0d1528",
+                            border: `1px solid ${selected ? "#ff8c0050" : "#142035"}`,
                             borderRadius: "10px",
                             padding: "8px 6px",
                             cursor: "pointer",
@@ -408,7 +412,7 @@ export default function RestaurantLead({
                               position: "absolute",
                               top: "4px",
                               right: "5px",
-                              color: "#00ff9d",
+                              color: "#ff8c00",
                               fontSize: "10px",
                               fontWeight: 700,
                             }}>✓</span>
@@ -421,7 +425,7 @@ export default function RestaurantLead({
                           </div>
                           <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "2px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "3px", justifyContent: "center" }}>
-                              <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#00ff9d", flexShrink: 0 }} />
+                              <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#ff8c00", flexShrink: 0 }} />
                               <span style={{ fontSize: "8px", color: "#c8d8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "40px" }}>
                                 {ev.homeTeam}
                               </span>
@@ -497,10 +501,10 @@ export default function RestaurantLead({
                     flex: 2,
                     borderRadius: "14px",
                     border: "none",
-                    background: saving ? "#1a2a1a" : "linear-gradient(135deg, #00e88a, #00c9ff)",
+                    background: saving ? "#1a2a1a" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
                     padding: "13px",
                     fontWeight: 800,
-                    color: "#040e18",
+                    color: "#ffffff",
                     cursor: saving ? "not-allowed" : "pointer",
                     fontSize: "15px",
                     opacity: saving ? 0.6 : 1,
