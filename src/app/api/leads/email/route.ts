@@ -12,6 +12,7 @@ type LeadPayload = {
   sports?: string[] | null;
   message?: string | null;
   uid?: string | null;
+  selectedEvents?: { id: string; title: string; dateISO: string }[] | null;
 };
 
 function esc(s: unknown) {
@@ -71,6 +72,7 @@ function buildHtml(p: LeadPayload) {
           ${row("Deportes", esc(asList(p.sports)))}
           ${row("Mensaje", esc(p.message))}
           ${row("UID sesión", esc(p.uid))}
+          ${p.selectedEvents && p.selectedEvents.length > 0 ? row("Partidos", esc(p.selectedEvents.map(e => `${e.title} (${e.dateISO})`).join(", "))) : ""}
         </table>
       </td></tr>
     </table>

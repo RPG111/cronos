@@ -161,21 +161,28 @@ export default function RestaurantLead({
       // 1. Save to Firestore
       await addDoc(collection(db, "leads_restaurants"), payload);
 
-      // 2. Notify via email (fire-and-forget)
-      fetch("/api/leads/email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          restaurantName: payload.restaurantName,
-          contactName:    payload.contactName,
-          phone:          payload.phone,
-          email:          payload.email,
-          city:           payload.city,
-          capacity:       payload.capacity,
-          message:        payload.message,
-          uid:            payload.uid,
-        }),
-      }).catch((err) => console.warn("Email notification failed (non-blocking):", err));
+      // 2. Notify via email
+      try {
+        const emailResp = await fetch("/api/leads/email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            restaurantName:  payload.restaurantName,
+            contactName:     payload.contactName,
+            phone:           payload.phone,
+            email:           payload.email,
+            city:            payload.city,
+            capacity:        payload.capacity,
+            message:         payload.message,
+            uid:             payload.uid,
+            selectedEvents:  payload.selectedEvents ?? null,
+          }),
+        });
+        const emailResult = await emailResp.json();
+        console.log('[RestaurantLead] email result:', emailResult);
+      } catch (err) {
+        console.error('[RestaurantLead] email fetch error:', err);
+      }
 
       // 3. Show success and auto-close
       setSuccess(true);
