@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import emailjs from '@emailjs/browser';
 import { app } from "@/lib/firebase";
 import {
   getFirestore,
@@ -163,25 +164,21 @@ export default function RestaurantLead({
 
       // 2. Notify via email
       try {
-        const emailResp = await fetch("/api/leads/email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            restaurantName:  payload.restaurantName,
-            contactName:     payload.contactName,
-            phone:           payload.phone,
-            email:           payload.email,
-            city:            payload.city,
-            capacity:        payload.capacity,
-            message:         payload.message,
-            uid:             payload.uid,
-            selectedEvents:  payload.selectedEvents ?? null,
-          }),
-        });
-        const emailResult = await emailResp.json();
-        console.log('[RestaurantLead] email result:', emailResult);
+        await emailjs.send(
+          'service_qj5u9fp',
+          'template_ctv1fca',
+          {
+            restaurant_name: payload.restaurantName ?? '',
+            contact_name:    payload.contactName ?? '',
+            city:            payload.city ?? '',
+            phone:           payload.phone ?? '',
+            email:           payload.email ?? '',
+            message:         payload.message ?? '',
+          },
+          '8IRx8bl9mN0Sv6W_M'
+        );
       } catch (err) {
-        console.error('[RestaurantLead] email fetch error:', err);
+        console.error('[RestaurantLead] emailjs error:', err);
       }
 
       // 3. Show success and auto-close
