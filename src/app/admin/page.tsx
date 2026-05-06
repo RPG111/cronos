@@ -21,6 +21,7 @@ import {
   setDoc,
   serverTimestamp,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -908,12 +909,28 @@ export default function AdminPage() {
                         <td className="py-2 pr-3 text-center text-zinc-300">{ev.capacity}</td>
                         <td className="py-2 text-center text-zinc-300">{ev.attendeeCount}</td>
                         <td className="py-2 pl-3">
-                          <button
-                            onClick={() => openEdit(ev)}
-                            className="rounded-lg border border-white/15 bg-zinc-800 px-2 py-1 text-xs text-white hover:bg-zinc-700 transition"
-                          >
-                            Editar
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => openEdit(ev)}
+                              className="rounded-lg border border-white/15 bg-zinc-800 px-2 py-1 text-xs text-white hover:bg-zinc-700 transition"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!confirm("¿Seguro que quieres eliminar este evento? Esta acción no se puede deshacer.")) return;
+                                try {
+                                  await deleteDoc(doc(db, "events", ev.id));
+                                  setEvents((prev) => prev.filter((e) => e.id !== ev.id));
+                                } catch (e: any) {
+                                  alert(`Error al eliminar: ${e?.message}`);
+                                }
+                              }}
+                              className="rounded-lg bg-red-600/80 px-2 py-1 text-xs text-white hover:bg-red-600 transition"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
