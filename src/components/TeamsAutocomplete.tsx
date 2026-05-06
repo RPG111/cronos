@@ -1,7 +1,9 @@
 // src/components/TeamsAutocomplete.tsx
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export type TeamOption = { id: string; name: string; country?: string; league?: string };
 
@@ -63,17 +65,41 @@ export default function TeamsAutocomplete({
   onChange: (v: string) => void;
   placeholder?: string;
 }) {
+  const [allTeams, setAllTeams] = useState<TeamOption[] | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getDocs(collection(db, "teams"))
+      .then((snap) => {
+        if (snap.empty) {
+          setAllTeams(POPULAR_TEAMS);
+        } else {
+          const teams: TeamOption[] = snap.docs.map((d) => ({
+            id: d.id,
+            name: d.data().name as string,
+          }));
+          teams.sort((a, b) => a.name.localeCompare(b.name, "es"));
+          setAllTeams(teams);
+        }
+      })
+      .catch(() => {
+        setAllTeams(POPULAR_TEAMS);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const source = allTeams ?? POPULAR_TEAMS;
   const query = (value || "").trim();
+
   const options = useMemo(() => {
     const q = query.toLowerCase();
-    if (!q) return POPULAR_TEAMS.slice(0, 12);
-    return POPULAR_TEAMS.filter(
-      (t) =>
-        t.name.toLowerCase().includes(q) ||
-        (t.country?.toLowerCase().includes(q) ?? false) ||
-        (t.league?.toLowerCase().includes(q) ?? false)
-    ).slice(0, 20);
-  }, [query]);
+    if (!q) return source.slice(0, 12);
+    return source
+      .filter((t) => t.name.toLowerCase().includes(q))
+      .slice(0, 20);
+  }, [query, source]);
 
   const exactMatch = options.some((o) => o.name.toLowerCase() === query.toLowerCase());
 
@@ -82,7 +108,7 @@ export default function TeamsAutocomplete({
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
+        placeholder={loading ? "Cargando equipos..." : placeholder}
         className="mt-1 w-full rounded-lg border border-white/10 bg-zinc-900/70 px-3 py-2 text-white outline-none focus:border-emerald-500"
       />
 
@@ -115,7 +141,7 @@ export default function TeamsAutocomplete({
           onClick={() => onChange(query)}
           className="mt-2 w-full rounded-lg border border-white/10 bg-zinc-800/70 px-3 py-2 text-sm text-white hover:bg-zinc-700"
         >
-          Usar “{query}”
+          Usar "{query}"
         </button>
       )}
 

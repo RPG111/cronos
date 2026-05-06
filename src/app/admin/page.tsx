@@ -13,6 +13,7 @@ import {
   type FanZoneType,
   type FanZoneCountry,
 } from "@/lib/firestore/fanzones";
+import { seedWorldTeams } from "@/lib/firestore/seedTeams";
 import {
   collection,
   doc,
@@ -629,6 +630,10 @@ export default function AdminPage() {
   const [fzEditId, setFzEditId] = useState<string | null>(null);
   const [fzModalInitial, setFzModalInitial] = useState<FanZoneForm>(EMPTY_FZ_FORM);
 
+  // Seed teams
+  const [seedingTeams, setSeedingTeams] = useState(false);
+  const [teamSeedMsg, setTeamSeedMsg] = useState("");
+
   const admins = useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_ADMIN_UIDS || "";
     return raw.split(",").map((s) => s.trim()).filter(Boolean);
@@ -966,6 +971,36 @@ export default function AdminPage() {
                 </table>
               </div>
             )}
+          </div>
+
+          {/* ── Equipos — Seed ── */}
+          <div className="rounded-xl border border-white/10 bg-black/50 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="font-semibold text-white/90">Equipos</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={async () => {
+                  setSeedingTeams(true);
+                  setTeamSeedMsg("");
+                  try {
+                    const n = await seedWorldTeams();
+                    setTeamSeedMsg(`✓ ${n} equipos cargados correctamente.`);
+                  } catch (e: any) {
+                    setTeamSeedMsg(`Error: ${e?.message ?? "desconocido"}`);
+                  } finally {
+                    setSeedingTeams(false);
+                  }
+                }}
+                disabled={seedingTeams}
+                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition disabled:opacity-50"
+              >
+                {seedingTeams ? "Cargando…" : "Cargar equipos mundiales (~500)"}
+              </button>
+              {teamSeedMsg && (
+                <span className="text-sm text-emerald-300">{teamSeedMsg}</span>
+              )}
+            </div>
           </div>
 
         </div>
