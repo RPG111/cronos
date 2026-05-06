@@ -53,6 +53,15 @@ type Attendee = {
   paidQuiniela?: boolean;
 };
 
+type AppUser = {
+  uid: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  team?: string;
+  createdAt?: string; // ISO string
+};
+
 type EventForm = {
   title: string;
   league: string;
@@ -634,6 +643,10 @@ export default function AdminPage() {
   const [seedingTeams, setSeedingTeams] = useState(false);
   const [teamSeedMsg, setTeamSeedMsg] = useState("");
 
+  // Users list
+  const [users, setUsers] = useState<AppUser[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
   const admins = useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_ADMIN_UIDS || "";
     return raw.split(",").map((s) => s.trim()).filter(Boolean);
@@ -691,6 +704,42 @@ export default function AdminPage() {
       fetchFanZones();
     }
   }, [uid, admins, eventsLoaded]);
+
+  async function fetchUsers() {
+    setLoadingUsers(true);
+    try {
+      const snap = await getDocs(collection(db, "users"));
+      const list: AppUser[] = snap.docs.map((d) => {
+        const data = d.data() as any;
+        const raw = data.createdAt;
+        let createdAt: string | undefined;
+        if (raw?.toDate) {
+          createdAt = raw.toDate().toISOString();
+        } else if (typeof raw === "string") {
+          createdAt = raw;
+        }
+        return {
+          uid: d.id,
+          name: data.name || data.displayName,
+          email: data.email,
+          phone: data.phone,
+          team: data.team,
+          createdAt,
+        };
+      });
+      list.sort((a, b) => {
+        if (!a.createdAt && !b.createdAt) return 0;
+        if (!a.createdAt) return 1;
+        if (!b.createdAt) return -1;
+        return b.createdAt.localeCompare(a.createdAt);
+      });
+      setUsers(list);
+    } catch (e: any) {
+      alert(`Error cargando usuarios: ${e?.message}`);
+    } finally {
+      setLoadingUsers(false);
+    }
+  }
 
   async function fetchFanZones() {
     setLoadingFZ(true);
@@ -964,6 +1013,63 @@ export default function AdminPage() {
                           >
                             Editar
                           </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* ── Usuarios registrados ── */}
+          <div className="rounded-xl border border-white/10 bg-black/50 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="font-semibold text-white/90">
+                Usuarios registrados
+                {users.length > 0 && (
+                  <span className="ml-2 rounded-full bg-zinc-700 px-2 py-0.5 text-xs text-zinc-300">
+                    {users.length}
+                  </span>
+                )}
+              </span>
+              <button
+                onClick={fetchUsers}
+                disabled={loadingUsers}
+                className="rounded-lg border border-white/15 bg-zinc-800 px-3 py-1 text-xs text-white hover:bg-zinc-700 transition disabled:opacity-50"
+              >
+                {loadingUsers ? "Cargando…" : "↺ Refrescar"}
+              </button>
+            </div>
+
+            {loadingUsers ? (
+              <div className="text-sm text-zinc-400">Cargando usuarios…</div>
+            ) : users.length === 0 ? (
+              <div className="text-sm text-zinc-400">
+                No hay usuarios registrados aún.{" "}
+                <button onClick={fetchUsers} className="underline">Cargar</button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-left text-xs text-zinc-400">
+                      <th className="pb-2 pr-3">Nombre</th>
+                      <th className="pb-2 pr-3">Email / Teléfono</th>
+                      <th className="pb-2 pr-3">Equipo</th>
+                      <th className="pb-2">Registro</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {users.map((u) => (
+                      <tr key={u.uid}>
+                        <td className="py-2 pr-3 text-white">{u.name || <span className="text-zinc-500">—</span>}</td>
+                        <td className="py-2 pr-3 text-zinc-300 text-xs">
+                          {u.email || u.phone || <span className="text-zinc-500">—</span>}
+                        </td>
+                        <td className="py-2 pr-3 text-zinc-300 text-xs">{u.team || <span className="text-zinc-500">—</span>}</td>
+                        <td className="py-2 text-zinc-400 text-xs whitespace-nowrap">
+                          {u.createdAt ? fmtDate(u.createdAt) : "—"}
                         </td>
                       </tr>
                     ))}
