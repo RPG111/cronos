@@ -11,6 +11,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import TeamsAutocomplete from "@/components/TeamsAutocomplete";
+import { useLangStore } from "@/lib/store";
 
 const labelStyle: React.CSSProperties = {
   display: "block",
@@ -75,6 +76,10 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
   const confirmationRef = useRef<ConfirmationResult | null>(null);
   const recaptchaReadyRef = useRef(false);
 
+  // Shared state
+  const [city, setCity] = useState("");
+  const [marketingConsent, setMarketingConsent] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -119,6 +124,8 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
         name: name.trim(),
         email: email.trim(),
         favoriteTeam: favoriteTeam.trim(),
+        city: city.trim(),
+        marketingConsent: true,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       }, { merge: true });
@@ -175,6 +182,8 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
           name: phoneName.trim(),
           phone: phone.trim(),
           favoriteTeam: phoneTeam.trim(),
+          city: city.trim(),
+          marketingConsent: true,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
         }, { merge: true });
@@ -316,14 +325,23 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
               />
             </div>
 
+            <div>
+              <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Ej. San Francisco, Oakland, San Jose..."
+                style={inputStyle}
+                autoComplete="address-level2"
+              />
+            </div>
+
+            <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} />
+
             {errorMsg && <ErrorBox msg={errorMsg} />}
 
-            <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" />
-
-            <p style={{ fontSize: "12px", color: "#3a5070", textAlign: "center", margin: 0 }}>
-              Al crear tu cuenta aceptas nuestros{" "}
-              <a href="/terms" style={{ color: "#ff8c00" }}>términos y condiciones</a>.
-            </p>
+            <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
               ¿Ya tienes cuenta?{" "}
               <a href="/auth/login" style={{ color: "#ff8c00", textDecoration: "none" }}>Inicia sesión aquí</a>
@@ -364,9 +382,23 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
               />
             </div>
 
+            <div>
+              <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+              <input
+                type="text"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                placeholder="Ej. San Francisco, Oakland, San Jose..."
+                style={inputStyle}
+                autoComplete="address-level2"
+              />
+            </div>
+
+            <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} />
+
             {errorMsg && <ErrorBox msg={errorMsg} />}
 
-            <SubmitButton loading={sending} label="Enviar código" loadingLabel="Enviando…" />
+            <SubmitButton loading={sending} label="Enviar código" loadingLabel="Enviando…" disabled={!marketingConsent} />
 
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
               ¿Ya tienes cuenta?{" "}
@@ -426,25 +458,51 @@ function ErrorBox({ msg }: { msg: string }) {
   );
 }
 
-function SubmitButton({ loading, label, loadingLabel }: { loading: boolean; label: string; loadingLabel: string }) {
+function SubmitButton({ loading, label, loadingLabel, disabled }: { loading: boolean; label: string; loadingLabel: string; disabled?: boolean }) {
+  const isDisabled = loading || disabled;
   return (
     <button
       type="submit"
-      disabled={loading}
+      disabled={isDisabled}
       style={{
         width: "100%",
         padding: "14px",
         borderRadius: "20px",
-        background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
+        background: isDisabled ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
         color: "#fff",
         border: "none",
         fontWeight: 800,
         fontSize: "14px",
-        cursor: loading ? "not-allowed" : "pointer",
-        opacity: loading ? 0.7 : 1,
+        cursor: isDisabled ? "not-allowed" : "pointer",
+        opacity: isDisabled ? 0.7 : 1,
       }}
     >
       {loading ? loadingLabel : label}
     </button>
+  );
+}
+
+function ConsentCheckbox({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  const { lang } = useLangStore();
+  const isEs = lang === "es";
+  return (
+    <label style={{ display: "flex", gap: "10px", alignItems: "flex-start", cursor: "pointer" }}>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        style={{ marginTop: "2px", accentColor: "#ff8c00", flexShrink: 0, width: "16px", height: "16px" }}
+      />
+      <span style={{ fontSize: "12px", color: "#8899bb", lineHeight: "1.6" }}>
+        {isEs ? "He leído y acepto la " : "I have read and agree to the "}
+        <a href="/privacy" style={{ color: "#ff8c00", textDecoration: "none" }}>
+          {isEs ? "Política de Privacidad" : "Privacy Policy"}
+        </a>
+        {isEs ? " y los " : " and "}
+        <a href="/terms" style={{ color: "#ff8c00", textDecoration: "none" }}>
+          {isEs ? "Términos y Condiciones" : "Terms and Conditions"}
+        </a>
+      </span>
+    </label>
   );
 }

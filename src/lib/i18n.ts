@@ -45,6 +45,8 @@ export const translations = {
       searchPlaceholder: "Buscar por ciudad o lugar...",
       searchClear: "Limpiar",
       loginToSave: "Inicia sesión para guardar tus favoritos",
+      tournamentChampions: "🏆 Champions League",
+      tournamentWorldCup: "🌍 World Cup 2026",
     },
     map: {
       title: "Fan Zones — Mundial 2026",
@@ -156,6 +158,8 @@ export const translations = {
       searchPlaceholder: "Search by city or venue...",
       searchClear: "Clear",
       loginToSave: "Log in to save your favorites",
+      tournamentChampions: "🏆 Champions League",
+      tournamentWorldCup: "🌍 World Cup 2026",
     },
     map: {
       title: "Fan Zones — World Cup 2026",

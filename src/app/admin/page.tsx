@@ -9,6 +9,8 @@ import {
   getAllFanZones,
   createFanZone,
   updateFanZone,
+  migrateTournamentField,
+  seedChampionsFanZones,
   type FanZone,
   type FanZoneType,
   type FanZoneCountry,
@@ -644,9 +646,38 @@ export default function AdminPage() {
   const [seedingTeams, setSeedingTeams] = useState(false);
   const [teamSeedMsg, setTeamSeedMsg] = useState("");
 
+  // Migration + Champions seed
+  const [migrating, setMigrating] = useState(false);
+  const [migrateMsg, setMigrateMsg] = useState("");
+  const [seedingChampions, setSeedingChampions] = useState(false);
+  const [championsMsg, setChampionsMsg] = useState("");
+
   // Users list
   const [users, setUsers] = useState<AppUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+
+  function exportUsersCSV() {
+    const headers = ["Nombre", "Email", "Teléfono", "Ciudad", "Equipo Favorito", "Fecha de Registro", "Consentimiento Marketing"];
+    const escape = (v: string | undefined) => `"${(v ?? "").replace(/"/g, '""')}"`;
+    const rows = users.map((u) => [
+      escape(u.name),
+      escape(u.email),
+      escape(u.phone),
+      escape((u as any).city),
+      escape(u.team),
+      escape(u.createdAt ? new Date(u.createdAt).toLocaleString("es-MX") : ""),
+      escape((u as any).marketingConsent != null ? String((u as any).marketingConsent) : ""),
+    ].join(","));
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const today = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `cronos-usuarios-${today}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   const admins = useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_ADMIN_UIDS || "";
@@ -963,8 +994,52 @@ export default function AdminPage() {
                 >
                   + Nuevo
                 </button>
+                <button
+                  disabled={migrating}
+                  onClick={async () => {
+                    setMigrating(true);
+                    setMigrateMsg("");
+                    try {
+                      const n = await migrateTournamentField();
+                      setMigrateMsg(`✓ ${n} docs actualizados con tournament:"world_cup_2026"`);
+                    } catch (e: any) {
+                      setMigrateMsg(`Error: ${e?.message ?? "desconocido"}`);
+                    } finally {
+                      setMigrating(false);
+                    }
+                  }}
+                  className="rounded-lg border border-blue-500/40 bg-blue-900/30 px-3 py-1 text-xs text-blue-300 hover:bg-blue-900/60 transition disabled:opacity-50"
+                >
+                  {migrating ? "Migrando…" : "Migrar: tournament"}
+                </button>
+                <button
+                  disabled={seedingChampions}
+                  onClick={async () => {
+                    setSeedingChampions(true);
+                    setChampionsMsg("");
+                    try {
+                      await seedChampionsFanZones();
+                      setChampionsMsg("✓ 3 eventos Champions League agregados");
+                      fetchFanZones();
+                    } catch (e: any) {
+                      setChampionsMsg(`Error: ${e?.message ?? "desconocido"}`);
+                    } finally {
+                      setSeedingChampions(false);
+                    }
+                  }}
+                  className="rounded-lg border border-purple-500/40 bg-purple-900/30 px-3 py-1 text-xs text-purple-300 hover:bg-purple-900/60 transition disabled:opacity-50"
+                >
+                  {seedingChampions ? "Agregando…" : "Seed Champions"}
+                </button>
               </div>
             </div>
+
+            {(migrateMsg || championsMsg) && (
+              <div className="mb-3 space-y-1">
+                {migrateMsg && <p className="text-xs text-blue-300">{migrateMsg}</p>}
+                {championsMsg && <p className="text-xs text-purple-300">{championsMsg}</p>}
+              </div>
+            )}
 
             {loadingFZ ? (
               <div className="text-sm text-zinc-400">Cargando…</div>
@@ -1050,13 +1125,23 @@ export default function AdminPage() {
                   </span>
                 )}
               </span>
-              <button
-                onClick={fetchUsers}
-                disabled={loadingUsers}
-                className="rounded-lg border border-white/15 bg-zinc-800 px-3 py-1 text-xs text-white hover:bg-zinc-700 transition disabled:opacity-50"
-              >
-                {loadingUsers ? "Cargando…" : "↺ Refrescar"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={fetchUsers}
+                  disabled={loadingUsers}
+                  className="rounded-lg border border-white/15 bg-zinc-800 px-3 py-1 text-xs text-white hover:bg-zinc-700 transition disabled:opacity-50"
+                >
+                  {loadingUsers ? "Cargando…" : "↺ Refrescar"}
+                </button>
+                <button
+                  onClick={exportUsersCSV}
+                  disabled={users.length === 0}
+                  style={{ background: "#0a2a1a", border: "1px solid #00ff9d40", color: "#00ff9d" }}
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                >
+                  Exportar CSV
+                </button>
+              </div>
             </div>
 
             {loadingUsers ? (

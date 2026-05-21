@@ -1,78 +1,180 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect } from "react";
+import Header from "@/components/Header";
+import BottomNav from "@/components/BottomNav";
+import { useLangStore } from "@/lib/store";
+import { detectLanguage } from "@/lib/i18n";
+
+const content = {
+  es: {
+    title: "Términos y Condiciones",
+    updated: "Última actualización: 1 de mayo de 2026",
+    sections: [
+      {
+        title: "1. Uso del sitio — Edad mínima",
+        body: "El uso de la plataforma Cronos Sports, disponible en cronosports.app, está permitido únicamente para personas mayores de 13 años. Al crear una cuenta, el usuario declara tener al menos 13 años de edad. Los usuarios entre 13 y 18 años deben contar con la autorización de su tutor legal. Cronos Sports se reserva el derecho de cancelar cuentas que violen este requisito.",
+      },
+      {
+        title: "2. Descripción del servicio",
+        body: "Cronos Sports es una plataforma digital que conecta a aficionados al fútbol con Fan Zones, Fan Festivals y eventos de watch party del Mundial 2026 en USA, Canadá y México. El servicio incluye: visualización de eventos programados, reservaciones en establecimientos participantes, participación en el bracket del Mundial y actividades de entretenimiento como quinielas y giveaways.",
+      },
+      {
+        title: "3. El Bracket — Concurso gratuito sin compra necesaria",
+        body: "El bracket del Mundial 2026 organizado por Cronos Sports es un concurso de predicción completamente gratuito. NO SE REQUIERE NINGUNA COMPRA para participar ni para ganar. La elegibilidad y las instrucciones de participación alternativas están disponibles en hola@cronosports.app. El concurso está abierto a residentes legales de los Estados Unidos mayores de 13 años.",
+      },
+      {
+        title: "4. Premio del bracket (NO PURCHASE NECESSARY)",
+        body: "NO ES NECESARIO REALIZAR UNA COMPRA PARA PARTICIPAR O GANAR. El premio del bracket del Mundial Cronos Sports consiste en una tarjeta de regalo o premio en efectivo equivalente de entre $200 y $300 USD, patrocinado íntegramente por Cronos Sports. El ganador se determinará por mayor puntuación acumulada en las predicciones del torneo según las reglas publicadas. Cronos Sports se reserva el derecho de modificar el monto del premio hasta la fecha de inicio del torneo. En caso de empate, se realizará un sorteo aleatorio entre los participantes empatados. Void where prohibited by law.",
+      },
+      {
+        title: "5. Cambios de fechas y eventos",
+        body: "Cronos Sports se reserva el derecho de modificar, posponer, cancelar o reprogramar cualquier evento, fecha de actividad, o característica del servicio en cualquier momento, sin previo aviso. Esto incluye cambios en las fechas del bracket, eventos de watch party, Fan Zones y cualquier actividad promocional. Cronos Sports no será responsable por gastos incurridos por el usuario en relación con un evento modificado o cancelado.",
+      },
+      {
+        title: "6. Registro y cuentas",
+        body: "Para acceder a las funcionalidades completas, el usuario debe registrarse con información veraz y actualizada, incluyendo nombre completo, email o número de teléfono, ciudad de residencia y equipo favorito. El usuario es responsable de mantener la confidencialidad de su cuenta. Cronos Sports puede suspender cuentas que proporcionen información falsa o que violen estos términos.",
+      },
+      {
+        title: "7. Consentimiento de comunicaciones",
+        body: "Al registrarse y marcar la casilla de consentimiento, el usuario autoriza a Cronos Sports a enviar comunicaciones sobre eventos, promociones, el bracket y noticias relacionadas con el Mundial 2026. El usuario puede cancelar estas comunicaciones en cualquier momento enviando un correo a hola@cronosports.app o usando el enlace de baja en cada correo.",
+      },
+      {
+        title: "8. Privacidad y datos",
+        body: "Cronos Sports recopila y procesa datos personales exclusivamente para prestar el servicio. Los datos incluyen: nombre, email, teléfono, ciudad, equipo favorito e historial de participación. Cronos Sports nunca vende datos a terceros. Consulta nuestra Política de Privacidad completa en /privacy para más detalles sobre tus derechos CCPA.",
+      },
+      {
+        title: "9. Consentimiento de grabación e imagen",
+        body: "Al asistir a eventos organizados por Cronos Sports, el usuario otorga su consentimiento para ser grabado en video, foto y audio. Cronos Sports puede usar este material en redes sociales y materiales de marketing. El usuario puede solicitar la eliminación de su imagen enviando un correo a hola@cronosports.app.",
+      },
+      {
+        title: "10. Limitación de responsabilidad",
+        body: "Cronos Sports no será responsable por daños directos, indirectos o consecuentes derivados del uso de la plataforma; cancelación de eventos; calidad del servicio de establecimientos terceros; o interrupciones técnicas. En ningún caso la responsabilidad total de Cronos Sports excederá el monto pagado por el usuario en los últimos 12 meses, o $100 USD si no hubo pago.",
+      },
+      {
+        title: "11. Propiedad intelectual",
+        body: "El nombre Cronos Sports, logotipo, diseño de la interfaz, código fuente y contenidos son propiedad exclusiva de Cronos Sports. Queda prohibida su reproducción, distribución o uso comercial sin autorización escrita previa.",
+      },
+      {
+        title: "12. Ley aplicable y jurisdicción",
+        body: "Estos términos se rigen por las leyes del Estado de California, Estados Unidos. Cualquier disputa será sometida a la jurisdicción de los tribunales competentes del Condado de Alameda, California.",
+      },
+      {
+        title: "13. Contacto",
+        body: "Para consultas, solicitudes o reclamaciones relacionadas con estos términos: hola@cronosports.app. Cronos Sports responde en un máximo de 5 días hábiles.",
+      },
+    ],
+  },
+  en: {
+    title: "Terms and Conditions",
+    updated: "Last updated: May 1, 2026",
+    sections: [
+      {
+        title: "1. Use of site — Minimum age",
+        body: "Use of the Cronos Sports platform, available at cronosports.app, is permitted only for people over 13 years of age. By creating an account, the user declares they are at least 13 years old. Users between 13 and 18 must have authorization from their legal guardian. Cronos Sports reserves the right to cancel accounts that violate this requirement.",
+      },
+      {
+        title: "2. Service description",
+        body: "Cronos Sports is a digital platform that connects soccer fans with Fan Zones, Fan Festivals, and World Cup 2026 watch party events in the USA, Canada, and Mexico. The service includes: viewing scheduled events, reservations at participating venues, participation in the World Cup bracket, and entertainment activities such as contests and giveaways.",
+      },
+      {
+        title: "3. The Bracket — Free contest, no purchase necessary",
+        body: "The World Cup 2026 bracket organized by Cronos Sports is a completely free prediction contest. NO PURCHASE IS REQUIRED to enter or win. Eligibility and alternative entry instructions are available at hola@cronosports.app. The contest is open to legal residents of the United States who are 13 years of age or older.",
+      },
+      {
+        title: "4. Bracket prize (NO PURCHASE NECESSARY)",
+        body: "NO PURCHASE NECESSARY TO ENTER OR WIN. The Cronos Sports World Cup bracket prize consists of a gift card or equivalent cash prize of between $200 and $300 USD, sponsored entirely by Cronos Sports. The winner will be determined by the highest cumulative score in tournament predictions according to the published rules. Cronos Sports reserves the right to modify the prize amount until the tournament start date. In the event of a tie, a random draw will be held among tied participants. Void where prohibited by law.",
+      },
+      {
+        title: "5. Date and event changes",
+        body: "Cronos Sports reserves the right to modify, postpone, cancel, or reschedule any event, activity date, or service feature at any time, without prior notice. This includes changes to bracket dates, watch party events, Fan Zones, and any promotional activities. Cronos Sports will not be liable for expenses incurred by users in connection with a modified or cancelled event.",
+      },
+      {
+        title: "6. Registration and accounts",
+        body: "To access full functionality, users must register with accurate and up-to-date information, including full name, email or phone number, city of residence, and favorite team. Users are responsible for maintaining the confidentiality of their account. Cronos Sports may suspend accounts that provide false information or violate these terms.",
+      },
+      {
+        title: "7. Communications consent",
+        body: "By registering and checking the consent box, the user authorizes Cronos Sports to send communications about events, promotions, the bracket, and World Cup 2026 news. Users can cancel these communications at any time by emailing hola@cronosports.app or using the unsubscribe link in any email.",
+      },
+      {
+        title: "8. Privacy and data",
+        body: "Cronos Sports collects and processes personal data solely to provide the service. Data collected includes: name, email, phone, city, favorite team, and participation history. Cronos Sports never sells data to third parties. See our full Privacy Policy at /privacy for details about your CCPA rights.",
+      },
+      {
+        title: "9. Recording and image consent",
+        body: "By attending events organized by Cronos Sports, the user consents to being recorded in video, photo, and audio. Cronos Sports may use this material on social media and marketing materials. Users can request removal of their image by emailing hola@cronosports.app.",
+      },
+      {
+        title: "10. Limitation of liability",
+        body: "Cronos Sports will not be liable for direct, indirect, or consequential damages arising from use of the platform; event cancellations; quality of third-party venue services; or technical interruptions. In no event will Cronos Sports' total liability exceed the amount paid by the user in the last 12 months, or $100 USD if no payment was made.",
+      },
+      {
+        title: "11. Intellectual property",
+        body: "The name Cronos Sports, logo, interface design, source code, and content are the exclusive property of Cronos Sports. Reproduction, distribution, or commercial use without prior written authorization is prohibited.",
+      },
+      {
+        title: "12. Applicable law and jurisdiction",
+        body: "These terms are governed by the laws of the State of California, United States. Any dispute will be subject to the exclusive jurisdiction of the competent courts of Alameda County, California.",
+      },
+      {
+        title: "13. Contact",
+        body: "For questions, requests, or complaints related to these terms: hola@cronosports.app. Cronos Sports responds within 5 business days.",
+      },
+    ],
+  },
+};
 
 export default function TermsPage() {
+  const { lang, setLang } = useLangStore();
+
+  useEffect(() => {
+    setLang(detectLanguage());
+  }, [setLang]);
+
+  const c = content[lang];
+
   return (
-    <main style={{ background: "#080c14", minHeight: "100dvh", padding: "0 0 48px" }}>
-      <header style={{ background: "#080c14", borderBottom: "1px solid #142035", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <Link href="/home" style={{ color: "#3a5070", fontSize: "13px", textDecoration: "none" }}>← volver</Link>
-        <span className="logo-cronos" style={{ fontSize: "20px" }}>CRONOS</span>
-        <div style={{ width: "60px" }} />
-      </header>
+    <>
+      <Header />
+      <main style={{ background: "#080c14", minHeight: "100dvh", paddingBottom: "120px" }}>
+        <div style={{ maxWidth: "680px", margin: "0 auto", padding: "32px 20px" }}>
+          <h1 style={{ color: "#e8f0ff", fontSize: "26px", fontWeight: 700, marginBottom: "6px" }}>
+            {c.title}
+          </h1>
+          <p style={{ color: "#8899bb", fontSize: "12px", marginBottom: "32px" }}>{c.updated}</p>
 
-      <div style={{ maxWidth: "720px", margin: "0 auto", padding: "32px 20px" }}>
-        <h1 style={{ color: "#e8f0ff", fontSize: "28px", fontWeight: 700, marginBottom: "8px" }}>términos y condiciones de uso</h1>
-        <p style={{ color: "#3a5070", fontSize: "12px", marginBottom: "32px" }}>última actualización: 1 de abril de 2026</p>
-
-        {[
-          {
-            title: "1. aceptación de términos",
-            content: `al acceder, registrarse o utilizar la plataforma cronos, disponible en cronosports.app y sus aplicaciones asociadas, el usuario acepta de manera expresa, libre e informada la totalidad de los presentes términos y condiciones de uso. si el usuario no está de acuerdo con alguno de los términos aquí establecidos, deberá abstenerse de utilizar la plataforma. cronos se reserva el derecho de modificar estos términos en cualquier momento, siendo responsabilidad del usuario revisarlos periódicamente. el uso continuado de la plataforma después de cualquier modificación constituirá la aceptación de dichos cambios. estos términos constituyen un acuerdo legal vinculante entre el usuario y cronos. el usuario declara tener la capacidad legal suficiente para aceptar estos términos y, en caso de ser menor de 18 años, deberá contar con la autorización expresa de su tutor legal.`
-          },
-          {
-            title: "2. descripción del servicio",
-            content: `cronos es una plataforma digital que conecta a personas interesadas en ver eventos deportivos en vivo con restaurantes y establecimientos que transmiten dichos eventos. el servicio incluye, sin limitarse a: la visualización de eventos deportivos programados, la realización de reservaciones en establecimientos participantes, la participación en actividades de entretenimiento durante los eventos (quinielas, trivias, sorteos), la creación de un perfil de usuario y la interacción con la comunidad cronos. cronos actúa únicamente como intermediario entre los usuarios y los establecimientos, sin ser responsable de la calidad, disponibilidad o condiciones del servicio prestado por los restaurantes participantes. cronos puede agregar, modificar o eliminar funcionalidades del servicio en cualquier momento sin previo aviso.`
-          },
-          {
-            title: "3. registro y elegibilidad",
-            content: `para acceder a las funcionalidades completas de cronos, el usuario debe registrarse proporcionando información veraz, actualizada y completa, incluyendo nombre completo, número de teléfono y equipo deportivo favorito. el usuario es responsable de mantener la confidencialidad de su cuenta y de todas las actividades que ocurran bajo la misma. cronos se reserva el derecho de suspender o cancelar cuentas que proporcionen información falsa, que violen estos términos o que realicen actividades que perjudiquen a otros usuarios o a la plataforma. el registro en cronos está disponible para personas mayores de 13 años. los usuarios entre 13 y 18 años deben contar con autorización de su tutor legal. al registrarse, el usuario autoriza a cronos a enviar comunicaciones relacionadas con el servicio, incluyendo confirmaciones de reservación, recordatorios de eventos y actualizaciones de la plataforma.`
-          },
-          {
-            title: "4. uso de la plataforma",
-            content: `el usuario se compromete a utilizar cronos de manera responsable y conforme a la legislación aplicable. queda expresamente prohibido: utilizar la plataforma para fines ilegales o no autorizados; publicar contenido ofensivo, difamatorio o que viole derechos de terceros; intentar acceder sin autorización a sistemas o cuentas de otros usuarios; realizar actividades que interrumpan o deterioren el funcionamiento de la plataforma; utilizar bots, scrapers o cualquier herramienta automatizada para acceder al contenido; revender o comercializar el acceso a la plataforma sin autorización expresa de cronos; y cualquier otra actividad que cronos considere inapropiada a su discreción. cronos se reserva el derecho de eliminar contenido y suspender usuarios sin previo aviso cuando se detecte una violación de estas condiciones.`
-          },
-          {
-            title: "5. reservaciones y cancelaciones",
-            content: `las reservaciones realizadas a través de cronos están sujetas a disponibilidad y se confirman mediante un código qr único enviado al usuario. cada evento tiene un cupo máximo establecido por cronos y el establecimiento participante. las reservaciones se asignan por orden de llegada hasta agotar el cupo disponible. el usuario puede cancelar su reservación directamente desde la aplicación hasta 2 horas antes del inicio del evento. cancelaciones realizadas con menos de 2 horas de anticipación pueden estar sujetas a restricciones para futuras reservaciones. cronos no garantiza la disponibilidad de lugares en eventos con alta demanda. en caso de cancelación del evento por parte del establecimiento, cronos notificará a los usuarios registrados a la brevedad posible. cronos no se hace responsable por gastos de traslado, tiempo invertido u otros costos incurridos por el usuario en relación con un evento cancelado.`
-          },
-          {
-            title: "6. consentimiento de grabación y uso de imagen",
-            content: `al confirmar una reservación y asistir a cualquier evento organizado, coordinado o promovido por cronos, el usuario otorga a cronos su consentimiento expreso, libre, informado e irrevocable para ser grabado en video, fotografía y audio durante el transcurso del evento y en cualquier actividad relacionada con el mismo. este consentimiento incluye, sin limitarse a: la grabación de reacciones individuales y grupales durante los partidos, entrevistas informales, participación en trivias y quinielas, y cualquier otro momento que cronos considere relevante para la creación de contenido. el usuario autoriza a cronos a utilizar dicho material audiovisual —incluyendo su imagen, voz y likeness— en redes sociales (incluyendo tiktok, youtube, instagram, facebook y cualquier otra plataforma que cronos utilice o pueda utilizar en el futuro), campañas de marketing digital y tradicional, contenido promocional, material publicitario, presentaciones a inversores, cobertura periodística y cualquier otro uso comercial o no comercial que cronos determine conveniente, sin que ello genere para el usuario derecho a compensación económica, regalías o cualquier otro beneficio material. esta licencia es perpetua, mundial, no exclusiva, transferible y sublicenciable. cronos puede ceder estos derechos a terceros sin necesidad de notificación previa. el usuario que desee solicitar la eliminación de su imagen de materiales ya publicados podrá hacerlo enviando una solicitud escrita a hola@cronosports.app indicando su nombre completo, el evento al que asistió y una descripción del material que desea eliminar. cronos se compromete a responder dicha solicitud en un plazo máximo de 30 días hábiles, aunque la eliminación técnica de contenido en plataformas de terceros puede estar sujeta a los tiempos y políticas de cada plataforma.`
-          },
-          {
-            title: "7. quinielas y actividades en eventos",
-            content: `las quinielas y demás actividades de entretenimiento organizadas durante los eventos de cronos son actividades de participación voluntaria entre los asistentes presentes físicamente en el evento. cronos actúa únicamente como facilitador tecnológico para el registro y seguimiento de predicciones, sin intermediar en la recaudación, custodia o distribución de ningún fondo monetario. cualquier contribución económica asociada a las quinielas (como el pago de $5 usd por participante) se realiza directamente entre los participantes presentes, sin que cronos sea parte de dicha transacción. cronos no garantiza la exactitud en la determinación de ganadores ni se responsabiliza por disputas entre participantes relacionadas con los resultados de las quinielas. la participación en quinielas con dinero real puede estar regulada por las leyes locales; es responsabilidad exclusiva del usuario conocer y cumplir con la legislación aplicable en su jurisdicción.`
-          },
-          {
-            title: "8. política de privacidad y datos",
-            content: `cronos recopila y procesa datos personales de los usuarios con el único propósito de prestar el servicio descrito en estos términos. los datos recopilados incluyen: nombre completo, número de teléfono, equipo deportivo favorito, historial de reservaciones y participación en eventos. cronos no vende, arrienda ni comparte datos personales con terceros sin consentimiento del usuario, salvo en los casos requeridos por ley o necesarios para la prestación del servicio (como el envío de notificaciones sms a través de twilio). los datos se almacenan de forma segura en servidores de google firebase, sujetos a las políticas de seguridad y privacidad de dicho proveedor. el usuario puede solicitar la eliminación de sus datos personales en cualquier momento escribiendo a hola@cronosports.app. cronos se reserva el derecho de conservar ciertos datos por el tiempo requerido por obligaciones legales o para la resolución de disputas.`
-          },
-          {
-            title: "9. propiedad intelectual",
-            content: `todo el contenido de la plataforma cronos, incluyendo pero no limitado a: el nombre cronos, el logotipo, el diseño de la interfaz, el código fuente, los textos, las imágenes, los videos producidos por cronos y cualquier otro elemento distintivo, es propiedad exclusiva de cronos y está protegido por las leyes de propiedad intelectual aplicables. el usuario no adquiere ningún derecho de propiedad intelectual sobre la plataforma o su contenido por el hecho de utilizarla. queda expresamente prohibida la reproducción, distribución, modificación o uso comercial de cualquier elemento de cronos sin autorización escrita previa.`
-          },
-          {
-            title: "10. limitación de responsabilidad",
-            content: `cronos no será responsable por daños directos, indirectos, incidentales, especiales o consecuentes derivados del uso o imposibilidad de uso de la plataforma; de la cancelación o modificación de eventos por parte de los establecimientos participantes; de la calidad del servicio prestado por los restaurantes; de pérdidas económicas asociadas a las quinielas u otras actividades de entretenimiento; de interrupciones del servicio por mantenimiento, fallas técnicas o causas de fuerza mayor; ni de cualquier otro daño relacionado con el uso de la plataforma. en ningún caso la responsabilidad total de cronos hacia el usuario excederá el monto pagado por el usuario a cronos en los últimos 12 meses, o $100 usd en caso de que no haya mediado pago alguno.`
-          },
-          {
-            title: "11. modificaciones al servicio",
-            content: `cronos se reserva el derecho de modificar, suspender o discontinuar cualquier aspecto del servicio en cualquier momento y sin previo aviso. esto incluye la modificación de precios, funcionalidades, eventos disponibles y cualquier otro aspecto operativo de la plataforma. cronos no será responsable ante el usuario ni ante terceros por cualquier modificación, suspensión o discontinuación del servicio.`
-          },
-          {
-            title: "12. ley aplicable y jurisdicción",
-            content: `estos términos y condiciones se rigen por las leyes del estado de california, estados unidos de américa. cualquier disputa derivada de o relacionada con estos términos será sometida a la jurisdicción exclusiva de los tribunales competentes del condado de alameda, california. el usuario renuncia expresamente a cualquier otro fuero o jurisdicción que pudiera corresponderle.`
-          },
-          {
-            title: "13. contacto",
-            content: `para cualquier consulta, solicitud o reclamación relacionada con estos términos y condiciones, el usuario puede contactar a cronos a través de: correo electrónico: hola@cronosports.app. cronos se compromete a responder todas las comunicaciones en un plazo máximo de 5 días hábiles.`
-          }
-        ].map((section, i) => (
-          <div key={i} style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "20px 24px", marginBottom: "12px" }}>
-            <h2 style={{ color: "#00c9ff", fontSize: "12px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", marginBottom: "12px" }}>{section.title}</h2>
-            <p style={{ color: "#c8d8f0", fontSize: "14px", lineHeight: "1.8", margin: 0 }}>{section.content}</p>
-          </div>
-        ))}
-      </div>
-    </main>
+          {c.sections.map((section, i) => (
+            <div
+              key={i}
+              style={{
+                background: "#0a1220",
+                border: "1px solid #142035",
+                borderRadius: "16px",
+                padding: "20px 24px",
+                marginBottom: "12px",
+              }}
+            >
+              <h2
+                style={{
+                  color: "#ff8c00",
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  letterSpacing: "1.5px",
+                  textTransform: "uppercase",
+                  marginBottom: "10px",
+                }}
+              >
+                {section.title}
+              </h2>
+              <p style={{ color: "#c8d8f0", fontSize: "14px", lineHeight: "1.8", margin: 0 }}>
+                {section.body}
+              </p>
+            </div>
+          ))}
+        </div>
+      </main>
+      <BottomNav />
+    </>
   );
 }

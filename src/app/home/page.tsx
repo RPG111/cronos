@@ -281,7 +281,8 @@ export default function HomePage() {
   const router = useRouter();
   const [zones, setZones] = useState<FanZone[]>([]);
   const [loading, setLoading] = useState(true);
-  const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico" | null>("mexico");
+  const [tournamentFilter, setTournamentFilter] = useState<"champions_2026" | "world_cup_2026">("champions_2026");
+  const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "fan_festival" | "fan_zone">("all");
   const [tooltip, setTooltip] = useState<"fan_festival" | "fan_zone" | null>(null);
@@ -338,19 +339,23 @@ export default function HomePage() {
     });
   }, [zones, userLat, userLng]);
 
-  // Filtro por país + tipo + búsqueda
+  // Filtro por torneo + país + tipo + búsqueda
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return sorted.filter((z) => {
-      if (countryFilter !== null && z.country !== countryFilter) return false;
-      if (typeFilter !== "all" && z.type !== typeFilter) return false;
+      const zt = z.tournament ?? "world_cup_2026";
+      if (zt !== tournamentFilter) return false;
+      if (tournamentFilter === "world_cup_2026") {
+        if (countryFilter !== null && z.country !== countryFilter) return false;
+        if (typeFilter !== "all" && z.type !== typeFilter) return false;
+      }
       if (q) {
         const haystack = `${z.name} ${z.city} ${z.venue}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
     });
-  }, [sorted, countryFilter, typeFilter, searchQuery]);
+  }, [sorted, countryFilter, typeFilter, searchQuery, tournamentFilter]);
 
   async function handleToggleSave(id: string) {
     if (!uid) { alert(t.home.loginToSave); return; }
@@ -424,7 +429,61 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* ── Sección 2: Filtros + Lista ── */}
+        {/* ── Sección 2: Selector de torneo ── */}
+        <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
+          {([
+            { key: "champions_2026", label: "Champions League" },
+            { key: "world_cup_2026", label: "World Cup 2026" },
+          ] as const).map(({ key, label }) => {
+            const active = tournamentFilter === key;
+            return (
+              <div key={key} className="card-chrome-wrap" style={{ borderRadius: "20px", flex: 1 }}>
+                <button
+                  onClick={() => {
+                    setTournamentFilter(key);
+                    setTypeFilter("all");
+                    setCountryFilter(null);
+                    setSearchQuery("");
+                  }}
+                  style={active ? {
+                    background: "#0a1220",
+                    borderRadius: "20px",
+                    padding: "11px 28px",
+                    fontSize: "15px",
+                    fontWeight: 700,
+                    color: "#ff8c00",
+                    border: "none",
+                    cursor: "pointer",
+                    width: "100%",
+                  } : {
+                    background: "#080c14",
+                    borderRadius: "20px",
+                    padding: "11px 28px",
+                    fontSize: "15px",
+                    fontWeight: 500,
+                    color: "#8899bb",
+                    border: "none",
+                    cursor: "pointer",
+                    width: "100%",
+                  }}
+                >
+                  <span style={{
+                    background: "linear-gradient(180deg, #ffffff 0%, #a8c0d6 25%, #c8d8e8 45%, #6888aa 60%, #9ab0c8 75%, #d0e0f0 88%, #7890a8 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    backgroundClip: "text",
+                    fontWeight: 700,
+                    ...(active ? { filter: "drop-shadow(0 0 6px rgba(160,200,255,0.4))" } : { opacity: 0.6 }),
+                  }}>
+                    {label}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Sección 3: Filtros + Lista ── */}
 
         {/* Buscador */}
         <style>{`.fz-search::placeholder { color: #4a5a7a; }`}</style>
@@ -474,7 +533,8 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Fila 1: filtro por tipo */}
+        {/* Filtros de tipo y país — solo para World Cup */}
+        {tournamentFilter === "world_cup_2026" && <>
         <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap", position: "relative" }}>
 
           {/* Overlay para cerrar tooltip al tocar fuera */}
@@ -648,6 +708,7 @@ export default function HomePage() {
             );
           })}
         </div>
+        </>}
 
         {loading ? (
           <div style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>

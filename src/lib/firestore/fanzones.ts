@@ -20,6 +20,7 @@ export type FanZoneEntry = string; // "Gratuita" | "Requiere registro" | "Ticket
 
 export type FanZone = {
   id: string;
+  tournament?: string;
   type: FanZoneType;
   name: string;
   city: string;
@@ -137,4 +138,85 @@ export async function removeFanZoneForUser(uid: string, fanZoneId: string): Prom
 export async function getSavedFanZoneIds(uid: string): Promise<string[]> {
   const snap = await getDocs(collection(db, "users", uid, "savedFanZones"));
   return snap.docs.map((d) => d.id);
+}
+
+// Migración: agrega tournament:"world_cup_2026" a docs que no lo tengan
+export async function migrateTournamentField(): Promise<number> {
+  const snap = await getDocs(collection(db, "wc2026_fanzones"));
+  const batch: Promise<void>[] = [];
+  snap.docs.forEach((d) => {
+    if (!d.data().tournament) {
+      batch.push(
+        updateDoc(doc(db, "wc2026_fanzones", d.id), { tournament: "world_cup_2026" })
+      );
+    }
+  });
+  await Promise.all(batch);
+  return batch.length;
+}
+
+// Seed: agrega los 3 eventos de Champions League Final 2026
+export async function seedChampionsFanZones(): Promise<void> {
+  const champions = [
+    {
+      id: "champions-splash-thrive",
+      tournament: "champions_2026",
+      type: "fan_zone" as FanZoneType,
+      name: "Champions League Final — Splash at Thrive City",
+      city: "San Francisco",
+      country: "usa" as FanZoneCountry,
+      venue: "Splash Sports Bar at Thrive City, Chase Center",
+      address: "1 Warriors Way, San Francisco, CA 94158",
+      lat: 37.7679,
+      lng: -122.3874,
+      entry: "Gratuita con RSVP — First come first served",
+      datesOpen: "Sábado 31 mayo 2026 — Puertas 8am, Kickoff 9am",
+      officialUrl: "https://www.eventbrite.com/e/champions-league-final-watch-party-at-splash-tickets-1987458938185",
+      registrationUrl: "https://www.eventbrite.com/e/champions-league-final-watch-party-at-splash-tickets-1987458938185",
+      notes: "30,000 sq ft sports bar con mega pantalla de 1,400 sq ft. DJ pre y post partido. Copa del mundo para foto. Simuladores de soccer, foosball y shuffleboard.",
+      active: true,
+    },
+    {
+      id: "champions-sf-vikings",
+      tournament: "champions_2026",
+      type: "fan_zone" as FanZoneType,
+      name: "Champions League Final — SF Vikings Soccer Club",
+      city: "San Francisco",
+      country: "usa" as FanZoneCountry,
+      venue: "Steins Beer Garden (German Beerhall)",
+      address: "731 Clement St, San Francisco, CA 94118",
+      lat: 37.7827,
+      lng: -122.4672,
+      entry: "Ticketado — $40 adultos / $25 menores de 21",
+      datesOpen: "Sábado 31 mayo 2026",
+      officialUrl: "https://www.zeffy.com/en-US/ticketing/2026-champions-league-watch-party",
+      registrationUrl: "https://www.zeffy.com/en-US/ticketing/2026-champions-league-watch-party",
+      notes: "Incluye asiento + brunch + medio litro de bebida. Ambiente íntimo de comunidad futbolera. Organizado por SF Vikings Soccer Club.",
+      active: true,
+    },
+    {
+      id: "champions-mas-bayarea",
+      tournament: "champions_2026",
+      type: "fan_zone" as FanZoneType,
+      name: "Champions League Final — MAS Bay Area",
+      city: "Santa Clara",
+      country: "usa" as FanZoneCountry,
+      venue: "MAS Bay Area",
+      address: "2322 Walsh Avenue, Santa Clara, CA 95051",
+      lat: 37.3512,
+      lng: -121.9796,
+      entry: "Por confirmar",
+      datesOpen: "Sábado 31 mayo 2026",
+      officialUrl: "https://www.masbayarea.org/masbaevents/champtions",
+      registrationUrl: "https://www.masbayarea.org/masbaevents/champtions",
+      notes: "Watch party organizado por la comunidad. Verificar detalles en el sitio oficial.",
+      active: true,
+    },
+  ];
+
+  await Promise.all(
+    champions.map(({ id, ...data }) =>
+      setDoc(doc(db, "wc2026_fanzones", id), { ...data, updatedAt: serverTimestamp() })
+    )
+  );
 }
