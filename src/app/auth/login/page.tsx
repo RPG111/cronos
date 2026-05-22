@@ -31,15 +31,25 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
-function authErrorToSpanish(code: string): string {
+function phoneToFakeEmail(phone: string): string {
+  let digits = phone.replace(/[\s\-().+]/g, "").replace(/\D/g, "");
+  if (digits.length === 10) digits = "1" + digits;
+  return `${digits}@cronos.phone`;
+}
+
+function authErrorToSpanish(code: string, mode: "email" | "phone" = "email"): string {
   switch (code) {
     case "auth/user-not-found":
     case "auth/invalid-credential":
-      return "No existe una cuenta con este email";
+      return mode === "phone"
+        ? "No existe una cuenta con este teléfono"
+        : "No existe una cuenta con este email";
     case "auth/wrong-password":
       return "Contraseña incorrecta";
     case "auth/invalid-email":
-      return "Email inválido";
+      return mode === "phone"
+        ? "Número de teléfono inválido"
+        : "Email inválido";
     case "auth/too-many-requests":
       return "Demasiados intentos. Intenta más tarde";
     default:
@@ -49,11 +59,21 @@ function authErrorToSpanish(code: string): string {
 
 export default function LoginPage() {
   const router = useRouter();
+  const [mode, setMode] = useState<"email" | "phone">("email");
+
+  // Email mode
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  // Phone mode
+  const [phone, setPhone] = useState("");
+  const [phonePassword, setPhonePassword] = useState("");
+  const [showPhonePassword, setShowPhonePassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
       if (u) router.replace("/home");
@@ -61,7 +81,7 @@ export default function LoginPage() {
     return () => unsub();
   }, [router]);
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
     if (!email.trim()) { setErrorMsg("El email es obligatorio."); return; }
@@ -71,10 +91,32 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace("/home");
     } catch (err: any) {
-      setErrorMsg(authErrorToSpanish(err?.code ?? ""));
+      setErrorMsg(authErrorToSpanish(err?.code ?? "", "email"));
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handlePhoneLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setErrorMsg(null);
+    if (!phone.trim())    { setErrorMsg("El teléfono es obligatorio."); return; }
+    if (!phonePassword)   { setErrorMsg("La contraseña es obligatoria."); return; }
+    try {
+      setLoading(true);
+      const fakeEmail = phoneToFakeEmail(phone.trim());
+      await signInWithEmailAndPassword(auth, fakeEmail, phonePassword);
+      router.replace("/home");
+    } catch (err: any) {
+      setErrorMsg(authErrorToSpanish(err?.code ?? "", "phone"));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function switchMode(newMode: "email" | "phone") {
+    setMode(newMode);
+    setErrorMsg(null);
   }
 
   return (
@@ -125,115 +167,221 @@ export default function LoginPage() {
           fontSize: "12px",
           letterSpacing: "2px",
           textTransform: "uppercase",
-          marginBottom: "28px",
+          marginBottom: "20px",
         }}>
           eventos deportivos · bay area
         </p>
 
-        <form onSubmit={handleLogin} style={{ display: "grid", gap: "18px" }}>
-          {/* Email */}
-          <div>
-            <label style={labelStyle}>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="tu@email.com"
-              style={inputStyle}
-              autoComplete="email"
-            />
-          </div>
+        {/* Toggle email / phone */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "6px",
+          background: "#0a1220",
+          border: "1px solid #142035",
+          borderRadius: "14px",
+          padding: "4px",
+          marginBottom: "24px",
+        }}>
+          {(["email", "phone"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => switchMode(m)}
+              style={{
+                padding: "9px",
+                borderRadius: "10px",
+                border: "none",
+                background: mode === m ? "#ff8c00" : "transparent",
+                color: mode === m ? "#fff" : "#8899bb",
+                fontWeight: mode === m ? 700 : 500,
+                fontSize: "13px",
+                cursor: "pointer",
+                transition: "all 0.15s",
+              }}
+            >
+              {m === "email" ? "📧 Con correo" : "📱 Con teléfono"}
+            </button>
+          ))}
+        </div>
 
-          {/* Contraseña */}
-          <div>
-            <label style={labelStyle}>Contraseña</label>
-            <div style={{ position: "relative" }}>
+        {/* ── EMAIL MODE ── */}
+        {mode === "email" && (
+          <form onSubmit={handleEmailLogin} style={{ display: "grid", gap: "18px" }}>
+            <div>
+              <label style={labelStyle}>Email</label>
               <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Tu contraseña"
-                style={{ ...inputStyle, paddingRight: "44px" }}
-                autoComplete="current-password"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="tu@email.com"
+                style={inputStyle}
+                autoComplete="email"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword((v) => !v)}
-                style={{
-                  position: "absolute",
-                  right: "12px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  color: "#3a5070",
-                  fontSize: "13px",
-                  padding: "4px",
-                }}
-              >
-                {showPassword ? "Ocultar" : "Ver"}
-              </button>
             </div>
-          </div>
 
-          {/* Error */}
-          {errorMsg && (
-            <p style={{
-              background: "rgba(255,60,60,0.08)",
-              border: "1px solid rgba(255,60,60,0.2)",
-              borderRadius: "10px",
-              padding: "10px 14px",
-              fontSize: "13px",
-              color: "#ff6b6b",
-              margin: 0,
-            }}>
-              {errorMsg}
-            </p>
-          )}
+            <div>
+              <label style={labelStyle}>Contraseña</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Tu contraseña"
+                  style={{ ...inputStyle, paddingRight: "44px" }}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#3a5070",
+                    fontSize: "13px",
+                    padding: "4px",
+                  }}
+                >
+                  {showPassword ? "Ocultar" : "Ver"}
+                </button>
+              </div>
+            </div>
 
-          {/* Botón principal */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "14px",
-              borderRadius: "24px",
-              background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
-              color: "#fff",
-              border: "none",
-              fontWeight: 800,
-              fontSize: "14px",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? "Ingresando…" : "Iniciar sesión"}
-          </button>
+            {errorMsg && <ErrorBox msg={errorMsg} />}
 
-          {/* ¿Olvidaste tu contraseña? */}
-          <a
-            href="/auth/forgot-password"
-            style={{
-              color: "#8899bb",
-              fontSize: "13px",
-              textAlign: "center",
-              textDecoration: "none",
-            }}
-          >
-            ¿Olvidaste tu contraseña?
-          </a>
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "14px",
+                borderRadius: "24px",
+                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                color: "#fff",
+                border: "none",
+                fontWeight: 800,
+                fontSize: "14px",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1,
+              }}
+            >
+              {loading ? "Ingresando…" : "Iniciar sesión"}
+            </button>
 
-          {/* Link a registro */}
-          <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
-            ¿No tienes cuenta?{" "}
-            <a href="/auth/register" style={{ color: "#ff8c00", textDecoration: "none" }}>
-              Regístrate aquí
+            <a
+              href="/auth/forgot-password"
+              style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", textDecoration: "none" }}
+            >
+              ¿Olvidaste tu contraseña?
             </a>
-          </p>
-        </form>
+
+            <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
+              ¿No tienes cuenta?{" "}
+              <a href="/auth/register" style={{ color: "#ff8c00", textDecoration: "none" }}>
+                Regístrate aquí
+              </a>
+            </p>
+          </form>
+        )}
+
+        {/* ── PHONE MODE ── */}
+        {mode === "phone" && (
+          <form onSubmit={handlePhoneLogin} style={{ display: "grid", gap: "18px" }}>
+            <div>
+              <label style={labelStyle}>Teléfono</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="+1 415 555 1234"
+                style={inputStyle}
+                autoComplete="tel"
+              />
+            </div>
+
+            <div>
+              <label style={labelStyle}>Contraseña</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPhonePassword ? "text" : "password"}
+                  value={phonePassword}
+                  onChange={(e) => setPhonePassword(e.target.value)}
+                  placeholder="Tu contraseña"
+                  style={{ ...inputStyle, paddingRight: "44px" }}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPhonePassword((v) => !v)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "#3a5070",
+                    fontSize: "13px",
+                    padding: "4px",
+                  }}
+                >
+                  {showPhonePassword ? "Ocultar" : "Ver"}
+                </button>
+              </div>
+            </div>
+
+            {errorMsg && <ErrorBox msg={errorMsg} />}
+
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "14px",
+                borderRadius: "24px",
+                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                color: "#fff",
+                border: "none",
+                fontWeight: 800,
+                fontSize: "14px",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1,
+              }}
+            >
+              {loading ? "Ingresando…" : "Iniciar sesión"}
+            </button>
+
+            <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
+              ¿No tienes cuenta?{" "}
+              <a href="/auth/register" style={{ color: "#ff8c00", textDecoration: "none" }}>
+                Regístrate aquí
+              </a>
+            </p>
+          </form>
+        )}
       </div>
     </main>
+  );
+}
+
+function ErrorBox({ msg }: { msg: string }) {
+  return (
+    <p style={{
+      background: "rgba(255,60,60,0.08)",
+      border: "1px solid rgba(255,60,60,0.2)",
+      borderRadius: "10px",
+      padding: "10px 14px",
+      fontSize: "13px",
+      color: "#ff6b6b",
+      margin: 0,
+    }}>
+      {msg}
+    </p>
   );
 }

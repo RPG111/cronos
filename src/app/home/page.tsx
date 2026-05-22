@@ -197,6 +197,32 @@ function FanZoneCard({
           </div>
         )}
 
+        {/* Badges food / alcohol / amenities */}
+        {(zone.alcohol != null || zone.food || zone.amenities) && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+            {zone.alcohol === true && (
+              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(0,200,100,0.1)", border: "1px solid rgba(0,200,100,0.3)", color: "#00c864", whiteSpace: "nowrap" }}>
+                🍺 Alcohol disponible
+              </span>
+            )}
+            {zone.alcohol === false && (
+              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(100,100,100,0.1)", border: "1px solid rgba(100,100,100,0.3)", color: "#8899bb", whiteSpace: "nowrap" }}>
+                🚫 Sin alcohol
+              </span>
+            )}
+            {zone.food && (
+              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,140,0,0.1)", border: "1px solid rgba(255,140,0,0.3)", color: "#ff8c00", whiteSpace: "nowrap" }}>
+                🍔 {zone.food}
+              </span>
+            )}
+            {zone.amenities && (
+              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(0,150,255,0.1)", border: "1px solid rgba(0,150,255,0.3)", color: "#0096ff", whiteSpace: "nowrap" }}>
+                ✨ {zone.amenities}
+              </span>
+            )}
+          </div>
+        )}
+
         {/* Botones */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
           {zone.registrationUrl && (

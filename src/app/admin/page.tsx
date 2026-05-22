@@ -135,6 +135,9 @@ type FanZoneForm = {
   officialUrl: string;
   registrationUrl: string;
   notes: string;
+  food: string;
+  alcohol: "null" | "true" | "false";
+  amenities: string;
   active: boolean;
 };
 
@@ -152,6 +155,9 @@ const EMPTY_FZ_FORM: FanZoneForm = {
   officialUrl: "",
   registrationUrl: "",
   notes: "",
+  food: "",
+  alcohol: "null",
+  amenities: "",
   active: true,
 };
 
@@ -340,6 +346,9 @@ function FanZoneModal({
         officialUrl: form.officialUrl.trim() || null,
         registrationUrl: form.registrationUrl.trim() || null,
         notes: form.notes.trim() || null,
+        food: form.food.trim() || null,
+        alcohol: form.alcohol === "null" ? null : form.alcohol === "true",
+        amenities: form.amenities.trim() || null,
         active: form.active,
       };
       if (editId) {
@@ -466,6 +475,38 @@ function FanZoneModal({
                 value={form.notes}
                 onChange={(e) => setF("notes", e.target.value)}
                 placeholder="Info adicional visible en la card…"
+              />
+            </div>
+
+            {/* Food */}
+            <div className="col-span-2">
+              <label className={lbl}>COMIDA DISPONIBLE (opcional)</label>
+              <input
+                className={inp}
+                value={form.food}
+                onChange={(e) => setF("food", e.target.value)}
+                placeholder="Food trucks, Tacos, etc."
+              />
+            </div>
+
+            {/* Alcohol */}
+            <div>
+              <label className={lbl}>ALCOHOL</label>
+              <select className={inp} value={form.alcohol} onChange={(e) => setF("alcohol", e.target.value as FanZoneForm["alcohol"])}>
+                <option value="null">No especificado</option>
+                <option value="true">Sí hay alcohol</option>
+                <option value="false">Sin alcohol</option>
+              </select>
+            </div>
+
+            {/* Amenities */}
+            <div>
+              <label className={lbl}>OTRAS AMENIDADES (opcional)</label>
+              <input
+                className={inp}
+                value={form.amenities}
+                onChange={(e) => setF("amenities", e.target.value)}
+                placeholder="DJ, pantalla gigante, etc."
               />
             </div>
 
@@ -832,6 +873,9 @@ export default function AdminPage() {
       officialUrl:     fz.officialUrl ?? "",
       registrationUrl: fz.registrationUrl ?? "",
       notes:           fz.notes ?? "",
+      food:            fz.food ?? "",
+      alcohol:         fz.alcohol == null ? "null" : fz.alcohol ? "true" : "false",
+      amenities:       fz.amenities ?? "",
       active:          fz.active,
     });
     setFzModalOpen(true);

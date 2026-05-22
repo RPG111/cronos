@@ -1,13 +1,10 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  ConfirmationResult,
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import TeamsAutocomplete from "@/components/TeamsAutocomplete";
@@ -35,16 +32,24 @@ const inputStyle: React.CSSProperties = {
   boxSizing: "border-box",
 };
 
-function authErrorToSpanish(code: string): string {
+function phoneToFakeEmail(phone: string): string {
+  let digits = phone.replace(/[\s\-().+]/g, "").replace(/\D/g, "");
+  if (digits.length === 10) digits = "1" + digits;
+  return `${digits}@cronos.phone`;
+}
+
+function authErrorToSpanish(code: string, mode: "email" | "phone" = "email"): string {
   switch (code) {
     case "auth/email-already-in-use":
-      return "Ya existe una cuenta con este email";
+      return mode === "phone"
+        ? "Ya existe una cuenta con este teléfono"
+        : "Ya existe una cuenta con este email";
     case "auth/weak-password":
       return "La contraseña debe tener al menos 6 caracteres";
     case "auth/invalid-email":
-      return "Email inválido";
-    case "auth/invalid-phone-number":
-      return "Número de teléfono inválido. Usa formato +1XXXXXXXXXX";
+      return mode === "phone"
+        ? "Número de teléfono inválido"
+        : "Email inválido";
     case "auth/too-many-requests":
       return "Demasiados intentos. Intenta más tarde";
     default:
@@ -69,12 +74,10 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
   const [phoneName, setPhoneName] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneTeam, setPhoneTeam] = useState("");
-  const [otpStep, setOtpStep] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [sending, setSending] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const confirmationRef = useRef<ConfirmationResult | null>(null);
-  const recaptchaReadyRef = useRef(false);
+  const [phonePassword, setPhonePassword] = useState("");
+  const [phoneConfirmPassword, setPhoneConfirmPassword] = useState("");
+  const [showPhonePassword, setShowPhonePassword] = useState(false);
+  const [showPhoneConfirm, setShowPhoneConfirm] = useState(false);
 
   // Shared state
   const [city, setCity] = useState("");
@@ -89,22 +92,6 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
     });
     return () => unsub();
   }, [router]);
-
-  // Init invisible reCAPTCHA once
-  useEffect(() => {
-    if (recaptchaReadyRef.current) return;
-    try {
-      // @ts-expect-error
-      if (!window.recaptchaVerifier) {
-        const verifier = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
-        // @ts-expect-error
-        window.recaptchaVerifier = verifier;
-      }
-      recaptchaReadyRef.current = true;
-    } catch (e) {
-      console.error("reCAPTCHA init error", e);
-    }
-  }, []);
 
   function resetErrors() { setErrorMsg(null); }
 
@@ -131,314 +118,285 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
       }, { merge: true });
       router.replace("/home");
     } catch (err: any) {
-      setErrorMsg(authErrorToSpanish(err?.code ?? ""));
+      setErrorMsg(authErrorToSpanish(err?.code ?? "", "email"));
     } finally {
       setLoading(false);
     }
   }
 
-  // PHONE — send OTP
-  async function handleSendCode(e: React.FormEvent) {
+  // PHONE submit
+  async function handlePhoneSubmit(e: React.FormEvent) {
     e.preventDefault();
     resetErrors();
-    if (!phoneName.trim()) { setErrorMsg("El nombre es obligatorio."); return; }
-    const raw = phone.trim();
-    if (!raw.startsWith("+") || raw.length < 8) {
-      setErrorMsg("Escribe tu teléfono con + y lada, ej. +14155551234");
+    if (!phoneName.trim())       { setErrorMsg("El nombre es obligatorio."); return; }
+    const rawPhone = phone.trim();
+    if (!rawPhone)               { setErrorMsg("El teléfono es obligatorio."); return; }
+    if (rawPhone.replace(/\D/g, "").length < 10) {
+      setErrorMsg("Escribe tu teléfono con código de país, ej. +1 415 555 1234");
       return;
     }
+    if (!phonePassword)          { setErrorMsg("La contraseña es obligatoria."); return; }
+    if (phonePassword.length < 6){ setErrorMsg("La contraseña debe tener al menos 6 caracteres."); return; }
+    if (phonePassword !== phoneConfirmPassword) { setErrorMsg("Las contraseñas no coinciden."); return; }
     try {
-      setSending(true);
-      // @ts-expect-error
-      const verifier: RecaptchaVerifier = window.recaptchaVerifier;
-      if (!verifier) { setErrorMsg("Captcha no listo. Recarga la página."); return; }
-      const conf = await signInWithPhoneNumber(auth, raw, verifier);
-      confirmationRef.current = conf;
-      setOtpStep(true);
-    } catch (err: any) {
-      setErrorMsg(authErrorToSpanish(err?.code ?? ""));
-      try {
-        // @ts-expect-error
-        window.recaptchaVerifier?.clear();
-        // @ts-expect-error
-        window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
-      } catch {}
-    } finally {
-      setSending(false);
-    }
-  }
-
-  // PHONE — verify OTP
-  async function handleVerifyOtp(e: React.FormEvent) {
-    e.preventDefault();
-    resetErrors();
-    if (!otp.trim()) { setErrorMsg("Ingresa el código."); return; }
-    if (!confirmationRef.current) { setOtpStep(false); return; }
-    try {
-      setVerifying(true);
-      const result = await confirmationRef.current.confirm(otp.trim());
-      if (result.user) {
-        await setDoc(doc(db, "users", result.user.uid), {
-          name: phoneName.trim(),
-          phone: phone.trim(),
-          favoriteTeam: phoneTeam.trim(),
-          city: city.trim(),
-          marketingConsent: true,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        }, { merge: true });
-      }
+      setLoading(true);
+      const fakeEmail = phoneToFakeEmail(rawPhone);
+      const result = await createUserWithEmailAndPassword(auth, fakeEmail, phonePassword);
+      await setDoc(doc(db, "users", result.user.uid), {
+        name: phoneName.trim(),
+        phone: rawPhone,
+        favoriteTeam: phoneTeam.trim(),
+        city: city.trim(),
+        marketingConsent: true,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
       router.replace("/home");
     } catch (err: any) {
-      setErrorMsg("Código incorrecto. Intenta de nuevo.");
+      setErrorMsg(authErrorToSpanish(err?.code ?? "", "phone"));
     } finally {
-      setVerifying(false);
+      setLoading(false);
     }
   }
 
   function switchMode(newMode: "email" | "phone") {
     setMode(newMode);
     setErrorMsg(null);
-    setOtpStep(false);
-    setOtp("");
   }
 
   return (
-    <>
-      <div id="recaptcha-container" className="absolute left-[-9999px] top-[-9999px]" />
+    <div style={{
+      background: "#0a1220",
+      border: "1px solid #142035",
+      borderRadius: "24px",
+      padding: "32px 28px",
+      maxWidth: "420px",
+      width: "92%",
+    }}>
+      {/* Logo */}
+      <div style={{ textAlign: "center", marginBottom: "6px" }}>
+        <span className="logo-cronos select-none" style={{ fontSize: "32px" }} />
+      </div>
 
+      {/* Subtítulo */}
+      <p style={{
+        textAlign: "center",
+        color: "#8899bb",
+        fontSize: "12px",
+        letterSpacing: "2px",
+        textTransform: "uppercase",
+        marginBottom: "20px",
+      }}>
+        Eventos deportivos · Bay Area
+      </p>
+
+      {/* Toggle email / phone */}
       <div style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        gap: "6px",
         background: "#0a1220",
         border: "1px solid #142035",
-        borderRadius: "24px",
-        padding: "32px 28px",
-        maxWidth: "420px",
-        width: "92%",
+        borderRadius: "14px",
+        padding: "4px",
+        marginBottom: "24px",
       }}>
-        {/* Logo */}
-        <div style={{ textAlign: "center", marginBottom: "6px" }}>
-          <span className="logo-cronos select-none" style={{ fontSize: "32px" }} />
-        </div>
-
-        {/* Subtítulo */}
-        <p style={{
-          textAlign: "center",
-          color: "#8899bb",
-          fontSize: "12px",
-          letterSpacing: "2px",
-          textTransform: "uppercase",
-          marginBottom: "20px",
-        }}>
-          Eventos deportivos · Bay Area
-        </p>
-
-        {/* Toggle email / phone */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "6px",
-          background: "#0a1220",
-          border: "1px solid #142035",
-          borderRadius: "14px",
-          padding: "4px",
-          marginBottom: "24px",
-        }}>
-          {(["email", "phone"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => switchMode(m)}
-              style={{
-                padding: "9px",
-                borderRadius: "10px",
-                border: "none",
-                background: mode === m ? "#ff8c00" : "transparent",
-                color: mode === m ? "#fff" : "#8899bb",
-                fontWeight: mode === m ? 700 : 500,
-                fontSize: "13px",
-                cursor: "pointer",
-                transition: "all 0.15s",
-              }}
-            >
-              {m === "email" ? "📧 Con correo" : "📱 Con teléfono"}
-            </button>
-          ))}
-        </div>
-
-        {/* ── EMAIL MODE ── */}
-        {mode === "email" && (
-          <form onSubmit={handleEmailSubmit} style={{ display: "grid", gap: "16px" }}>
-            <div>
-              <label style={labelStyle}>Nombre completo</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-                placeholder="Tu nombre" style={inputStyle} autoComplete="name" />
-            </div>
-
-            <div>
-              <label style={labelStyle}>Email</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="tu@email.com" style={inputStyle} autoComplete="email" />
-            </div>
-
-            <div>
-              <label style={labelStyle}>Contraseña</label>
-              <div style={{ position: "relative" }}>
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  style={{ ...inputStyle, paddingRight: "44px" }}
-                  autoComplete="new-password"
-                />
-                <button type="button" onClick={() => setShowPassword((v) => !v)}
-                  style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
-                  {showPassword ? "Ocultar" : "Ver"}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label style={labelStyle}>Confirmar contraseña</label>
-              <div style={{ position: "relative" }}>
-                <input
-                  type={showConfirm ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Repite tu contraseña"
-                  style={{ ...inputStyle, paddingRight: "44px" }}
-                  autoComplete="new-password"
-                />
-                <button type="button" onClick={() => setShowConfirm((v) => !v)}
-                  style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
-                  {showConfirm ? "Ocultar" : "Ver"}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label style={labelStyle}>Equipo favorito <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
-              <TeamsAutocomplete
-                value={favoriteTeam}
-                onChange={setFavoriteTeam}
-                placeholder="Ej. América, Chivas, Barcelona..."
-              />
-            </div>
-
-            <div>
-              <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Ej. San Francisco, Oakland, San Jose..."
-                style={inputStyle}
-                autoComplete="address-level2"
-              />
-            </div>
-
-            <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} />
-
-            {errorMsg && <ErrorBox msg={errorMsg} />}
-
-            <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
-            <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
-              ¿Ya tienes cuenta?{" "}
-              <a href="/auth/login" style={{ color: "#ff8c00", textDecoration: "none" }}>Inicia sesión aquí</a>
-            </p>
-          </form>
-        )}
-
-        {/* ── PHONE MODE ── */}
-        {mode === "phone" && !otpStep && (
-          <form onSubmit={handleSendCode} style={{ display: "grid", gap: "16px" }}>
-            <div>
-              <label style={labelStyle}>Nombre completo</label>
-              <input type="text" value={phoneName} onChange={(e) => setPhoneName(e.target.value)}
-                placeholder="Tu nombre" style={inputStyle} autoComplete="name" />
-            </div>
-
-            <div>
-              <label style={labelStyle}>Teléfono</label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 415 555 1234"
-                style={inputStyle}
-                autoComplete="tel"
-              />
-              <p style={{ fontSize: "11px", color: "#3a5070", marginTop: "4px" }}>
-                Formato internacional: +1XXXXXXXXXX
-              </p>
-            </div>
-
-            <div>
-              <label style={labelStyle}>Equipo favorito <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
-              <TeamsAutocomplete
-                value={phoneTeam}
-                onChange={setPhoneTeam}
-                placeholder="Ej. América, Chivas, Barcelona..."
-              />
-            </div>
-
-            <div>
-              <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
-              <input
-                type="text"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Ej. San Francisco, Oakland, San Jose..."
-                style={inputStyle}
-                autoComplete="address-level2"
-              />
-            </div>
-
-            <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} />
-
-            {errorMsg && <ErrorBox msg={errorMsg} />}
-
-            <SubmitButton loading={sending} label="Enviar código" loadingLabel="Enviando…" disabled={!marketingConsent} />
-
-            <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
-              ¿Ya tienes cuenta?{" "}
-              <a href="/auth/login" style={{ color: "#ff8c00", textDecoration: "none" }}>Inicia sesión aquí</a>
-            </p>
-          </form>
-        )}
-
-        {/* ── PHONE OTP STEP ── */}
-        {mode === "phone" && otpStep && (
-          <form onSubmit={handleVerifyOtp} style={{ display: "grid", gap: "16px" }}>
-            <p style={{ fontSize: "13px", color: "#8899bb", margin: 0, textAlign: "center" }}>
-              Código enviado a <strong style={{ color: "#e8f0ff" }}>{phone}</strong>
-            </p>
-
-            <div>
-              <label style={labelStyle}>Código de 6 dígitos</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                placeholder="123456"
-                maxLength={6}
-                style={{ ...inputStyle, letterSpacing: "6px", fontSize: "20px", textAlign: "center" }}
-              />
-            </div>
-
-            {errorMsg && <ErrorBox msg={errorMsg} />}
-
-            <SubmitButton loading={verifying} label="Verificar código" loadingLabel="Verificando…" />
-
-            <button type="button" onClick={() => { setOtpStep(false); setOtp(""); setErrorMsg(null); }}
-              style={{ background: "none", border: "1px solid #142035", borderRadius: "20px", padding: "11px", color: "#8899bb", fontSize: "13px", cursor: "pointer" }}>
-              Cambiar teléfono
-            </button>
-          </form>
-        )}
+        {(["email", "phone"] as const).map((m) => (
+          <button
+            key={m}
+            type="button"
+            onClick={() => switchMode(m)}
+            style={{
+              padding: "9px",
+              borderRadius: "10px",
+              border: "none",
+              background: mode === m ? "#ff8c00" : "transparent",
+              color: mode === m ? "#fff" : "#8899bb",
+              fontWeight: mode === m ? 700 : 500,
+              fontSize: "13px",
+              cursor: "pointer",
+              transition: "all 0.15s",
+            }}
+          >
+            {m === "email" ? "📧 Con correo" : "📱 Con teléfono"}
+          </button>
+        ))}
       </div>
-    </>
+
+      {/* ── EMAIL MODE ── */}
+      {mode === "email" && (
+        <form onSubmit={handleEmailSubmit} style={{ display: "grid", gap: "16px" }}>
+          <div>
+            <label style={labelStyle}>Nombre completo</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)}
+              placeholder="Tu nombre" style={inputStyle} autoComplete="name" />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Email</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="tu@email.com" style={inputStyle} autoComplete="email" />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Contraseña</label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                style={{ ...inputStyle, paddingRight: "44px" }}
+                autoComplete="new-password"
+              />
+              <button type="button" onClick={() => setShowPassword((v) => !v)}
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
+                {showPassword ? "Ocultar" : "Ver"}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>Confirmar contraseña</label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repite tu contraseña"
+                style={{ ...inputStyle, paddingRight: "44px" }}
+                autoComplete="new-password"
+              />
+              <button type="button" onClick={() => setShowConfirm((v) => !v)}
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
+                {showConfirm ? "Ocultar" : "Ver"}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>Equipo favorito <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+            <TeamsAutocomplete
+              value={favoriteTeam}
+              onChange={setFavoriteTeam}
+              placeholder="Ej. América, Chivas, Barcelona..."
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Ej. San Francisco, Oakland, San Jose..."
+              style={inputStyle}
+              autoComplete="address-level2"
+            />
+          </div>
+
+          <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} />
+
+          {errorMsg && <ErrorBox msg={errorMsg} />}
+
+          <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
+          <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
+            ¿Ya tienes cuenta?{" "}
+            <a href="/auth/login" style={{ color: "#ff8c00", textDecoration: "none" }}>Inicia sesión aquí</a>
+          </p>
+        </form>
+      )}
+
+      {/* ── PHONE MODE ── */}
+      {mode === "phone" && (
+        <form onSubmit={handlePhoneSubmit} style={{ display: "grid", gap: "16px" }}>
+          <div>
+            <label style={labelStyle}>Nombre completo</label>
+            <input type="text" value={phoneName} onChange={(e) => setPhoneName(e.target.value)}
+              placeholder="Tu nombre" style={inputStyle} autoComplete="name" />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Teléfono</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+1 415 555 1234"
+              style={inputStyle}
+              autoComplete="tel"
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>Contraseña</label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPhonePassword ? "text" : "password"}
+                value={phonePassword}
+                onChange={(e) => setPhonePassword(e.target.value)}
+                placeholder="Mínimo 6 caracteres"
+                style={{ ...inputStyle, paddingRight: "44px" }}
+                autoComplete="new-password"
+              />
+              <button type="button" onClick={() => setShowPhonePassword((v) => !v)}
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
+                {showPhonePassword ? "Ocultar" : "Ver"}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>Confirmar contraseña</label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPhoneConfirm ? "text" : "password"}
+                value={phoneConfirmPassword}
+                onChange={(e) => setPhoneConfirmPassword(e.target.value)}
+                placeholder="Repite tu contraseña"
+                style={{ ...inputStyle, paddingRight: "44px" }}
+                autoComplete="new-password"
+              />
+              <button type="button" onClick={() => setShowPhoneConfirm((v) => !v)}
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
+                {showPhoneConfirm ? "Ocultar" : "Ver"}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>Equipo favorito <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+            <TeamsAutocomplete
+              value={phoneTeam}
+              onChange={setPhoneTeam}
+              placeholder="Ej. América, Chivas, Barcelona..."
+            />
+          </div>
+
+          <div>
+            <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+            <input
+              type="text"
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              placeholder="Ej. San Francisco, Oakland, San Jose..."
+              style={inputStyle}
+              autoComplete="address-level2"
+            />
+          </div>
+
+          <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} />
+
+          {errorMsg && <ErrorBox msg={errorMsg} />}
+
+          <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
+          <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
+            ¿Ya tienes cuenta?{" "}
+            <a href="/auth/login" style={{ color: "#ff8c00", textDecoration: "none" }}>Inicia sesión aquí</a>
+          </p>
+        </form>
+      )}
+    </div>
   );
 }
 

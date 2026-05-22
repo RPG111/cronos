@@ -34,6 +34,9 @@ export type FanZone = {
   officialUrl: string | null;
   registrationUrl: string | null;
   notes: string | null;
+  food: string | null;
+  alcohol: boolean | null;
+  amenities: string | null;
   active: boolean;
   updatedAt?: Timestamp;
 };
