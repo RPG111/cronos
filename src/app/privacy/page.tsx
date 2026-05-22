@@ -25,11 +25,11 @@ const content = {
       },
       {
         title: "4. Email marketing y comunicaciones",
-        body: "Si otorgaste consentimiento al registrarte, te enviaremos correos sobre eventos, promociones y noticias de Cronos Sports. Puedes cancelar la suscripción en cualquier momento haciendo clic en el enlace de baja incluido en cada correo, o escribiendo a hola@cronosports.app.",
+        body: "Si otorgaste consentimiento al registrarte, te enviaremos correos sobre eventos, promociones y noticias de Cronos Sports. Puedes cancelar la suscripción en cualquier momento haciendo clic en el enlace de baja incluido en cada correo, o escribiendo a cronos0sports@gmail.com.",
       },
       {
         title: "5. Tus derechos (CCPA y privacidad general)",
-        body: "De acuerdo con la Ley de Privacidad del Consumidor de California (CCPA) y principios generales de privacidad, tienes derecho a: conocer qué datos personales tenemos sobre ti, solicitar una copia de tus datos, corregir información incorrecta, y solicitar la eliminación completa de tus datos. Para ejercer cualquiera de estos derechos, escríbenos a hola@cronosports.app con el asunto \"Privacidad – [tu nombre]\". Respondemos en un máximo de 30 días hábiles.",
+        body: "De acuerdo con la Ley de Privacidad del Consumidor de California (CCPA) y principios generales de privacidad, tienes derecho a: conocer qué datos personales tenemos sobre ti, solicitar una copia de tus datos, corregir información incorrecta, y solicitar la eliminación completa de tus datos. Para ejercer cualquiera de estos derechos, escríbenos a cronos0sports@gmail.com con el asunto \"Privacidad – [tu nombre]\". Respondemos en un máximo de 30 días hábiles.",
       },
       {
         title: "6. Cookies",
@@ -41,7 +41,7 @@ const content = {
       },
       {
         title: "8. Menores de edad",
-        body: "El servicio está disponible para personas mayores de 13 años. No recopilamos intencionalmente información de menores de 13 años. Si crees que un menor ha proporcionado sus datos, contáctanos en hola@cronosports.app para eliminarlos.",
+        body: "El servicio está disponible para personas mayores de 13 años. No recopilamos intencionalmente información de menores de 13 años. Si crees que un menor ha proporcionado sus datos, contáctanos en cronos0sports@gmail.com para eliminarlos.",
       },
       {
         title: "9. Cambios a esta política",
@@ -49,7 +49,7 @@ const content = {
       },
       {
         title: "10. Contacto",
-        body: "Para cualquier pregunta, solicitud o ejercicio de tus derechos de privacidad, contáctanos en: hola@cronosports.app. Cronos Sports — Bay Area, California, USA.",
+        body: "Para cualquier pregunta, solicitud o ejercicio de tus derechos de privacidad, contáctanos en: cronos0sports@gmail.com. Cronos Sports — Bay Area, California, USA.",
       },
     ],
   },
@@ -71,11 +71,11 @@ const content = {
       },
       {
         title: "4. Email marketing and communications",
-        body: "If you gave consent at registration, we will send you emails about Cronos Sports events, promotions, and news. You can unsubscribe at any time by clicking the unsubscribe link included in every email, or by writing to hola@cronosports.app.",
+        body: "If you gave consent at registration, we will send you emails about Cronos Sports events, promotions, and news. You can unsubscribe at any time by clicking the unsubscribe link included in every email, or by writing to cronos0sports@gmail.com.",
       },
       {
         title: "5. Your rights (CCPA and general privacy)",
-        body: "Under the California Consumer Privacy Act (CCPA) and general privacy principles, you have the right to: know what personal data we hold about you, request a copy of your data, correct inaccurate information, and request complete deletion of your data. To exercise any of these rights, email us at hola@cronosports.app with the subject line \"Privacy – [your name]\". We respond within 30 business days.",
+        body: "Under the California Consumer Privacy Act (CCPA) and general privacy principles, you have the right to: know what personal data we hold about you, request a copy of your data, correct inaccurate information, and request complete deletion of your data. To exercise any of these rights, email us at cronos0sports@gmail.com with the subject line \"Privacy – [your name]\". We respond within 30 business days.",
       },
       {
         title: "6. Cookies",
@@ -87,7 +87,7 @@ const content = {
       },
       {
         title: "8. Minors",
-        body: "The service is available to people over 13 years of age. We do not intentionally collect information from children under 13. If you believe a minor has provided their data, contact us at hola@cronosports.app to have it removed.",
+        body: "The service is available to people over 13 years of age. We do not intentionally collect information from children under 13. If you believe a minor has provided their data, contact us at cronos0sports@gmail.com to have it removed.",
       },
       {
         title: "9. Changes to this policy",
@@ -95,7 +95,7 @@ const content = {
       },
       {
         title: "10. Contact",
-        body: "For any questions, requests, or to exercise your privacy rights, contact us at: hola@cronosports.app. Cronos Sports — Bay Area, California, USA.",
+        body: "For any questions, requests, or to exercise your privacy rights, contact us at: cronos0sports@gmail.com. Cronos Sports — Bay Area, California, USA.",
       },
     ],
   },

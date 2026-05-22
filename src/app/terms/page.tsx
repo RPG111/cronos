@@ -13,7 +13,7 @@ const content = {
     sections: [
       {
         title: "1. Uso del sitio — Edad mínima",
-        body: "El uso de la plataforma Cronos Sports, disponible en cronosports.app, está permitido únicamente para personas mayores de 13 años. Al crear una cuenta, el usuario declara tener al menos 13 años de edad. Los usuarios entre 13 y 18 años deben contar con la autorización de su tutor legal. Cronos Sports se reserva el derecho de cancelar cuentas que violen este requisito.",
+        body: "El uso de la plataforma Cronos Sports, disponible en cronosports.app, está permitido únicamente para personas mayores de 13 años. Al crear una cuenta, el usuario declara tener al menos 13 años de edad. Cronos Sports se reserva el derecho de cancelar cuentas que violen este requisito.",
       },
       {
         title: "2. Descripción del servicio",
@@ -21,11 +21,11 @@ const content = {
       },
       {
         title: "3. El Bracket — Concurso gratuito sin compra necesaria",
-        body: "El bracket del Mundial 2026 organizado por Cronos Sports es un concurso de predicción completamente gratuito. NO SE REQUIERE NINGUNA COMPRA para participar ni para ganar. La elegibilidad y las instrucciones de participación alternativas están disponibles en hola@cronosports.app. El concurso está abierto a residentes legales de los Estados Unidos mayores de 13 años.",
+        body: "El bracket del Mundial 2026 organizado por Cronos Sports es un concurso de predicción completamente gratuito. NO SE REQUIERE NINGUNA COMPRA para participar ni para ganar. El concurso está disponible para residentes del Bay Area, California. El concurso está abierto a residentes legales de los Estados Unidos mayores de 13 años.",
       },
       {
         title: "4. Premio del bracket (NO PURCHASE NECESSARY)",
-        body: "NO ES NECESARIO REALIZAR UNA COMPRA PARA PARTICIPAR O GANAR. El premio del bracket del Mundial Cronos Sports consiste en una tarjeta de regalo o premio en efectivo equivalente de entre $200 y $300 USD, patrocinado íntegramente por Cronos Sports. El ganador se determinará por mayor puntuación acumulada en las predicciones del torneo según las reglas publicadas. Cronos Sports se reserva el derecho de modificar el monto del premio hasta la fecha de inicio del torneo. En caso de empate, se realizará un sorteo aleatorio entre los participantes empatados. Void where prohibited by law.",
+        body: "NO ES NECESARIO REALIZAR UNA COMPRA PARA PARTICIPAR O GANAR. El premio del bracket del Mundial Cronos Sports consiste en una tarjeta de regalo o premio en efectivo equivalente de $200 USD fijo, patrocinado íntegramente por Cronos Sports. El ganador se determinará por mayor puntuación acumulada en las predicciones del torneo según las reglas publicadas. Cronos Sports se reserva el derecho de modificar el monto del premio hasta la fecha de inicio del torneo. Void where prohibited by law.",
       },
       {
         title: "5. Cambios de fechas y eventos",
@@ -37,7 +37,7 @@ const content = {
       },
       {
         title: "7. Consentimiento de comunicaciones",
-        body: "Al registrarse y marcar la casilla de consentimiento, el usuario autoriza a Cronos Sports a enviar comunicaciones sobre eventos, promociones, el bracket y noticias relacionadas con el Mundial 2026. El usuario puede cancelar estas comunicaciones en cualquier momento enviando un correo a hola@cronosports.app o usando el enlace de baja en cada correo.",
+        body: "Al registrarse y marcar la casilla de consentimiento, el usuario autoriza a Cronos Sports a enviar comunicaciones sobre eventos, promociones, el bracket y noticias relacionadas con el Mundial 2026. El usuario puede cancelar estas comunicaciones en cualquier momento enviando un correo a cronos0sports@gmail.com o usando el enlace de baja en cada correo.",
       },
       {
         title: "8. Privacidad y datos",
@@ -45,11 +45,11 @@ const content = {
       },
       {
         title: "9. Consentimiento de grabación e imagen",
-        body: "Al asistir a eventos organizados por Cronos Sports, el usuario otorga su consentimiento para ser grabado en video, foto y audio. Cronos Sports puede usar este material en redes sociales y materiales de marketing. El usuario puede solicitar la eliminación de su imagen enviando un correo a hola@cronosports.app.",
+        body: "Al asistir a eventos organizados por Cronos Sports, el usuario otorga su consentimiento para ser grabado en video, foto y audio. Cronos Sports puede usar este material en redes sociales y materiales de marketing. El usuario puede solicitar la eliminación de su imagen enviando un correo a cronos0sports@gmail.com.",
       },
       {
         title: "10. Limitación de responsabilidad",
-        body: "Cronos Sports no será responsable por daños directos, indirectos o consecuentes derivados del uso de la plataforma; cancelación de eventos; calidad del servicio de establecimientos terceros; o interrupciones técnicas. En ningún caso la responsabilidad total de Cronos Sports excederá el monto pagado por el usuario en los últimos 12 meses, o $100 USD si no hubo pago.",
+        body: "Cronos Sports no será responsable por daños directos, indirectos o consecuentes derivados del uso de la plataforma; cancelación de eventos; calidad del servicio de establecimientos terceros; o interrupciones técnicas. En ningún caso la responsabilidad total de Cronos Sports excederá el monto pagado por el usuario en los últimos 12 meses, o $1 USD si no hubo pago.",
       },
       {
         title: "11. Propiedad intelectual",
@@ -61,7 +61,7 @@ const content = {
       },
       {
         title: "13. Contacto",
-        body: "Para consultas, solicitudes o reclamaciones relacionadas con estos términos: hola@cronosports.app. Cronos Sports responde en un máximo de 5 días hábiles.",
+        body: "Para consultas, solicitudes o reclamaciones relacionadas con estos términos: cronos0sports@gmail.com. Cronos Sports responde en un máximo de 5 días hábiles.",
       },
     ],
   },
@@ -71,7 +71,7 @@ const content = {
     sections: [
       {
         title: "1. Use of site — Minimum age",
-        body: "Use of the Cronos Sports platform, available at cronosports.app, is permitted only for people over 13 years of age. By creating an account, the user declares they are at least 13 years old. Users between 13 and 18 must have authorization from their legal guardian. Cronos Sports reserves the right to cancel accounts that violate this requirement.",
+        body: "Use of the Cronos Sports platform, available at cronosports.app, is permitted only for people over 13 years of age. By creating an account, the user declares they are at least 13 years old. Cronos Sports reserves the right to cancel accounts that violate this requirement.",
       },
       {
         title: "2. Service description",
@@ -79,11 +79,11 @@ const content = {
       },
       {
         title: "3. The Bracket — Free contest, no purchase necessary",
-        body: "The World Cup 2026 bracket organized by Cronos Sports is a completely free prediction contest. NO PURCHASE IS REQUIRED to enter or win. Eligibility and alternative entry instructions are available at hola@cronosports.app. The contest is open to legal residents of the United States who are 13 years of age or older.",
+        body: "The World Cup 2026 bracket organized by Cronos Sports is a completely free prediction contest. NO PURCHASE IS REQUIRED to enter or win. The contest is available to Bay Area, California residents. The contest is open to legal residents of the United States who are 13 years of age or older.",
       },
       {
         title: "4. Bracket prize (NO PURCHASE NECESSARY)",
-        body: "NO PURCHASE NECESSARY TO ENTER OR WIN. The Cronos Sports World Cup bracket prize consists of a gift card or equivalent cash prize of between $200 and $300 USD, sponsored entirely by Cronos Sports. The winner will be determined by the highest cumulative score in tournament predictions according to the published rules. Cronos Sports reserves the right to modify the prize amount until the tournament start date. In the event of a tie, a random draw will be held among tied participants. Void where prohibited by law.",
+        body: "NO PURCHASE NECESSARY TO ENTER OR WIN. The Cronos Sports World Cup bracket prize consists of a gift card or equivalent cash prize of $200 USD fixed, sponsored entirely by Cronos Sports. The winner will be determined by the highest cumulative score in tournament predictions according to the published rules. Cronos Sports reserves the right to modify the prize amount until the tournament start date. Void where prohibited by law.",
       },
       {
         title: "5. Date and event changes",
@@ -95,7 +95,7 @@ const content = {
       },
       {
         title: "7. Communications consent",
-        body: "By registering and checking the consent box, the user authorizes Cronos Sports to send communications about events, promotions, the bracket, and World Cup 2026 news. Users can cancel these communications at any time by emailing hola@cronosports.app or using the unsubscribe link in any email.",
+        body: "By registering and checking the consent box, the user authorizes Cronos Sports to send communications about events, promotions, the bracket, and World Cup 2026 news. Users can cancel these communications at any time by emailing cronos0sports@gmail.com or using the unsubscribe link in any email.",
       },
       {
         title: "8. Privacy and data",
@@ -103,11 +103,11 @@ const content = {
       },
       {
         title: "9. Recording and image consent",
-        body: "By attending events organized by Cronos Sports, the user consents to being recorded in video, photo, and audio. Cronos Sports may use this material on social media and marketing materials. Users can request removal of their image by emailing hola@cronosports.app.",
+        body: "By attending events organized by Cronos Sports, the user consents to being recorded in video, photo, and audio. Cronos Sports may use this material on social media and marketing materials. Users can request removal of their image by emailing cronos0sports@gmail.com.",
       },
       {
         title: "10. Limitation of liability",
-        body: "Cronos Sports will not be liable for direct, indirect, or consequential damages arising from use of the platform; event cancellations; quality of third-party venue services; or technical interruptions. In no event will Cronos Sports' total liability exceed the amount paid by the user in the last 12 months, or $100 USD if no payment was made.",
+        body: "Cronos Sports will not be liable for direct, indirect, or consequential damages arising from use of the platform; event cancellations; quality of third-party venue services; or technical interruptions. In no event will Cronos Sports' total liability exceed the amount paid by the user in the last 12 months, or $1 USD if no payment was made.",
       },
       {
         title: "11. Intellectual property",
@@ -119,7 +119,7 @@ const content = {
       },
       {
         title: "13. Contact",
-        body: "For questions, requests, or complaints related to these terms: hola@cronosports.app. Cronos Sports responds within 5 business days.",
+        body: "For questions, requests, or complaints related to these terms: cronos0sports@gmail.com. Cronos Sports responds within 5 business days.",
       },
     ],
   },
