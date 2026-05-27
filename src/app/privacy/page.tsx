@@ -133,7 +133,7 @@ export default function PrivacyPage() {
             >
               <h2
                 style={{
-                  color: "#ff8c00",
+                  color: "#e63946",
                   fontSize: "12px",
                   fontWeight: 700,
                   letterSpacing: "1.5px",

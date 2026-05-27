@@ -33,7 +33,7 @@ export default function BottomNav() {
               key={href}
               href={href}
               className="flex flex-1 flex-col items-center justify-center gap-1 py-2 text-xs transition"
-              style={{ color: active ? "#ff8c00" : "#8899bb" }}
+              style={{ color: active ? "#e63946" : "#8899bb" }}
             >
               <Icon size={18} strokeWidth={2} />
               <span className="text-[11px] font-medium">{label}</span>
@@ -43,7 +43,7 @@ export default function BottomNav() {
                     width: "4px",
                     height: "4px",
                     borderRadius: "50%",
-                    background: "#ff8c00",
+                    background: "#e63946",
                   }}
                 />
               )}

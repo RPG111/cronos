@@ -26,6 +26,7 @@ const COUNTRY_FLAG: Record<string, string> = {
   usa: "🇺🇸",
   canada: "🇨🇦",
   mexico: "🇲🇽",
+  bay_area: "🇺🇸",
 };
 
 const COUNTRY_ORDER = ["usa", "canada", "mexico"];
@@ -115,16 +116,14 @@ function FanZoneCard({
       ? distanceKm(userLat, userLng, zone.lat, zone.lng)
       : null;
 
-  const entryColor = zone.entry.toLowerCase().startsWith("gratuita") || zone.entry.toLowerCase().startsWith("free")
-    ? "#00c97a"
-    : "#f59e0b";
-
   const registrationLabel =
     zone.entry.toLowerCase().includes("registro") || zone.entry.toLowerCase().includes("register")
       ? t.home.register
       : t.home.moreInfo;
 
-  const countryName = t.home.countries[zone.country as keyof typeof t.home.countries] ?? zone.country;
+  const countryName = zone.country === "bay_area"
+    ? (t.home.countries["usa"] ?? "EE.UU.")
+    : (t.home.countries[zone.country as keyof typeof t.home.countries] ?? zone.country);
 
   return (
     <div
@@ -163,8 +162,8 @@ function FanZoneCard({
           {dist != null && (
             <span style={{
               fontSize: "11px",
-              color: "#ff8c00",
-              background: "rgba(255,140,0,0.1)",
+              color: "#e63946",
+              background: "rgba(230,57,70,0.1)",
               borderRadius: "10px",
               padding: "1px 7px",
             }}>
@@ -180,46 +179,60 @@ function FanZoneCard({
         {/* Divisor */}
         <div style={{ height: "1px", background: "#142035", marginBottom: "10px" }} />
 
-        {/* Fechas + entrada */}
+        {/* Fechas */}
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "10px" }}>
           <span style={{ fontSize: "12px", color: "#8899bb" }}>
             📅 {translateField(zone.datesOpen, lang)}
-          </span>
-          <span style={{ fontSize: "12px", color: entryColor, fontWeight: 600 }}>
-            🎟 {translateField(zone.entry, lang)}
           </span>
         </div>
 
         {/* Notas */}
         {zone.notes && (
-          <div style={{ fontSize: "11px", color: "#6677aa", fontStyle: "italic", marginBottom: "10px" }}>
+          <div style={{ fontSize: "11px", color: "#ffffff", fontStyle: "italic", marginBottom: "10px" }}>
             {translateField(zone.notes, lang)}
           </div>
         )}
 
-        {/* Badges food / alcohol / amenities */}
-        {(zone.alcohol != null || zone.food || zone.amenities) && (
+        {/* Badges minimalistas */}
+        {zone.status === "coming_soon" ? (
+          <div style={{ display: "flex", marginBottom: "10px" }}>
+            <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(30,60,120,0.4)", border: "1px solid rgba(100,150,255,0.25)", color: "#8aabdd", whiteSpace: "nowrap" }}>
+              🔜 Próximamente
+            </span>
+          </div>
+        ) : (zone.food || zone.alcohol != null || zone.entry) && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
+            {zone.food && (
+              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#c8d8f0", whiteSpace: "nowrap" }}>
+                🍔 Comida disponible
+              </span>
+            )}
             {zone.alcohol === true && (
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(0,200,100,0.1)", border: "1px solid rgba(0,200,100,0.3)", color: "#00c864", whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#c8d8f0", whiteSpace: "nowrap" }}>
                 🍺 Alcohol disponible
               </span>
             )}
             {zone.alcohol === false && (
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(100,100,100,0.1)", border: "1px solid rgba(100,100,100,0.3)", color: "#8899bb", whiteSpace: "nowrap" }}>
+              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#c8d8f0", whiteSpace: "nowrap" }}>
                 🚫 Sin alcohol
               </span>
             )}
-            {zone.food && (
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,140,0,0.1)", border: "1px solid rgba(255,140,0,0.3)", color: "#ff8c00", whiteSpace: "nowrap" }}>
-                🍔 {zone.food}
-              </span>
-            )}
-            {zone.amenities && (
-              <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(0,150,255,0.1)", border: "1px solid rgba(0,150,255,0.3)", color: "#0096ff", whiteSpace: "nowrap" }}>
-                ✨ {zone.amenities}
-              </span>
-            )}
+            {zone.entry && (() => {
+              const e = zone.entry.toLowerCase();
+              const isGratis = e.includes("gratis") || e.includes("gratuita") || e.includes("free");
+              const isRegistro = e.includes("registro") || e.includes("rsvp") || e.includes("ticket");
+              const priceMatch = zone.entry.match(/\$[\d,.]+/);
+              let label: string;
+              if (priceMatch) label = `📋 Requiere registro · ${priceMatch[0]}`;
+              else if (isGratis && isRegistro) label = "📋 Gratis · Requiere registro";
+              else if (isGratis) label = "💰 Gratis · Walk-in";
+              else label = `📋 Requiere registro`;
+              return (
+                <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#c8d8f0", whiteSpace: "nowrap" }}>
+                  {label}
+                </span>
+              );
+            })()}
           </div>
         )}
 
@@ -232,7 +245,7 @@ function FanZoneCard({
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               style={{
-                background: "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                background: "linear-gradient(135deg, #c1222f, #e63946)",
                 color: "#fff",
                 fontSize: "12px",
                 fontWeight: 700,
@@ -308,7 +321,7 @@ export default function HomePage() {
   const [zones, setZones] = useState<FanZone[]>([]);
   const [loading, setLoading] = useState(true);
   const [tournamentFilter, setTournamentFilter] = useState<"champions_2026" | "world_cup_2026">("champions_2026");
-  const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico" | null>(null);
+  const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico" | "bay_area" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "fan_festival" | "fan_zone">("all");
   const [tooltip, setTooltip] = useState<"fan_festival" | "fan_zone" | null>(null);
@@ -435,8 +448,8 @@ export default function HomePage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "2px",
-              background: "rgba(255,140,0,0.08)",
-              border: "1px solid rgba(255,140,0,0.2)",
+              background: "rgba(230,57,70,0.08)",
+              border: "1px solid rgba(230,57,70,0.2)",
               borderRadius: "12px",
               padding: "6px 12px",
             }}>
@@ -447,12 +460,13 @@ export default function HomePage() {
                 { v: countdown.mins, l: t.home.countdownUnits.mins },
                 { v: countdown.secs, l: t.home.countdownUnits.secs },
               ].map(({ v, l }) => (
-                <span key={l} style={{ fontSize: "13px", color: "#ff8c00", fontWeight: 700, fontVariantNumeric: "tabular-nums", marginRight: "4px" }}>
+                <span key={l} style={{ fontSize: "13px", color: "#e63946", fontWeight: 700, fontVariantNumeric: "tabular-nums", marginRight: "4px" }}>
                   {String(v).padStart(2, "0")}{l}
                 </span>
               ))}
             </div>
           )}
+
         </div>
 
         {/* ── Sección 2: Selector de torneo ── */}
@@ -477,7 +491,7 @@ export default function HomePage() {
                     padding: "11px 28px",
                     fontSize: "15px",
                     fontWeight: 700,
-                    color: "#ff8c00",
+                    color: "#e63946",
                     border: "none",
                     cursor: "pointer",
                     width: "100%",
@@ -575,8 +589,8 @@ export default function HomePage() {
           <button
             onClick={() => setTypeFilter("all")}
             style={{
-              background: typeFilter === "all" ? "#ff8c00" : "#0a1220",
-              border: `1px solid ${typeFilter === "all" ? "#ff8c00" : "#142035"}`,
+              background: typeFilter === "all" ? "#e63946" : "#0a1220",
+              border: `1px solid ${typeFilter === "all" ? "#e63946" : "#142035"}`,
               color: typeFilter === "all" ? "#fff" : "#8899bb",
               borderRadius: "20px",
               padding: "7px 16px",
@@ -595,8 +609,8 @@ export default function HomePage() {
               <button
                 onClick={() => setTypeFilter("fan_festival")}
                 style={{
-                  background: typeFilter === "fan_festival" ? "#ff8c00" : "#0a1220",
-                  border: `1px solid ${typeFilter === "fan_festival" ? "#ff8c00" : "#142035"}`,
+                  background: typeFilter === "fan_festival" ? "#e63946" : "#0a1220",
+                  border: `1px solid ${typeFilter === "fan_festival" ? "#e63946" : "#142035"}`,
                   color: typeFilter === "fan_festival" ? "#fff" : "#8899bb",
                   borderRadius: "20px",
                   padding: "7px 16px",
@@ -652,8 +666,8 @@ export default function HomePage() {
               <button
                 onClick={() => setTypeFilter("fan_zone")}
                 style={{
-                  background: typeFilter === "fan_zone" ? "#ff8c00" : "#0a1220",
-                  border: `1px solid ${typeFilter === "fan_zone" ? "#ff8c00" : "#142035"}`,
+                  background: typeFilter === "fan_zone" ? "#e63946" : "#0a1220",
+                  border: `1px solid ${typeFilter === "fan_zone" ? "#e63946" : "#142035"}`,
                   color: typeFilter === "fan_zone" ? "#fff" : "#8899bb",
                   borderRadius: "20px",
                   padding: "7px 16px",
@@ -708,9 +722,10 @@ export default function HomePage() {
         {/* Fila 2: filtro por país */}
         <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
           {([
-            { key: "mexico", label: t.home.countryMexico },
-            { key: "usa",    label: t.home.countryUSA },
-            { key: "canada", label: t.home.countryCanada },
+            { key: "mexico",   label: t.home.countryMexico },
+            { key: "usa",      label: t.home.countryUSA },
+            { key: "canada",   label: t.home.countryCanada },
+            { key: "bay_area", label: "🌉 Bay Area" },
           ] as const).map(({ key, label }) => {
             const active = countryFilter === key;
             return (
@@ -718,8 +733,8 @@ export default function HomePage() {
                 key={key}
                 onClick={() => { setCountryFilter(key); setSearchQuery(""); }}
                 style={{
-                  background: active ? "#ff8c00" : "#0a1220",
-                  border: `1px solid ${active ? "#ff8c00" : "#142035"}`,
+                  background: active ? "#e63946" : "#0a1220",
+                  border: `1px solid ${active ? "#e63946" : "#142035"}`,
                   color: active ? "#fff" : "#8899bb",
                   borderRadius: "20px",
                   padding: "7px 16px",

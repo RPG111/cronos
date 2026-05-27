@@ -210,7 +210,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
               padding: "9px",
               borderRadius: "10px",
               border: "none",
-              background: mode === m ? "#ff8c00" : "transparent",
+              background: mode === m ? "#e63946" : "transparent",
               color: mode === m ? "#fff" : "#8899bb",
               fontWeight: mode === m ? 700 : 500,
               fontSize: "13px",
@@ -302,7 +302,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
           <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
           <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
             ¿Ya tienes cuenta?{" "}
-            <a href="/auth/login" style={{ color: "#ff8c00", textDecoration: "none" }}>Inicia sesión aquí</a>
+            <a href="/auth/login" style={{ color: "#e63946", textDecoration: "none" }}>Inicia sesión aquí</a>
           </p>
         </form>
       )}
@@ -392,7 +392,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
           <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
           <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
             ¿Ya tienes cuenta?{" "}
-            <a href="/auth/login" style={{ color: "#ff8c00", textDecoration: "none" }}>Inicia sesión aquí</a>
+            <a href="/auth/login" style={{ color: "#e63946", textDecoration: "none" }}>Inicia sesión aquí</a>
           </p>
         </form>
       )}
@@ -426,7 +426,7 @@ function SubmitButton({ loading, label, loadingLabel, disabled }: { loading: boo
         width: "100%",
         padding: "14px",
         borderRadius: "20px",
-        background: isDisabled ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
+        background: isDisabled ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #e63946)",
         color: "#fff",
         border: "none",
         fontWeight: 800,
@@ -449,15 +449,15 @@ function ConsentCheckbox({ checked, onChange }: { checked: boolean; onChange: (v
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        style={{ marginTop: "2px", accentColor: "#ff8c00", flexShrink: 0, width: "16px", height: "16px" }}
+        style={{ marginTop: "2px", accentColor: "#e63946", flexShrink: 0, width: "16px", height: "16px" }}
       />
       <span style={{ fontSize: "12px", color: "#8899bb", lineHeight: "1.6" }}>
         {isEs ? "He leído y acepto la " : "I have read and agree to the "}
-        <a href="/privacy" style={{ color: "#ff8c00", textDecoration: "none" }}>
+        <a href="/privacy" style={{ color: "#e63946", textDecoration: "none" }}>
           {isEs ? "Política de Privacidad" : "Privacy Policy"}
         </a>
         {isEs ? " y los " : " and "}
-        <a href="/terms" style={{ color: "#ff8c00", textDecoration: "none" }}>
+        <a href="/terms" style={{ color: "#e63946", textDecoration: "none" }}>
           {isEs ? "Términos y Condiciones" : "Terms and Conditions"}
         </a>
       </span>

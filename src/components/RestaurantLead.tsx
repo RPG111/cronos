@@ -40,7 +40,7 @@ type SelectedEvent = { id: string; title: string; dateISO: string };
 const sectionLabel: React.CSSProperties = {
   fontSize: "10px",
   letterSpacing: "2px",
-  color: "#ff8c00",
+  color: "#e63946",
   textTransform: "uppercase",
   fontWeight: 700,
   marginBottom: "12px",
@@ -239,7 +239,7 @@ export default function RestaurantLead({
           {success ? (
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", padding: "32px 0", textAlign: "center" }}>
               <div style={{ fontSize: "48px" }}>🎉</div>
-              <p style={{ fontSize: "18px", fontWeight: 600, color: "#ff8c00" }}>¡Gracias! Te contactaremos pronto.</p>
+              <p style={{ fontSize: "18px", fontWeight: 600, color: "#e63946" }}>¡Gracias! Te contactaremos pronto.</p>
               <p style={{ fontSize: "13px", color: "#3a5070" }}>Cerrando…</p>
             </div>
           ) : (
@@ -336,7 +336,7 @@ export default function RestaurantLead({
                   style={{
                     width: "100%",
                     background: "#0d1528",
-                    border: `1px solid ${eventsOpen ? "#ff8c0050" : "#142035"}`,
+                    border: `1px solid ${eventsOpen ? "#e6394650" : "#142035"}`,
                     borderRadius: "11px",
                     padding: "12px 14px",
                     color: selectedEvents.length ? "#c8d8f0" : "#3a5070",
@@ -361,7 +361,7 @@ export default function RestaurantLead({
                     <span style={{
                       background: "rgba(255,140,0,0.1)",
                       border: "1px solid rgba(255,140,0,0.25)",
-                      color: "#ff8c00",
+                      color: "#e63946",
                       fontSize: "11px",
                       fontWeight: 600,
                       padding: "4px 12px",
@@ -398,7 +398,7 @@ export default function RestaurantLead({
                           onClick={() => toggleEvent(ev)}
                           style={{
                             background: selected ? "#1a1200" : "#0d1528",
-                            border: `1px solid ${selected ? "#ff8c0050" : "#142035"}`,
+                            border: `1px solid ${selected ? "#e6394650" : "#142035"}`,
                             borderRadius: "10px",
                             padding: "8px 6px",
                             cursor: "pointer",
@@ -412,7 +412,7 @@ export default function RestaurantLead({
                               position: "absolute",
                               top: "4px",
                               right: "5px",
-                              color: "#ff8c00",
+                              color: "#e63946",
                               fontSize: "10px",
                               fontWeight: 700,
                             }}>✓</span>
@@ -425,7 +425,7 @@ export default function RestaurantLead({
                           </div>
                           <div style={{ marginTop: "6px", display: "flex", flexDirection: "column", gap: "2px" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "3px", justifyContent: "center" }}>
-                              <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#ff8c00", flexShrink: 0 }} />
+                              <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#e63946", flexShrink: 0 }} />
                               <span style={{ fontSize: "8px", color: "#c8d8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "40px" }}>
                                 {ev.homeTeam}
                               </span>
@@ -501,7 +501,7 @@ export default function RestaurantLead({
                     flex: 2,
                     borderRadius: "14px",
                     border: "none",
-                    background: saving ? "#1a2a1a" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                    background: saving ? "#1a2a1a" : "linear-gradient(135deg, #ff6b00, #e63946)",
                     padding: "13px",
                     fontWeight: 800,
                     color: "#ffffff",

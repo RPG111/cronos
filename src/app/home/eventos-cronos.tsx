@@ -355,7 +355,7 @@ export default function HomePage() {
               <div style={{ background: "#0a1220", borderRadius: "18px", overflow: "hidden" }}>
                 {/* Top: liga + venue pill */}
                 <div style={{ padding: "14px 14px 8px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#ff8c00", fontWeight: 700, textTransform: "uppercase" }}>
+                  <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#e63946", fontWeight: 700, textTransform: "uppercase" }}>
                     {ev.league}
                   </div>
                   <div style={{ background: "#0d1528", border: "1px solid #142035", borderRadius: "10px", padding: "4px 10px", textAlign: "right" }}>
@@ -378,7 +378,7 @@ export default function HomePage() {
                 {/* Barra de capacidad */}
                 <div style={{ margin: "0 14px 4px", background: "#0d1a2e", borderRadius: "3px", height: "3px" }}>
                   <div style={{
-                    background: "linear-gradient(90deg, #ff6b00, #ff8c00)",
+                    background: "linear-gradient(90deg, #ff6b00, #e63946)",
                     width: Math.min((c.total / ev.capacity) * 100, 100) + "%",
                     height: "100%",
                     borderRadius: "3px",
@@ -408,12 +408,12 @@ export default function HomePage() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 32px 1fr", alignItems: "center", padding: "10px 14px" }}>
                       <div style={{ textAlign: "left" }}>
                         <div style={{ color: "#e8f0ff", fontSize: "12px" }}>{aLabel}</div>
-                        <div style={{ color: "#ff8c00", fontSize: "22px", fontWeight: 700 }}>{c.a}</div>
+                        <div style={{ color: "#e63946", fontSize: "22px", fontWeight: 700 }}>{c.a}</div>
                       </div>
                       <div style={{ textAlign: "center", color: "#8899bb", fontSize: "10px", fontWeight: 700 }}>VS</div>
                       <div style={{ textAlign: "right" }}>
                         <div style={{ color: "#e8f0ff", fontSize: "12px" }}>{bLabel}</div>
-                        <div style={{ color: "#ff8c00", fontSize: "22px", fontWeight: 700 }}>{c.b}</div>
+                        <div style={{ color: "#e63946", fontSize: "22px", fontWeight: 700 }}>{c.b}</div>
                       </div>
                     </div>
                   );
@@ -425,7 +425,7 @@ export default function HomePage() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px" }}>
                       <button
                         onClick={() => openReserveModal(ev)}
-                        style={{ background: "linear-gradient(135deg, #ff6b00, #ff8c00)", border: "none", color: "#fff", fontSize: "17px", fontWeight: 800, padding: "12px", borderRadius: "24px", cursor: "pointer", width: "100%" }}
+                        style={{ background: "linear-gradient(135deg, #ff6b00, #e63946)", border: "none", color: "#fff", fontSize: "17px", fontWeight: 800, padding: "12px", borderRadius: "24px", cursor: "pointer", width: "100%" }}
                       >
                         Reservar lugar
                       </button>
@@ -452,7 +452,7 @@ export default function HomePage() {
                           });
                           setQrOpen(true);
                         }}
-                        style={{ background: "linear-gradient(135deg, #ff6b00, #ff8c00)", border: "none", color: "#fff", fontSize: "15px", fontWeight: 800, padding: "12px 24px", borderRadius: "24px", cursor: "pointer", whiteSpace: "nowrap" }}
+                        style={{ background: "linear-gradient(135deg, #ff6b00, #e63946)", border: "none", color: "#fff", fontSize: "15px", fontWeight: 800, padding: "12px 24px", borderRadius: "24px", cursor: "pointer", whiteSpace: "nowrap" }}
                       >
                         Ver QR
                       </button>
@@ -507,7 +507,7 @@ export default function HomePage() {
               <button onClick={() => setOpen(false)} disabled={saving} style={{ flex: 1, position: "relative", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#e8f0ff", fontSize: "14px", fontWeight: 600, padding: "12px", borderRadius: "24px", cursor: "pointer", overflow: "hidden", whiteSpace: "nowrap" }}>
                 Cancelar
               </button>
-              <button onClick={confirmReserve} disabled={saving} style={{ flex: 1, background: "linear-gradient(135deg, #ff6b00, #ff8c00)", color: "#fff", fontSize: "14px", fontWeight: 800, padding: "12px", borderRadius: "24px", border: "none", cursor: "pointer", opacity: saving ? 0.6 : 1 }}>
+              <button onClick={confirmReserve} disabled={saving} style={{ flex: 1, background: "linear-gradient(135deg, #ff6b00, #e63946)", color: "#fff", fontSize: "14px", fontWeight: 800, padding: "12px", borderRadius: "24px", border: "none", cursor: "pointer", opacity: saving ? 0.6 : 1 }}>
                 {saving ? "Guardando..." : "Confirmar reserva"}
               </button>
             </div>

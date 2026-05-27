@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 
 export type FanZoneType = "fan_festival" | "fan_zone";
-export type FanZoneCountry = "usa" | "canada" | "mexico";
+export type FanZoneCountry = "usa" | "canada" | "mexico" | "bay_area";
 export type FanZoneEntry = string; // "Gratuita" | "Requiere registro" | "Ticketed" | etc.
 
 export type FanZone = {
@@ -38,6 +38,7 @@ export type FanZone = {
   alcohol: boolean | null;
   amenities: string | null;
   active: boolean;
+  status?: "active" | "coming_soon";
   updatedAt?: Timestamp;
 };
 
@@ -63,7 +64,7 @@ const COUNTRY_ORDER: FanZoneCountry[] = ["usa", "canada", "mexico"];
 function sortByCountryAndCity(a: FanZone, b: FanZone): number {
   const ci = COUNTRY_ORDER.indexOf(a.country) - COUNTRY_ORDER.indexOf(b.country);
   if (ci !== 0) return ci;
-  return a.city.localeCompare(b.city);
+  return (a.city ?? "").localeCompare(b.city ?? "");
 }
 
 // Carga todos los fan zones activos (página pública)

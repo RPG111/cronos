@@ -10,12 +10,12 @@ import {
   createFanZone,
   updateFanZone,
   migrateTournamentField,
-  seedChampionsFanZones,
   type FanZone,
   type FanZoneType,
   type FanZoneCountry,
 } from "@/lib/firestore/fanzones";
 import { seedWorldTeams } from "@/lib/firestore/seedTeams";
+import { seedFanZones, seedNewFanZones, seedCdmxGdlFanZones, seedCanadaFanZones, seedBayAreaNewFanZones, patchFanZones } from "@/lib/firestore/seedFanZones";
 import {
   collection,
   doc,
@@ -690,8 +690,7 @@ export default function AdminPage() {
   // Migration + Champions seed
   const [migrating, setMigrating] = useState(false);
   const [migrateMsg, setMigrateMsg] = useState("");
-  const [seedingChampions, setSeedingChampions] = useState(false);
-  const [championsMsg, setChampionsMsg] = useState("");
+  const [syncingFZ, setSyncingFZ] = useState(false);
 
   // Users list
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -1057,31 +1056,34 @@ export default function AdminPage() {
                   {migrating ? "Migrando…" : "Migrar: tournament"}
                 </button>
                 <button
-                  disabled={seedingChampions}
+                  disabled={syncingFZ}
                   onClick={async () => {
-                    setSeedingChampions(true);
-                    setChampionsMsg("");
+                    setSyncingFZ(true);
                     try {
-                      await seedChampionsFanZones();
-                      setChampionsMsg("✓ 3 eventos Champions League agregados");
+                      await seedFanZones();
+                      await seedNewFanZones();
+                      await seedCdmxGdlFanZones();
+                      await seedCanadaFanZones();
+                      await seedBayAreaNewFanZones();
+                      await patchFanZones();
+                      alert("Fan Zones sincronizados correctamente");
                       fetchFanZones();
                     } catch (e: any) {
-                      setChampionsMsg(`Error: ${e?.message ?? "desconocido"}`);
+                      alert(`Error: ${e?.message ?? "desconocido"}`);
                     } finally {
-                      setSeedingChampions(false);
+                      setSyncingFZ(false);
                     }
                   }}
                   className="rounded-lg border border-purple-500/40 bg-purple-900/30 px-3 py-1 text-xs text-purple-300 hover:bg-purple-900/60 transition disabled:opacity-50"
                 >
-                  {seedingChampions ? "Agregando…" : "Seed Champions"}
+                  {syncingFZ ? "Sincronizando…" : "🔄 Sincronizar Fan Zones"}
                 </button>
               </div>
             </div>
 
-            {(migrateMsg || championsMsg) && (
-              <div className="mb-3 space-y-1">
-                {migrateMsg && <p className="text-xs text-blue-300">{migrateMsg}</p>}
-                {championsMsg && <p className="text-xs text-purple-300">{championsMsg}</p>}
+            {migrateMsg && (
+              <div className="mb-3">
+                <p className="text-xs text-blue-300">{migrateMsg}</p>
               </div>
             )}
 

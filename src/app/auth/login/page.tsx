@@ -192,7 +192,7 @@ export default function LoginPage() {
                 padding: "9px",
                 borderRadius: "10px",
                 border: "none",
-                background: mode === m ? "#ff8c00" : "transparent",
+                background: mode === m ? "#e63946" : "transparent",
                 color: mode === m ? "#fff" : "#8899bb",
                 fontWeight: mode === m ? 700 : 500,
                 fontSize: "13px",
@@ -261,7 +261,7 @@ export default function LoginPage() {
                 width: "100%",
                 padding: "14px",
                 borderRadius: "24px",
-                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #e63946)",
                 color: "#fff",
                 border: "none",
                 fontWeight: 800,
@@ -282,7 +282,7 @@ export default function LoginPage() {
 
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
               ¿No tienes cuenta?{" "}
-              <a href="/auth/register" style={{ color: "#ff8c00", textDecoration: "none" }}>
+              <a href="/auth/register" style={{ color: "#e63946", textDecoration: "none" }}>
                 Regístrate aquí
               </a>
             </p>
@@ -345,7 +345,7 @@ export default function LoginPage() {
                 width: "100%",
                 padding: "14px",
                 borderRadius: "24px",
-                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #e63946)",
                 color: "#fff",
                 border: "none",
                 fontWeight: 800,
@@ -359,7 +359,7 @@ export default function LoginPage() {
 
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
               ¿No tienes cuenta?{" "}
-              <a href="/auth/register" style={{ color: "#ff8c00", textDecoration: "none" }}>
+              <a href="/auth/register" style={{ color: "#e63946", textDecoration: "none" }}>
                 Regístrate aquí
               </a>
             </p>

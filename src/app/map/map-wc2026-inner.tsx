@@ -12,7 +12,7 @@ import type { FanZone } from "../../lib/firestore/fanzones";
 const orangeIcon = L.divIcon({
   html: `<div style="
     width:14px;height:14px;
-    background:#ff8c00;
+    background:#e63946;
     border-radius:50%;
     border:2px solid #fff;
     box-shadow:0 2px 8px rgba(0,0,0,0.5);
@@ -147,7 +147,7 @@ function PopupContent({ zone }: { zone: FanZone }) {
             target="_blank"
             rel="noopener noreferrer"
             style={{
-              background: "linear-gradient(135deg, #ff6b00, #ff8c00)",
+              background: "linear-gradient(135deg, #ff6b00, #e63946)",
               color: "#fff",
               fontSize: "11px",
               fontWeight: 700,

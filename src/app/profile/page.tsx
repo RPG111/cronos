@@ -111,7 +111,7 @@ export default function ProfilePage() {
               style={{
                 display: "inline-block",
                 marginTop: "12px",
-                background: "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                background: "linear-gradient(135deg, #ff6b00, #e63946)",
                 color: "#fff",
                 fontSize: "12px",
                 fontWeight: 700,
@@ -137,7 +137,7 @@ export default function ProfilePage() {
           <div style={{ marginTop: "20px", display: "grid", gap: "12px" }}>
             <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px" }}>
               <p style={{ margin: 0, color: "#8899bb", fontSize: "13px" }}>
-                <Link href="/auth/login" style={{ color: "#ff8c00", textDecoration: "underline" }}>
+                <Link href="/auth/login" style={{ color: "#e63946", textDecoration: "underline" }}>
                   {t.profile.loginLink}
                 </Link>{" "}
                 {t.profile.loginToViewAndSave}
@@ -150,7 +150,7 @@ export default function ProfilePage() {
               </h2>
               <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px" }}>
                 <p style={{ margin: 0, color: "#8899bb", fontSize: "13px" }}>
-                  <Link href="/auth/login" style={{ color: "#ff8c00", textDecoration: "underline" }}>
+                  <Link href="/auth/login" style={{ color: "#e63946", textDecoration: "underline" }}>
                     {t.profile.loginLink}
                   </Link>{" "}
                   {t.profile.loginToSave}
@@ -179,18 +179,18 @@ export default function ProfilePage() {
                   <div style={{ background: "#0a1220", borderRadius: "18px", padding: "16px" }}>
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
                       <div>
-                        <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#ff8c00", fontWeight: 700, textTransform: "uppercase" }}>
+                        <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#e63946", fontWeight: 700, textTransform: "uppercase" }}>
                           {it.event.league}
                         </div>
                         <div style={{ marginTop: "4px", fontSize: "18px", fontWeight: 700, color: "#e8f0ff" }}>
                           {it.event.title}
                         </div>
-                        <span style={{ marginTop: "8px", display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,140,0,0.12)", border: "1px solid rgba(255,140,0,0.3)", color: "#ff8c00", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "20px" }}>
+                        <span style={{ marginTop: "8px", display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,140,0,0.12)", border: "1px solid rgba(255,140,0,0.3)", color: "#e63946", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "20px" }}>
                           {t.profile.goingFor}{it.team}
                         </span>
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
-                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#ff8c00" }}>{it.event.venueName}</div>
+                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#e63946" }}>{it.event.venueName}</div>
                         <div style={{ fontSize: "11px", color: "#8899bb", marginTop: "2px" }}>
                           {it.event.address}<br />{it.event.city}
                         </div>
@@ -242,7 +242,7 @@ export default function ProfilePage() {
               ) : savedZones.length === 0 ? (
                 <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", color: "#8899bb", fontSize: "13px" }}>
                   {t.profile.noSavedFanZones}{" "}
-                  <Link href="/home" style={{ color: "#ff8c00", textDecoration: "underline" }}>
+                  <Link href="/home" style={{ color: "#e63946", textDecoration: "underline" }}>
                     {t.profile.exploreEvents}
                   </Link>
                 </div>
@@ -269,7 +269,7 @@ export default function ProfilePage() {
                           href={zone.registrationUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ background: "linear-gradient(135deg,#ff6b00,#ff8c00)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "6px 12px", borderRadius: "16px", textDecoration: "none" }}
+                          style={{ background: "linear-gradient(135deg,#ff6b00,#e63946)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "6px 12px", borderRadius: "16px", textDecoration: "none" }}
                         >
                           {t.profile.registerLabel}
                         </a>

@@ -67,7 +67,7 @@ export default function EventDetails({
     return (
       <main style={pageBg}>
         <div style={{ maxWidth: "560px", margin: "0 auto", padding: "32px 20px" }}>
-          <Link href="/home" style={{ color: "#ff8c00", textDecoration: "none" }}>
+          <Link href="/home" style={{ color: "#e63946", textDecoration: "none" }}>
             ← Volver
           </Link>
           <h1 style={{ marginTop: "16px", fontSize: "24px", fontWeight: 700, color: "#e8f0ff" }}>
@@ -142,20 +142,20 @@ function EventDetailsContent({ ev }: { ev: CronosEvent }) {
     <main style={pageBg}>
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "32px 20px" }}>
         <Link href="/home" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px", marginBottom: "16px" }}>
-          <span style={{ color: "#ff8c00" }}>←</span>
+          <span style={{ color: "#e63946" }}>←</span>
           <span style={{ color: "#8899bb" }}>Volver</span>
         </Link>
 
         <h1 style={{ fontSize: "28px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>
           {ev.title}
         </h1>
-        <div style={{ marginTop: "6px", fontSize: "11px", letterSpacing: "2px", textTransform: "uppercase", color: "#ff8c00" }}>
+        <div style={{ marginTop: "6px", fontSize: "11px", letterSpacing: "2px", textTransform: "uppercase", color: "#e63946" }}>
           {ev.league}
         </div>
 
         <div style={{ marginTop: "12px", color: "#8899bb" }}>{fmtDateLong(ev.dateISO)}</div>
         <div style={{ marginTop: "4px", color: "#8899bb" }}>
-          <span style={{ fontWeight: 600, color: "#ff8c00" }}>{ev.venueName}</span>
+          <span style={{ fontWeight: 600, color: "#e63946" }}>{ev.venueName}</span>
           <br />
           {ev.address}, {ev.city}
         </div>
@@ -221,7 +221,7 @@ function EventDetailsContent({ ev }: { ev: CronosEvent }) {
             href={links.google}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ flex: 1, textAlign: "center", padding: "14px", borderRadius: "24px", textDecoration: "none", background: "linear-gradient(135deg, #ff6b00, #ff8c00)", color: "#fff", fontWeight: 800, border: "none", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+            style={{ flex: 1, textAlign: "center", padding: "14px", borderRadius: "24px", textDecoration: "none", background: "linear-gradient(135deg, #ff6b00, #e63946)", color: "#fff", fontWeight: 800, border: "none", display: "inline-flex", alignItems: "center", justifyContent: "center" }}
           >
             Google Maps
           </a>

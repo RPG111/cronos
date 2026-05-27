@@ -182,7 +182,7 @@ export default function FanZoneDetailPage() {
             <button
               onClick={() => router.push("/home")}
               style={{
-                background: "#ff8c00",
+                background: "#e63946",
                 border: "none",
                 color: "#fff",
                 fontSize: "14px",
@@ -252,7 +252,7 @@ export default function FanZoneDetailPage() {
 
             {/* Fechas + entrada */}
             <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", marginBottom: "16px" }}>
-              <div style={{ fontSize: "13px", color: "#8899bb", marginBottom: "8px" }}>
+              <div style={{ fontSize: "13px", color: "#ffffff", marginBottom: "8px" }}>
                 📅 {translateField(zone.datesOpen, lang)}
               </div>
               <div style={{ fontSize: "13px", color: entryColor, fontWeight: 600 }}>
@@ -269,7 +269,7 @@ export default function FanZoneDetailPage() {
                 padding: "16px",
                 marginBottom: "16px",
                 fontSize: "12px",
-                color: "#6677aa",
+                color: "#ffffff",
                 fontStyle: "italic",
                 lineHeight: 1.6,
               }}>
@@ -277,29 +277,36 @@ export default function FanZoneDetailPage() {
               </div>
             )}
 
-            {/* Badges food / alcohol / amenities */}
+            {/* ¿Qué encontrarás? */}
             {(zone.alcohol != null || zone.food || zone.amenities) && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "16px" }}>
-                {zone.alcohol === true && (
-                  <span style={{ fontSize: "11px", padding: "3px 10px", borderRadius: "20px", background: "rgba(0,200,100,0.1)", border: "1px solid rgba(0,200,100,0.3)", color: "#00c864", whiteSpace: "nowrap" }}>
-                    🍺 Alcohol disponible
-                  </span>
-                )}
-                {zone.alcohol === false && (
-                  <span style={{ fontSize: "11px", padding: "3px 10px", borderRadius: "20px", background: "rgba(100,100,100,0.1)", border: "1px solid rgba(100,100,100,0.3)", color: "#8899bb", whiteSpace: "nowrap" }}>
-                    🚫 Sin alcohol
-                  </span>
-                )}
-                {zone.food && (
-                  <span style={{ fontSize: "11px", padding: "3px 10px", borderRadius: "20px", background: "rgba(255,140,0,0.1)", border: "1px solid rgba(255,140,0,0.3)", color: "#ff8c00", whiteSpace: "nowrap" }}>
-                    🍔 {zone.food}
-                  </span>
-                )}
-                {zone.amenities && (
-                  <span style={{ fontSize: "11px", padding: "3px 10px", borderRadius: "20px", background: "rgba(0,150,255,0.1)", border: "1px solid rgba(0,150,255,0.3)", color: "#0096ff", whiteSpace: "nowrap" }}>
-                    ✨ {zone.amenities}
-                  </span>
-                )}
+              <div style={{ marginBottom: "16px" }}>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#8899bb", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>
+                  {lang === "en" ? "What to expect?" : "¿Qué encontrarás?"}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {zone.food && (
+                    <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🍔 {lang === "en" ? "Food" : "Comida"}</div>
+                      <div style={{ fontSize: "13px", color: "#8899bb", lineHeight: 1.5 }}>{zone.food}</div>
+                    </div>
+                  )}
+                  {zone.alcohol != null && (
+                    <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🍺 {lang === "en" ? "Drinks" : "Bebidas"}</div>
+                      <div style={{ fontSize: "13px", color: "#8899bb", lineHeight: 1.5 }}>
+                        {zone.alcohol
+                          ? (lang === "en" ? "Alcoholic beverages available" : "Bebidas alcohólicas disponibles")
+                          : (lang === "en" ? "Alcohol-free event" : "Evento sin alcohol")}
+                      </div>
+                    </div>
+                  )}
+                  {zone.amenities && (
+                    <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🪩 {lang === "en" ? "Amenities" : "Amenidades"}</div>
+                      <div style={{ fontSize: "13px", color: "#8899bb", lineHeight: 1.5 }}>{zone.amenities}</div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
@@ -333,7 +340,7 @@ export default function FanZoneDetailPage() {
                   style={{
                     display: "block",
                     textAlign: "center",
-                    background: "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                    background: "linear-gradient(135deg, #c1222f, #e63946)",
                     color: "#fff",
                     fontSize: "14px",
                     fontWeight: 700,

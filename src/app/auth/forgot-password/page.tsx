@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
               border: "1px solid rgba(255,140,0,0.2)",
               borderRadius: "12px",
               padding: "16px",
-              color: "#ff8c00",
+              color: "#e63946",
               fontSize: "14px",
             }}>
               ✓ Revisa tu bandeja de entrada y sigue las instrucciones.
@@ -129,7 +129,7 @@ export default function ForgotPasswordPage() {
             <a
               href="/auth/login"
               style={{
-                color: "#ff8c00",
+                color: "#e63946",
                 fontSize: "14px",
                 textDecoration: "none",
                 fontWeight: 600,
@@ -173,7 +173,7 @@ export default function ForgotPasswordPage() {
                 width: "100%",
                 padding: "14px",
                 borderRadius: "20px",
-                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #ff8c00)",
+                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #e63946)",
                 color: "#fff",
                 border: "none",
                 fontWeight: 800,
