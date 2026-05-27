@@ -2,32 +2,55 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Fan Zones — cualquiera puede leer, nadie puede escribir desde el cliente
+    // Fan Zones del Mundial — lectura pública, escritura solo desde servidor
     match /wc2026_fanzones/{document=**} {
       allow read: if true;
       allow write: if false;
     }
 
-    // Usuarios — solo el propio usuario puede leer y escribir sus datos
+    // Eventos deportivos — lectura pública
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if false;
+
+      // Asistentes — solo usuarios autenticados pueden escribir su propio registro
+      match /attendees/{userId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Picks/quinielas — solo el propio usuario
+      match /picks/{userId} {
+        allow read: if true;
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // Usuarios — solo el propio usuario
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
 
-    // Favoritos del usuario
-    match /users/{userId}/savedFanZones/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Restaurant leads — cualquiera puede crear, nadie puede leer desde cliente
-    match /restaurant_leads/{document=**} {
-      allow create: if true;
-      allow read, write: if false;
+      // Fan zones guardadas
+      match /savedFanZones/{document=**} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // Teams — solo lectura pública
     match /teams/{document=**} {
       allow read: if true;
       allow write: if false;
+    }
+
+    // Leads de restaurantes — cualquiera puede crear (nombre correcto)
+    match /leads_restaurants/{document=**} {
+      allow create: if true;
+      allow read, write: if false;
+    }
+
+    // Bookings — solo usuarios autenticados
+    match /bookings/{document=**} {
+      allow read, write: if request.auth != null;
     }
 
     // Todo lo demás — denegado

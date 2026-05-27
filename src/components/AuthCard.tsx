@@ -14,7 +14,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "10px",
   letterSpacing: "2px",
-  color: "#8899bb",
+  color: "#8a7a50",
   fontWeight: 700,
   textTransform: "uppercase",
   marginBottom: "6px",
@@ -22,8 +22,8 @@ const labelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "#0d1528",
-  border: "1px solid #142035",
+  background: "#150e1e",
+  border: "1px solid #2a2010",
   borderRadius: "12px",
   padding: "12px 14px",
   color: "#c8d8f0",
@@ -166,8 +166,8 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
 
   return (
     <div style={{
-      background: "#0a1220",
-      border: "1px solid #142035",
+      background: "#110f1a",
+      border: "1px solid #2a2010",
       borderRadius: "24px",
       padding: "32px 28px",
       maxWidth: "420px",
@@ -181,7 +181,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
       {/* Subtítulo */}
       <p style={{
         textAlign: "center",
-        color: "#8899bb",
+        color: "#8a7a50",
         fontSize: "12px",
         letterSpacing: "2px",
         textTransform: "uppercase",
@@ -195,8 +195,8 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
         gap: "6px",
-        background: "#0a1220",
-        border: "1px solid #142035",
+        background: "#110f1a",
+        border: "1px solid #2a2010",
         borderRadius: "14px",
         padding: "4px",
         marginBottom: "24px",
@@ -210,8 +210,8 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
               padding: "9px",
               borderRadius: "10px",
               border: "none",
-              background: mode === m ? "#e63946" : "transparent",
-              color: mode === m ? "#fff" : "#8899bb",
+              background: mode === m ? "#f0c040" : "transparent",
+              color: mode === m ? "#fff" : "#8a7a50",
               fontWeight: mode === m ? 700 : 500,
               fontSize: "13px",
               cursor: "pointer",
@@ -250,7 +250,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowPassword((v) => !v)}
-                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a3d28", fontSize: "13px", padding: "4px" }}>
                 {showPassword ? "Ocultar" : "Ver"}
               </button>
             </div>
@@ -268,14 +268,14 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowConfirm((v) => !v)}
-                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a3d28", fontSize: "13px", padding: "4px" }}>
                 {showConfirm ? "Ocultar" : "Ver"}
               </button>
             </div>
           </div>
 
           <div>
-            <label style={labelStyle}>Equipo favorito <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+            <label style={labelStyle}>Equipo favorito <span style={{ color: "#4a3d28", fontWeight: 400 }}>(opcional)</span></label>
             <TeamsAutocomplete
               value={favoriteTeam}
               onChange={setFavoriteTeam}
@@ -284,7 +284,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
           </div>
 
           <div>
-            <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+            <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#4a3d28", fontWeight: 400 }}>(opcional)</span></label>
             <input
               type="text"
               value={city}
@@ -302,7 +302,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
           <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
           <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
             ¿Ya tienes cuenta?{" "}
-            <a href="/auth/login" style={{ color: "#e63946", textDecoration: "none" }}>Inicia sesión aquí</a>
+            <a href="/auth/login" style={{ color: "#f0c040", textDecoration: "none" }}>Inicia sesión aquí</a>
           </p>
         </form>
       )}
@@ -340,7 +340,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowPhonePassword((v) => !v)}
-                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a3d28", fontSize: "13px", padding: "4px" }}>
                 {showPhonePassword ? "Ocultar" : "Ver"}
               </button>
             </div>
@@ -358,14 +358,14 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowPhoneConfirm((v) => !v)}
-                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#3a5070", fontSize: "13px", padding: "4px" }}>
+                style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a3d28", fontSize: "13px", padding: "4px" }}>
                 {showPhoneConfirm ? "Ocultar" : "Ver"}
               </button>
             </div>
           </div>
 
           <div>
-            <label style={labelStyle}>Equipo favorito <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+            <label style={labelStyle}>Equipo favorito <span style={{ color: "#4a3d28", fontWeight: 400 }}>(opcional)</span></label>
             <TeamsAutocomplete
               value={phoneTeam}
               onChange={setPhoneTeam}
@@ -374,7 +374,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
           </div>
 
           <div>
-            <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#3a5070", fontWeight: 400 }}>(opcional)</span></label>
+            <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#4a3d28", fontWeight: 400 }}>(opcional)</span></label>
             <input
               type="text"
               value={city}
@@ -392,7 +392,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
           <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
           <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
             ¿Ya tienes cuenta?{" "}
-            <a href="/auth/login" style={{ color: "#e63946", textDecoration: "none" }}>Inicia sesión aquí</a>
+            <a href="/auth/login" style={{ color: "#f0c040", textDecoration: "none" }}>Inicia sesión aquí</a>
           </p>
         </form>
       )}
@@ -408,7 +408,7 @@ function ErrorBox({ msg }: { msg: string }) {
       borderRadius: "10px",
       padding: "10px 14px",
       fontSize: "13px",
-      color: "#ff6b6b",
+      color: "#f0c040",
       margin: 0,
     }}>
       {msg}
@@ -426,7 +426,7 @@ function SubmitButton({ loading, label, loadingLabel, disabled }: { loading: boo
         width: "100%",
         padding: "14px",
         borderRadius: "20px",
-        background: isDisabled ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #e63946)",
+        background: isDisabled ? "#1a1200" : "linear-gradient(135deg, #f0c040, #f0c040)",
         color: "#fff",
         border: "none",
         fontWeight: 800,
@@ -449,15 +449,15 @@ function ConsentCheckbox({ checked, onChange }: { checked: boolean; onChange: (v
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        style={{ marginTop: "2px", accentColor: "#e63946", flexShrink: 0, width: "16px", height: "16px" }}
+        style={{ marginTop: "2px", accentColor: "#f0c040", flexShrink: 0, width: "16px", height: "16px" }}
       />
-      <span style={{ fontSize: "12px", color: "#8899bb", lineHeight: "1.6" }}>
+      <span style={{ fontSize: "12px", color: "#8a7a50", lineHeight: "1.6" }}>
         {isEs ? "He leído y acepto la " : "I have read and agree to the "}
-        <a href="/privacy" style={{ color: "#e63946", textDecoration: "none" }}>
+        <a href="/privacy" style={{ color: "#f0c040", textDecoration: "none" }}>
           {isEs ? "Política de Privacidad" : "Privacy Policy"}
         </a>
         {isEs ? " y los " : " and "}
-        <a href="/terms" style={{ color: "#e63946", textDecoration: "none" }}>
+        <a href="/terms" style={{ color: "#f0c040", textDecoration: "none" }}>
           {isEs ? "Términos y Condiciones" : "Terms and Conditions"}
         </a>
       </span>

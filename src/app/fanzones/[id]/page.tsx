@@ -142,7 +142,7 @@ export default function FanZoneDetailPage() {
       : t.home.moreInfo;
 
   return (
-    <main style={{ minHeight: "100dvh", background: "#080c14" }}>
+    <main style={{ minHeight: "100dvh", background: "#09080f" }}>
       <Header
         onOpenLead={() => setLeadOpen(true)}
         isLoggedIn={!!uid}
@@ -158,7 +158,7 @@ export default function FanZoneDetailPage() {
           style={{
             background: "none",
             border: "none",
-            color: "#8899bb",
+            color: "#8a7a50",
             fontSize: "14px",
             cursor: "pointer",
             padding: "0 0 20px 0",
@@ -169,20 +169,20 @@ export default function FanZoneDetailPage() {
         </button>
 
         {loading && (
-          <div style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", paddingTop: "60px" }}>
+          <div style={{ color: "#8a7a50", fontSize: "13px", textAlign: "center", paddingTop: "60px" }}>
             {t.home.loading}
           </div>
         )}
 
         {notFound && !loading && (
           <div style={{ textAlign: "center", paddingTop: "60px" }}>
-            <p style={{ color: "#8899bb", fontSize: "15px", marginBottom: "20px" }}>
+            <p style={{ color: "#8a7a50", fontSize: "15px", marginBottom: "20px" }}>
               {t.detail.notFound}
             </p>
             <button
               onClick={() => router.push("/home")}
               style={{
-                background: "#e63946",
+                background: "#f0c040",
                 border: "none",
                 color: "#fff",
                 fontSize: "14px",
@@ -211,18 +211,18 @@ export default function FanZoneDetailPage() {
                   size={20}
                   strokeWidth={1.5}
                   fill={isSaved ? "#f59e0b" : "none"}
-                  stroke={isSaved ? "#f59e0b" : "#8899bb"}
+                  stroke={isSaved ? "#f59e0b" : "#8a7a50"}
                 />
               </button>
             </div>
 
             {/* Nombre */}
-            <h1 style={{ fontSize: "24px", fontWeight: 700, color: "#e8f0ff", margin: "0 0 8px 0", lineHeight: 1.3 }}>
+            <h1 style={{ fontSize: "24px", fontWeight: 700, color: "#f0f4ff", margin: "0 0 8px 0", lineHeight: 1.3 }}>
               {zone.name}
             </h1>
 
             {/* Ciudad + país */}
-            <div style={{ fontSize: "14px", color: "#8899bb", marginBottom: "20px" }}>
+            <div style={{ fontSize: "14px", color: "#8a7a50", marginBottom: "20px" }}>
               {COUNTRY_FLAG[zone.country]} {zone.city},{" "}
               {t.home.countries[zone.country as keyof typeof t.home.countries] ?? zone.country}
             </div>
@@ -241,7 +241,7 @@ export default function FanZoneDetailPage() {
             </div>
 
             {/* Venue + dirección */}
-            <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", marginBottom: "16px" }}>
+            <div style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "16px", marginBottom: "16px" }}>
               <div style={{ fontSize: "13px", fontWeight: 600, color: "#c8d8f0", marginBottom: "4px" }}>
                 {zone.venue}
               </div>
@@ -251,7 +251,7 @@ export default function FanZoneDetailPage() {
             </div>
 
             {/* Fechas + entrada */}
-            <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", marginBottom: "16px" }}>
+            <div style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "16px", marginBottom: "16px" }}>
               <div style={{ fontSize: "13px", color: "#ffffff", marginBottom: "8px" }}>
                 📅 {translateField(zone.datesOpen, lang)}
               </div>
@@ -263,8 +263,8 @@ export default function FanZoneDetailPage() {
             {/* Notas */}
             {zone.notes && (
               <div style={{
-                background: "#0a1220",
-                border: "1px solid #142035",
+                background: "#110f1a",
+                border: "1px solid #2a2010",
                 borderRadius: "16px",
                 padding: "16px",
                 marginBottom: "16px",
@@ -280,20 +280,20 @@ export default function FanZoneDetailPage() {
             {/* ¿Qué encontrarás? */}
             {(zone.alcohol != null || zone.food || zone.amenities) && (
               <div style={{ marginBottom: "16px" }}>
-                <div style={{ fontSize: "13px", fontWeight: 700, color: "#8899bb", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>
+                <div style={{ fontSize: "13px", fontWeight: 700, color: "#8a7a50", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>
                   {lang === "en" ? "What to expect?" : "¿Qué encontrarás?"}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   {zone.food && (
                     <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                       <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🍔 {lang === "en" ? "Food" : "Comida"}</div>
-                      <div style={{ fontSize: "13px", color: "#8899bb", lineHeight: 1.5 }}>{zone.food}</div>
+                      <div style={{ fontSize: "13px", color: "#8a7a50", lineHeight: 1.5 }}>{zone.food}</div>
                     </div>
                   )}
                   {zone.alcohol != null && (
                     <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                       <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🍺 {lang === "en" ? "Drinks" : "Bebidas"}</div>
-                      <div style={{ fontSize: "13px", color: "#8899bb", lineHeight: 1.5 }}>
+                      <div style={{ fontSize: "13px", color: "#8a7a50", lineHeight: 1.5 }}>
                         {zone.alcohol
                           ? (lang === "en" ? "Alcoholic beverages available" : "Bebidas alcohólicas disponibles")
                           : (lang === "en" ? "Alcohol-free event" : "Evento sin alcohol")}
@@ -303,7 +303,7 @@ export default function FanZoneDetailPage() {
                   {zone.amenities && (
                     <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                       <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🪩 {lang === "en" ? "Amenities" : "Amenidades"}</div>
-                      <div style={{ fontSize: "13px", color: "#8899bb", lineHeight: 1.5 }}>{zone.amenities}</div>
+                      <div style={{ fontSize: "13px", color: "#8a7a50", lineHeight: 1.5 }}>{zone.amenities}</div>
                     </div>
                   )}
                 </div>
@@ -340,7 +340,7 @@ export default function FanZoneDetailPage() {
                   style={{
                     display: "block",
                     textAlign: "center",
-                    background: "linear-gradient(135deg, #c1222f, #e63946)",
+                    background: "linear-gradient(135deg, #f0c040, #f0c040)",
                     color: "#fff",
                     fontSize: "14px",
                     fontWeight: 700,
@@ -362,8 +362,8 @@ export default function FanZoneDetailPage() {
                     display: "block",
                     textAlign: "center",
                     background: "none",
-                    border: "1px solid #142035",
-                    color: "#8899bb",
+                    border: "1px solid #2a2010",
+                    color: "#8a7a50",
                     fontSize: "14px",
                     fontWeight: 600,
                     padding: "12px 20px",

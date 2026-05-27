@@ -131,7 +131,7 @@ function FanZoneCard({
       onClick={() => onCardClick(zone.id)}
       style={{ marginBottom: "12px", cursor: "pointer" }}
     >
-      <div style={{ background: "#0a1220", borderRadius: "18px", padding: "14px" }}>
+      <div style={{ background: "#110f1a", borderRadius: "18px", padding: "14px" }}>
         {/* Top: badge + estrella */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px", marginBottom: "8px" }}>
           <TypeBadge type={zone.type} t={t} />
@@ -144,26 +144,26 @@ function FanZoneCard({
               size={17}
               strokeWidth={1.5}
               fill={isSaved ? "#f59e0b" : "none"}
-              stroke={isSaved ? "#f59e0b" : "#8899bb"}
+              stroke={isSaved ? "#f59e0b" : "#8a7a50"}
             />
           </button>
         </div>
 
         {/* Nombre */}
-        <div style={{ fontSize: "16px", fontWeight: 700, color: "#e8f0ff", marginBottom: "4px", lineHeight: 1.3 }}>
+        <div style={{ fontSize: "16px", fontWeight: 700, color: "#f0f4ff", marginBottom: "4px", lineHeight: 1.3 }}>
           {zone.name}
         </div>
 
         {/* Ciudad + país + distancia */}
         <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
-          <span style={{ fontSize: "13px", color: "#8899bb" }}>
+          <span style={{ fontSize: "13px", color: "#8a7a50" }}>
             {COUNTRY_FLAG[zone.country]} {zone.city}, {countryName}
           </span>
           {dist != null && (
             <span style={{
               fontSize: "11px",
-              color: "#e63946",
-              background: "rgba(230,57,70,0.1)",
+              color: "#f0c040",
+              background: "rgba(240,192,64,0.1)",
               borderRadius: "10px",
               padding: "1px 7px",
             }}>
@@ -177,11 +177,11 @@ function FanZoneCard({
         <div style={{ fontSize: "11px", color: "#4a5a7a", marginBottom: "10px" }}>{zone.address}</div>
 
         {/* Divisor */}
-        <div style={{ height: "1px", background: "#142035", marginBottom: "10px" }} />
+        <div style={{ height: "1px", background: "#2a2010", marginBottom: "10px" }} />
 
         {/* Fechas */}
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "10px" }}>
-          <span style={{ fontSize: "12px", color: "#8899bb" }}>
+          <span style={{ fontSize: "12px", color: "#8a7a50" }}>
             📅 {translateField(zone.datesOpen, lang)}
           </span>
         </div>
@@ -245,7 +245,7 @@ function FanZoneCard({
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               style={{
-                background: "linear-gradient(135deg, #c1222f, #e63946)",
+                background: "linear-gradient(135deg, #f0c040, #f0c040)",
                 color: "#fff",
                 fontSize: "12px",
                 fontWeight: 700,
@@ -299,7 +299,7 @@ function FanZoneCard({
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
               style={{
-                color: "#8899bb",
+                color: "#8a7a50",
                 fontSize: "11px",
                 textDecoration: "underline",
                 padding: "4px 0",
@@ -423,7 +423,7 @@ export default function HomePage() {
   }
 
   return (
-    <main style={{ minHeight: "100dvh", background: "#080c14" }}>
+    <main style={{ minHeight: "100dvh", background: "#09080f" }}>
       <Header
         onOpenLead={() => setLeadOpen(true)}
         isLoggedIn={!!uid}
@@ -435,10 +435,10 @@ export default function HomePage() {
 
         {/* ── Sección 1: Banner ── */}
         <div style={{ marginBottom: "28px" }}>
-          <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#e8f0ff", margin: 0, lineHeight: 1.3 }}>
+          <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#f0f4ff", margin: 0, lineHeight: 1.3 }}>
             {t.home.bannerTitle}
           </h2>
-          <p style={{ color: "#8899bb", marginTop: "6px", fontSize: "13px" }}>
+          <p style={{ color: "#8a7a50", marginTop: "6px", fontSize: "13px" }}>
             {t.home.bannerSubtitle}
           </p>
 
@@ -448,19 +448,19 @@ export default function HomePage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "2px",
-              background: "rgba(230,57,70,0.08)",
-              border: "1px solid rgba(230,57,70,0.2)",
+              background: "rgba(240,192,64,0.08)",
+              border: "1px solid rgba(240,192,64,0.2)",
               borderRadius: "12px",
               padding: "6px 12px",
             }}>
-              <span style={{ fontSize: "11px", color: "#8899bb", marginRight: "6px" }}>{t.home.countdownLabel}</span>
+              <span style={{ fontSize: "11px", color: "#8a7a50", marginRight: "6px" }}>{t.home.countdownLabel}</span>
               {[
                 { v: countdown.days, l: t.home.countdownUnits.days },
                 { v: countdown.hours, l: t.home.countdownUnits.hours },
                 { v: countdown.mins, l: t.home.countdownUnits.mins },
                 { v: countdown.secs, l: t.home.countdownUnits.secs },
               ].map(({ v, l }) => (
-                <span key={l} style={{ fontSize: "13px", color: "#e63946", fontWeight: 700, fontVariantNumeric: "tabular-nums", marginRight: "4px" }}>
+                <span key={l} style={{ fontSize: "13px", color: "#f0c040", fontWeight: 700, fontVariantNumeric: "tabular-nums", marginRight: "4px" }}>
                   {String(v).padStart(2, "0")}{l}
                 </span>
               ))}
@@ -486,34 +486,31 @@ export default function HomePage() {
                     setSearchQuery("");
                   }}
                   style={active ? {
-                    background: "#0a1220",
+                    background: "#110f1a",
                     borderRadius: "20px",
                     padding: "11px 28px",
                     fontSize: "15px",
                     fontWeight: 700,
-                    color: "#e63946",
+                    color: "#f0c040",
                     border: "none",
                     cursor: "pointer",
                     width: "100%",
                   } : {
-                    background: "#080c14",
+                    background: "#09080f",
                     borderRadius: "20px",
                     padding: "11px 28px",
                     fontSize: "15px",
                     fontWeight: 500,
-                    color: "#8899bb",
+                    color: "#8a7a50",
                     border: "none",
                     cursor: "pointer",
                     width: "100%",
                   }}
                 >
                   <span style={{
-                    background: "linear-gradient(180deg, #ffffff 0%, #a8c0d6 25%, #c8d8e8 45%, #6888aa 60%, #9ab0c8 75%, #d0e0f0 88%, #7890a8 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                    backgroundClip: "text",
+                    color: "#ffffff",
                     fontWeight: 700,
-                    ...(active ? { filter: "drop-shadow(0 0 6px rgba(160,200,255,0.4))" } : { opacity: 0.6 }),
+                    ...(active ? {} : { opacity: 0.6 }),
                   }}>
                     {label}
                   </span>
@@ -540,9 +537,9 @@ export default function HomePage() {
             className="fz-search"
             style={{
               width: "100%",
-              background: "#0a1220",
-              border: "1px solid #142035",
-              color: "#e8f0ff",
+              background: "#110f1a",
+              border: "1px solid #2a2010",
+              color: "#f0f4ff",
               borderRadius: "12px",
               padding: "10px 40px 10px 14px",
               fontSize: "14px",
@@ -589,9 +586,9 @@ export default function HomePage() {
           <button
             onClick={() => setTypeFilter("all")}
             style={{
-              background: typeFilter === "all" ? "#e63946" : "#0a1220",
-              border: `1px solid ${typeFilter === "all" ? "#e63946" : "#142035"}`,
-              color: typeFilter === "all" ? "#fff" : "#8899bb",
+              background: typeFilter === "all" ? "#f0c040" : "#110f1a",
+              border: `1px solid ${typeFilter === "all" ? "#f0c040" : "#2a2010"}`,
+              color: typeFilter === "all" ? "#fff" : "#8a7a50",
               borderRadius: "20px",
               padding: "7px 16px",
               fontSize: "13px",
@@ -609,9 +606,9 @@ export default function HomePage() {
               <button
                 onClick={() => setTypeFilter("fan_festival")}
                 style={{
-                  background: typeFilter === "fan_festival" ? "#e63946" : "#0a1220",
-                  border: `1px solid ${typeFilter === "fan_festival" ? "#e63946" : "#142035"}`,
-                  color: typeFilter === "fan_festival" ? "#fff" : "#8899bb",
+                  background: typeFilter === "fan_festival" ? "#f0c040" : "#110f1a",
+                  border: `1px solid ${typeFilter === "fan_festival" ? "#f0c040" : "#2a2010"}`,
+                  color: typeFilter === "fan_festival" ? "#fff" : "#8a7a50",
                   borderRadius: "20px",
                   padding: "7px 16px",
                   fontSize: "13px",
@@ -646,7 +643,7 @@ export default function HomePage() {
                 left: 0,
                 zIndex: 100,
                 background: "#0e1a2e",
-                border: "1px solid #1e3050",
+                border: "1px solid #3d2f18",
                 borderRadius: "12px",
                 padding: "12px 14px",
                 fontSize: "12px",
@@ -666,9 +663,9 @@ export default function HomePage() {
               <button
                 onClick={() => setTypeFilter("fan_zone")}
                 style={{
-                  background: typeFilter === "fan_zone" ? "#e63946" : "#0a1220",
-                  border: `1px solid ${typeFilter === "fan_zone" ? "#e63946" : "#142035"}`,
-                  color: typeFilter === "fan_zone" ? "#fff" : "#8899bb",
+                  background: typeFilter === "fan_zone" ? "#f0c040" : "#110f1a",
+                  border: `1px solid ${typeFilter === "fan_zone" ? "#f0c040" : "#2a2010"}`,
+                  color: typeFilter === "fan_zone" ? "#fff" : "#8a7a50",
                   borderRadius: "20px",
                   padding: "7px 16px",
                   fontSize: "13px",
@@ -703,7 +700,7 @@ export default function HomePage() {
                 left: 0,
                 zIndex: 100,
                 background: "#0e1a2e",
-                border: "1px solid #1e3050",
+                border: "1px solid #3d2f18",
                 borderRadius: "12px",
                 padding: "12px 14px",
                 fontSize: "12px",
@@ -733,9 +730,9 @@ export default function HomePage() {
                 key={key}
                 onClick={() => { setCountryFilter(key); setSearchQuery(""); }}
                 style={{
-                  background: active ? "#e63946" : "#0a1220",
-                  border: `1px solid ${active ? "#e63946" : "#142035"}`,
-                  color: active ? "#fff" : "#8899bb",
+                  background: active ? "#f0c040" : "#110f1a",
+                  border: `1px solid ${active ? "#f0c040" : "#2a2010"}`,
+                  color: active ? "#fff" : "#8a7a50",
                   borderRadius: "20px",
                   padding: "7px 16px",
                   fontSize: "13px",
@@ -752,11 +749,11 @@ export default function HomePage() {
         </>}
 
         {loading ? (
-          <div style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>
+          <div style={{ color: "#8a7a50", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>
             {t.home.loading}
           </div>
         ) : filtered.length === 0 ? (
-          <div style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>
+          <div style={{ color: "#8a7a50", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>
             {t.home.noEvents}
           </div>
         ) : (

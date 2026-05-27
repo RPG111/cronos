@@ -1,20 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-  --bg-primary: #080c14;
-  --bg-card: #0a1220;
-  --bg-input: #0d1528;
-  --border-default: #142035;
-  --border-hover: #1e3050;
-  --accent-cyan: #00c9ff;
-  --accent-green: #00ff9d;
-  --text-primary: #e8f0ff;
-  --text-secondary: #c8d8f0;
-  --text-muted: #3a5070;
-  --gradient-main: linear-gradient(135deg, #00e88a, #00c9ff);
-  --gradient-logo: linear-gradient(135deg, #a8edea, #00c9ff, #7b8fff, #00ff9d);
+  --bg-primary: #09080f;
+  --bg-card: #110f1a;
+  --bg-input: #150e1e;
+  --border-default: #2a2010;
+  --border-hover: #3d2f18;
+  --accent-gold: #f0c040;
+  --accent-white: #ffffff;
+  --text-primary: #f0f4ff;
+  --text-secondary: #8a7a50;
+  --text-muted: #4a3d28;
 }
 
 @theme inline {
@@ -37,6 +33,20 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+}
+
+@media (min-width: 768px) {
+  body {
+    display: flex;
+    justify-content: center;
+    background-color: #040810;
+  }
+
+  #__next, main, .main-content {
+    max-width: 480px;
+    width: 100%;
+    background-color: #09080f;
+  }
 }
 
 .btn-primary-cronos {
@@ -72,7 +82,7 @@ body {
 }
 
 .input-cronos:focus {
-  border-color: rgba(0, 201, 255, 0.4);
+  border-color: rgba(240,192,64, 0.4);
 }
 
 .logo-cronos {
@@ -106,7 +116,7 @@ body {
   position: relative;
   overflow: hidden;
   border-radius: 24px;
-  background: linear-gradient(135deg, #ff6b00, #e63946) !important;
+  background: linear-gradient(135deg, #f0c040, #f0c040) !important;
   color: #fff !important;
   font-size: 14px;
 }
@@ -129,7 +139,7 @@ body {
   border-radius: 24px;
   background: rgba(200, 200, 200, 0.04);
   border: 1px solid rgba(200, 200, 200, 0.15);
-  color: #e8f0ff;
+  color: #f0f4ff;
   font-size: 14px;
   font-weight: 600;
   padding: 12px 20px;
@@ -172,3 +182,30 @@ body {
 .group:hover .neon-top { opacity: 1 !important; }
 .group:hover .neon-bottom { opacity: 0.7 !important; }
 .group:hover { background: rgba(192,192,192,0.1) !important; border-color: rgba(220,220,220,0.5) !important; }
+
+/* ── Leaflet — Cyber Gold theme ─────────────────────────────────────────── */
+.leaflet-popup-content-wrapper {
+  background: #110f1a;
+  border: 1px solid #2a2010;
+  border-radius: 10px;
+  color: #f0f4ff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.leaflet-popup-tip {
+  background: #110f1a;
+}
+.leaflet-popup-content {
+  color: #f0f4ff;
+  font-size: 13px;
+}
+.leaflet-popup-close-button {
+  color: #8a7a50 !important;
+}
+.leaflet-control-zoom a {
+  background: #110f1a !important;
+  color: #f0c040 !important;
+  border: 1px solid #2a2010 !important;
+}
+.leaflet-control-zoom a:hover {
+  background: #2a2010 !important;
+}

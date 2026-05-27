@@ -13,7 +13,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "10px",
   letterSpacing: "2px",
-  color: "#8899bb",
+  color: "#8a7a50",
   fontWeight: 700,
   textTransform: "uppercase",
   marginBottom: "6px",
@@ -21,8 +21,8 @@ const labelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "#0d1528",
-  border: "1px solid #142035",
+  background: "#150e1e",
+  border: "1px solid #2a2010",
   borderRadius: "11px",
   padding: "12px 14px",
   color: "#c8d8f0",
@@ -127,7 +127,7 @@ export default function LoginPage() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "#080c14",
+      background: "#09080f",
     }}>
       {/* Fondo */}
       <img
@@ -148,8 +148,8 @@ export default function LoginPage() {
       <div style={{
         position: "relative",
         zIndex: 10,
-        background: "#0a1220",
-        border: "1px solid #142035",
+        background: "#110f1a",
+        border: "1px solid #2a2010",
         borderRadius: "24px",
         padding: "32px 28px",
         maxWidth: "420px",
@@ -163,7 +163,7 @@ export default function LoginPage() {
         {/* Subtítulo */}
         <p style={{
           textAlign: "center",
-          color: "#8899bb",
+          color: "#8a7a50",
           fontSize: "12px",
           letterSpacing: "2px",
           textTransform: "uppercase",
@@ -177,8 +177,8 @@ export default function LoginPage() {
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: "6px",
-          background: "#0a1220",
-          border: "1px solid #142035",
+          background: "#110f1a",
+          border: "1px solid #2a2010",
           borderRadius: "14px",
           padding: "4px",
           marginBottom: "24px",
@@ -192,8 +192,8 @@ export default function LoginPage() {
                 padding: "9px",
                 borderRadius: "10px",
                 border: "none",
-                background: mode === m ? "#e63946" : "transparent",
-                color: mode === m ? "#fff" : "#8899bb",
+                background: mode === m ? "#f0c040" : "transparent",
+                color: mode === m ? "#fff" : "#8a7a50",
                 fontWeight: mode === m ? 700 : 500,
                 fontSize: "13px",
                 cursor: "pointer",
@@ -242,7 +242,7 @@ export default function LoginPage() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#3a5070",
+                    color: "#4a3d28",
                     fontSize: "13px",
                     padding: "4px",
                   }}
@@ -261,7 +261,7 @@ export default function LoginPage() {
                 width: "100%",
                 padding: "14px",
                 borderRadius: "24px",
-                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #e63946)",
+                background: loading ? "#1a1200" : "linear-gradient(135deg, #f0c040, #f0c040)",
                 color: "#fff",
                 border: "none",
                 fontWeight: 800,
@@ -275,14 +275,14 @@ export default function LoginPage() {
 
             <a
               href="/auth/forgot-password"
-              style={{ color: "#8899bb", fontSize: "13px", textAlign: "center", textDecoration: "none" }}
+              style={{ color: "#8a7a50", fontSize: "13px", textAlign: "center", textDecoration: "none" }}
             >
               ¿Olvidaste tu contraseña?
             </a>
 
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
               ¿No tienes cuenta?{" "}
-              <a href="/auth/register" style={{ color: "#e63946", textDecoration: "none" }}>
+              <a href="/auth/register" style={{ color: "#f0c040", textDecoration: "none" }}>
                 Regístrate aquí
               </a>
             </p>
@@ -326,7 +326,7 @@ export default function LoginPage() {
                     background: "none",
                     border: "none",
                     cursor: "pointer",
-                    color: "#3a5070",
+                    color: "#4a3d28",
                     fontSize: "13px",
                     padding: "4px",
                   }}
@@ -345,7 +345,7 @@ export default function LoginPage() {
                 width: "100%",
                 padding: "14px",
                 borderRadius: "24px",
-                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #e63946)",
+                background: loading ? "#1a1200" : "linear-gradient(135deg, #f0c040, #f0c040)",
                 color: "#fff",
                 border: "none",
                 fontWeight: 800,
@@ -359,7 +359,7 @@ export default function LoginPage() {
 
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
               ¿No tienes cuenta?{" "}
-              <a href="/auth/register" style={{ color: "#e63946", textDecoration: "none" }}>
+              <a href="/auth/register" style={{ color: "#f0c040", textDecoration: "none" }}>
                 Regístrate aquí
               </a>
             </p>
@@ -378,7 +378,7 @@ function ErrorBox({ msg }: { msg: string }) {
       borderRadius: "10px",
       padding: "10px 14px",
       fontSize: "13px",
-      color: "#ff6b6b",
+      color: "#f0c040",
       margin: 0,
     }}>
       {msg}

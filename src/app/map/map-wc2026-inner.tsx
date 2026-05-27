@@ -12,7 +12,7 @@ import type { FanZone } from "../../lib/firestore/fanzones";
 const orangeIcon = L.divIcon({
   html: `<div style="
     width:14px;height:14px;
-    background:#e63946;
+    background:#f0c040;
     border-radius:50%;
     border:2px solid #fff;
     box-shadow:0 2px 8px rgba(0,0,0,0.5);
@@ -26,10 +26,10 @@ const orangeIcon = L.divIcon({
 const userIcon = L.divIcon({
   html: `<div style="
     width:12px;height:12px;
-    background:#3b82f6;
+    background:#f0c040;
     border-radius:50%;
     border:2px solid #fff;
-    box-shadow:0 0 0 4px rgba(59,130,246,0.25);
+    box-shadow:0 0 0 4px rgba(240,192,64,0.25);
   "></div>`,
   className: "",
   iconSize: [12, 12],
@@ -222,8 +222,8 @@ export default function MapWC2026Inner({ zones, userLat, userLng }: Props) {
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+        url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
       />
 
       {/* Actualiza la vista si llega la ubicación después del mount */}

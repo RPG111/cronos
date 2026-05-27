@@ -91,7 +91,7 @@ export default function ProfilePage() {
   }, [uid]);
 
   return (
-    <main style={{ minHeight: "100dvh", background: "#080c14" }}>
+    <main style={{ minHeight: "100dvh", background: "#09080f" }}>
       <div style={{ maxWidth: "560px", margin: "0 auto", padding: "32px 20px" }}>
 
         {/* ── Banner Bay Area — visible para todos ── */}
@@ -102,7 +102,7 @@ export default function ProfilePage() {
           padding: "16px",
           marginBottom: "28px",
         }}>
-          <div style={{ fontSize: "13px", fontWeight: 600, color: "#e8f0ff", lineHeight: 1.6 }}>
+          <div style={{ fontSize: "13px", fontWeight: 600, color: "#f0f4ff", lineHeight: 1.6 }}>
             {t.profile.bannerText}
           </div>
           {!authLoading && !uid && (
@@ -111,7 +111,7 @@ export default function ProfilePage() {
               style={{
                 display: "inline-block",
                 marginTop: "12px",
-                background: "linear-gradient(135deg, #ff6b00, #e63946)",
+                background: "linear-gradient(135deg, #f0c040, #f0c040)",
                 color: "#fff",
                 fontSize: "12px",
                 fontWeight: 700,
@@ -126,18 +126,18 @@ export default function ProfilePage() {
         </div>
 
         {/* ── Heading ── */}
-        <h1 style={{ fontSize: "28px", fontWeight: 700, color: "#e8f0ff", margin: "0 0 6px" }}>
+        <h1 style={{ fontSize: "28px", fontWeight: 700, color: "#f0f4ff", margin: "0 0 6px" }}>
           {t.profile.myProfile}
         </h1>
 
         {authLoading ? (
-          <div style={{ color: "#8899bb", fontSize: "13px", marginTop: "16px" }}>{t.profile.loading}</div>
+          <div style={{ color: "#8a7a50", fontSize: "13px", marginTop: "16px" }}>{t.profile.loading}</div>
         ) : !uid ? (
           /* ── Sin sesión ── */
           <div style={{ marginTop: "20px", display: "grid", gap: "12px" }}>
-            <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px" }}>
-              <p style={{ margin: 0, color: "#8899bb", fontSize: "13px" }}>
-                <Link href="/auth/login" style={{ color: "#e63946", textDecoration: "underline" }}>
+            <div style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "16px" }}>
+              <p style={{ margin: 0, color: "#8a7a50", fontSize: "13px" }}>
+                <Link href="/auth/login" style={{ color: "#f0c040", textDecoration: "underline" }}>
                   {t.profile.loginLink}
                 </Link>{" "}
                 {t.profile.loginToViewAndSave}
@@ -145,12 +145,12 @@ export default function ProfilePage() {
             </div>
 
             <div style={{ marginTop: "8px" }}>
-              <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#e8f0ff", margin: "0 0 10px" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#f0f4ff", margin: "0 0 10px" }}>
                 {t.profile.savedFanZones}
               </h2>
-              <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px" }}>
-                <p style={{ margin: 0, color: "#8899bb", fontSize: "13px" }}>
-                  <Link href="/auth/login" style={{ color: "#e63946", textDecoration: "underline" }}>
+              <div style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "16px" }}>
+                <p style={{ margin: 0, color: "#8a7a50", fontSize: "13px" }}>
+                  <Link href="/auth/login" style={{ color: "#f0c040", textDecoration: "underline" }}>
                     {t.profile.loginLink}
                   </Link>{" "}
                   {t.profile.loginToSave}
@@ -163,40 +163,40 @@ export default function ProfilePage() {
           <div style={{ marginTop: "20px", display: "grid", gap: "12px" }}>
 
             {/* Reservas Cronos */}
-            <p style={{ margin: 0, color: "#8899bb", fontSize: "13px" }}>{t.profile.confirmedReservations}</p>
+            <p style={{ margin: 0, color: "#8a7a50", fontSize: "13px" }}>{t.profile.confirmedReservations}</p>
 
             {resLoading ? (
-              <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", color: "#8899bb", fontSize: "13px" }}>
+              <div style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "16px", color: "#8a7a50", fontSize: "13px" }}>
                 {t.profile.loading}
               </div>
             ) : items.length === 0 ? (
-              <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", color: "#8899bb", fontSize: "13px" }}>
+              <div style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "16px", color: "#8a7a50", fontSize: "13px" }}>
                 {t.profile.noReservations}
               </div>
             ) : (
               items.map((it) => (
                 <div key={it.event.id} className="card-chrome-wrap">
-                  <div style={{ background: "#0a1220", borderRadius: "18px", padding: "16px" }}>
+                  <div style={{ background: "#110f1a", borderRadius: "18px", padding: "16px" }}>
                     <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px" }}>
                       <div>
-                        <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#e63946", fontWeight: 700, textTransform: "uppercase" }}>
+                        <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#f0c040", fontWeight: 700, textTransform: "uppercase" }}>
                           {it.event.league}
                         </div>
-                        <div style={{ marginTop: "4px", fontSize: "18px", fontWeight: 700, color: "#e8f0ff" }}>
+                        <div style={{ marginTop: "4px", fontSize: "18px", fontWeight: 700, color: "#f0f4ff" }}>
                           {it.event.title}
                         </div>
-                        <span style={{ marginTop: "8px", display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,140,0,0.12)", border: "1px solid rgba(255,140,0,0.3)", color: "#e63946", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "20px" }}>
+                        <span style={{ marginTop: "8px", display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(255,140,0,0.12)", border: "1px solid rgba(255,140,0,0.3)", color: "#f0c040", fontSize: "11px", fontWeight: 600, padding: "4px 10px", borderRadius: "20px" }}>
                           {t.profile.goingFor}{it.team}
                         </span>
                       </div>
                       <div style={{ textAlign: "right", flexShrink: 0 }}>
-                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#e63946" }}>{it.event.venueName}</div>
-                        <div style={{ fontSize: "11px", color: "#8899bb", marginTop: "2px" }}>
+                        <div style={{ fontSize: "13px", fontWeight: 600, color: "#f0c040" }}>{it.event.venueName}</div>
+                        <div style={{ fontSize: "11px", color: "#8a7a50", marginTop: "2px" }}>
                           {it.event.address}<br />{it.event.city}
                         </div>
                       </div>
                     </div>
-                    <div style={{ marginTop: "10px", fontSize: "12px", color: "#8899bb" }}>
+                    <div style={{ marginTop: "10px", fontSize: "12px", color: "#8a7a50" }}>
                       {fmtDateShort(it.event.dateISO)}
                     </div>
                     <div style={{ marginTop: "12px", display: "flex", gap: "10px" }}>
@@ -231,24 +231,24 @@ export default function ProfilePage() {
 
             {/* ── Mis Fan Zones guardados ── */}
             <div style={{ marginTop: "8px" }}>
-              <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#e8f0ff", margin: "0 0 12px" }}>
+              <h2 style={{ fontSize: "18px", fontWeight: 700, color: "#f0f4ff", margin: "0 0 12px" }}>
                 {t.profile.savedFanZones}
               </h2>
 
               {zonesLoading ? (
-                <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", color: "#8899bb", fontSize: "13px" }}>
+                <div style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "16px", color: "#8a7a50", fontSize: "13px" }}>
                   {t.profile.loading}
                 </div>
               ) : savedZones.length === 0 ? (
-                <div style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "16px", color: "#8899bb", fontSize: "13px" }}>
+                <div style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "16px", color: "#8a7a50", fontSize: "13px" }}>
                   {t.profile.noSavedFanZones}{" "}
-                  <Link href="/home" style={{ color: "#e63946", textDecoration: "underline" }}>
+                  <Link href="/home" style={{ color: "#f0c040", textDecoration: "underline" }}>
                     {t.profile.exploreEvents}
                   </Link>
                 </div>
               ) : (
                 savedZones.map((zone) => (
-                  <div key={zone.id} style={{ background: "#0a1220", border: "1px solid #142035", borderRadius: "16px", padding: "14px", marginBottom: "10px" }}>
+                  <div key={zone.id} style={{ background: "#110f1a", border: "1px solid #2a2010", borderRadius: "16px", padding: "14px", marginBottom: "10px" }}>
                     {zone.type === "fan_festival" ? (
                       <span style={{ display: "inline-block", background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.4)", color: "#f59e0b", fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "20px", marginBottom: "6px" }}>
                         {t.profile.fanFestivalBadge}
@@ -258,18 +258,18 @@ export default function ProfilePage() {
                         {t.profile.fanZoneBadge}
                       </span>
                     )}
-                    <div style={{ fontSize: "15px", fontWeight: 700, color: "#e8f0ff", marginBottom: "3px" }}>
+                    <div style={{ fontSize: "15px", fontWeight: 700, color: "#f0f4ff", marginBottom: "3px" }}>
                       {zone.name}
                     </div>
-                    <div style={{ fontSize: "12px", color: "#8899bb", marginBottom: "2px" }}>{zone.venue}</div>
-                    <div style={{ fontSize: "12px", color: "#8899bb", marginBottom: "10px" }}>📅 {zone.datesOpen}</div>
+                    <div style={{ fontSize: "12px", color: "#8a7a50", marginBottom: "2px" }}>{zone.venue}</div>
+                    <div style={{ fontSize: "12px", color: "#8a7a50", marginBottom: "10px" }}>📅 {zone.datesOpen}</div>
                     <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                       {zone.registrationUrl && (
                         <a
                           href={zone.registrationUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ background: "linear-gradient(135deg,#ff6b00,#e63946)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "6px 12px", borderRadius: "16px", textDecoration: "none" }}
+                          style={{ background: "linear-gradient(135deg,#f0c040,#f0c040)", color: "#fff", fontSize: "11px", fontWeight: 700, padding: "6px 12px", borderRadius: "16px", textDecoration: "none" }}
                         >
                           {t.profile.registerLabel}
                         </a>
@@ -287,7 +287,7 @@ export default function ProfilePage() {
                           href={zone.officialUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          style={{ color: "#8899bb", fontSize: "10px", textDecoration: "underline", padding: "6px 2px" }}
+                          style={{ color: "#8a7a50", fontSize: "10px", textDecoration: "underline", padding: "6px 2px" }}
                         >
                           {t.profile.officialSite}
                         </a>

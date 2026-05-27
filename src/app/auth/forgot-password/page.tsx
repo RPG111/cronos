@@ -9,7 +9,7 @@ const labelStyle: React.CSSProperties = {
   display: "block",
   fontSize: "10px",
   letterSpacing: "2px",
-  color: "#8899bb",
+  color: "#8a7a50",
   fontWeight: 700,
   textTransform: "uppercase",
   marginBottom: "6px",
@@ -17,8 +17,8 @@ const labelStyle: React.CSSProperties = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%",
-  background: "#0d1528",
-  border: "1px solid #142035",
+  background: "#150e1e",
+  border: "1px solid #2a2010",
   borderRadius: "12px",
   padding: "12px 14px",
   color: "#c8d8f0",
@@ -63,7 +63,7 @@ export default function ForgotPasswordPage() {
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      background: "#080c14",
+      background: "#09080f",
     }}>
       {/* Fondo */}
       <img
@@ -84,8 +84,8 @@ export default function ForgotPasswordPage() {
       <div style={{
         position: "relative",
         zIndex: 10,
-        background: "#0a1220",
-        border: "1px solid #142035",
+        background: "#110f1a",
+        border: "1px solid #2a2010",
         borderRadius: "24px",
         padding: "32px 28px",
         maxWidth: "420px",
@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
 
         <h1 style={{
           textAlign: "center",
-          color: "#e8f0ff",
+          color: "#f0f4ff",
           fontSize: "18px",
           fontWeight: 700,
           margin: "0 0 6px",
@@ -107,7 +107,7 @@ export default function ForgotPasswordPage() {
         </h1>
         <p style={{
           textAlign: "center",
-          color: "#8899bb",
+          color: "#8a7a50",
           fontSize: "13px",
           marginBottom: "28px",
         }}>
@@ -121,7 +121,7 @@ export default function ForgotPasswordPage() {
               border: "1px solid rgba(255,140,0,0.2)",
               borderRadius: "12px",
               padding: "16px",
-              color: "#e63946",
+              color: "#f0c040",
               fontSize: "14px",
             }}>
               ✓ Revisa tu bandeja de entrada y sigue las instrucciones.
@@ -129,7 +129,7 @@ export default function ForgotPasswordPage() {
             <a
               href="/auth/login"
               style={{
-                color: "#e63946",
+                color: "#f0c040",
                 fontSize: "14px",
                 textDecoration: "none",
                 fontWeight: 600,
@@ -159,7 +159,7 @@ export default function ForgotPasswordPage() {
                 borderRadius: "10px",
                 padding: "10px 14px",
                 fontSize: "13px",
-                color: "#ff6b6b",
+                color: "#f0c040",
                 margin: 0,
               }}>
                 {errorMsg}
@@ -173,7 +173,7 @@ export default function ForgotPasswordPage() {
                 width: "100%",
                 padding: "14px",
                 borderRadius: "20px",
-                background: loading ? "#1a1200" : "linear-gradient(135deg, #ff6b00, #e63946)",
+                background: loading ? "#1a1200" : "linear-gradient(135deg, #f0c040, #f0c040)",
                 color: "#fff",
                 border: "none",
                 fontWeight: 800,
@@ -189,7 +189,7 @@ export default function ForgotPasswordPage() {
               href="/auth/login"
               style={{
                 textAlign: "center",
-                color: "#8899bb",
+                color: "#8a7a50",
                 fontSize: "13px",
                 textDecoration: "none",
               }}

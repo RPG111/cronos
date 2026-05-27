@@ -82,11 +82,11 @@ type EventForm = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const STATUS_BADGE: Record<EventStatus, string> = {
-  draft:     "bg-zinc-700/80 text-zinc-300",
-  published: "bg-emerald-500/25 text-emerald-300",
-  live:      "bg-blue-500/25 text-blue-300",
-  closed:    "bg-red-500/25 text-red-300",
+const STATUS_BADGE: Record<EventStatus, { className: string; style: React.CSSProperties }> = {
+  draft:     { className: "bg-zinc-700/80 text-zinc-300", style: {} },
+  published: { className: "", style: { backgroundColor: '#110f1a', color: '#f0c040' } },
+  live:      { className: "", style: { backgroundColor: '#110f1a', color: '#f0c040' } },
+  closed:    { className: "bg-red-500/25 text-red-300", style: {} },
 };
 
 function isoToLocal(iso: string): string {
@@ -218,7 +218,7 @@ function EventModal({
     }
   }
 
-  const inputCls = "w-full rounded-lg border border-white/10 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500";
+  const inputCls = "w-full rounded-lg border border-white/10 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none";
   const labelCls = "block text-xs tracking-widest text-white/60 mb-1";
 
   return (
@@ -295,7 +295,8 @@ function EventModal({
               Cancelar
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-60">
+              className="flex-1 rounded-xl px-4 py-2 text-sm font-semibold text-white transition disabled:opacity-60"
+              style={{ backgroundColor: '#110f1a', color: '#f0c040' }}>
               {saving ? "Guardando…" : "Guardar"}
             </button>
           </div>
@@ -365,7 +366,7 @@ function FanZoneModal({
     }
   }
 
-  const inp = "w-full rounded-lg border border-white/10 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500";
+  const inp = "w-full rounded-lg border border-white/10 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none";
   const lbl = "block text-xs tracking-widest text-white/60 mb-1";
   const inpHighlight = "w-full rounded-lg border-2 border-yellow-400/60 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none focus:border-yellow-400";
 
@@ -519,7 +520,7 @@ function FanZoneModal({
                   checked={form.active}
                   onChange={(e) => setF("active", e.target.checked)}
                 />
-                <div className="h-6 w-11 rounded-full bg-zinc-600 peer-checked:bg-emerald-500 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-5" />
+                <div className="h-6 w-11 rounded-full bg-zinc-600 transition-colors after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-5" style={{ ...(form.active ? { backgroundColor: '#110f1a' } : {}) }} />
               </label>
               <span className="text-sm text-white/80">
                 {form.active ? "Activo — visible en la página pública" : "Inactivo — oculto del público"}
@@ -533,7 +534,8 @@ function FanZoneModal({
               Cancelar
             </button>
             <button type="submit" disabled={saving}
-              className="flex-1 rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600 transition disabled:opacity-60">
+              className="flex-1 rounded-xl px-4 py-2 text-sm font-semibold transition disabled:opacity-60"
+              style={{ backgroundColor: '#110f1a', color: '#f0c040' }}>
               {saving ? "Guardando…" : "Guardar"}
             </button>
           </div>
@@ -602,7 +604,7 @@ function AttendeesSection({ events }: { events: AdminEvent[] }) {
       <select
         value={selectedId}
         onChange={(e) => handleSelectEvent(e.target.value)}
-        className="w-full rounded-lg border border-white/10 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none focus:border-emerald-500"
+        className="w-full rounded-lg border border-white/10 bg-zinc-800/70 px-3 py-2 text-sm text-white outline-none"
       >
         <option value="">— Selecciona un evento —</option>
         {events.map((ev) => (
@@ -643,9 +645,10 @@ function AttendeesSection({ events }: { events: AdminEvent[] }) {
                       disabled={togglingUid === a.uid}
                       className={`rounded-lg px-2 py-1 text-xs font-semibold transition disabled:opacity-50 ${
                         a.paidQuiniela
-                          ? "bg-emerald-500/30 text-emerald-300 hover:bg-emerald-500/50"
+                          ? "hover:bg-zinc-700"
                           : "bg-zinc-700 text-zinc-400 hover:bg-zinc-600"
                       }`}
+                      style={a.paidQuiniela ? { backgroundColor: '#110f1a', color: '#f0c040' } : {}}
                     >
                       {a.paidQuiniela ? "Pagó ✓" : "Pendiente"}
                     </button>
@@ -920,7 +923,7 @@ export default function AdminPage() {
         <p className="mt-1 text-white/80">UID: <code>{uid}</code></p>
 
         <div className="mt-6 grid gap-4">
-          <Link href="/home" className="underline text-emerald-300">Volver al Home</Link>
+          <Link href="/home" className="underline" style={{ color: '#f0c040' }}>Volver al Home</Link>
 
           {/* ── Eventos ── */}
           <div className="rounded-xl border border-white/10 bg-black/50 p-4">
@@ -936,7 +939,8 @@ export default function AdminPage() {
                 </button>
                 <button
                   onClick={openNew}
-                  className="rounded-lg bg-emerald-500 px-3 py-1 text-xs font-semibold text-white hover:bg-emerald-600 transition"
+                  className="rounded-lg px-3 py-1 text-xs font-semibold transition"
+                  style={{ backgroundColor: '#110f1a', color: '#f0c040' }}
                 >
                   + Nuevo evento
                 </button>
@@ -976,7 +980,7 @@ export default function AdminPage() {
                           <div className="text-zinc-500 text-xs">{ev.city}</div>
                         </td>
                         <td className="py-2 pr-3 text-center">
-                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_BADGE[ev.status] ?? STATUS_BADGE.draft}`}>
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${(STATUS_BADGE[ev.status] ?? STATUS_BADGE.draft).className}`} style={(STATUS_BADGE[ev.status] ?? STATUS_BADGE.draft).style}>
                             {ev.status}
                           </span>
                         </td>
@@ -1051,7 +1055,8 @@ export default function AdminPage() {
                       setMigrating(false);
                     }
                   }}
-                  className="rounded-lg border border-blue-500/40 bg-blue-900/30 px-3 py-1 text-xs text-blue-300 hover:bg-blue-900/60 transition disabled:opacity-50"
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
                 >
                   {migrating ? "Migrando…" : "Migrar: tournament"}
                 </button>
@@ -1074,7 +1079,8 @@ export default function AdminPage() {
                       setSyncingFZ(false);
                     }
                   }}
-                  className="rounded-lg border border-purple-500/40 bg-purple-900/30 px-3 py-1 text-xs text-purple-300 hover:bg-purple-900/60 transition disabled:opacity-50"
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
                 >
                   {syncingFZ ? "Sincronizando…" : "🔄 Sincronizar Fan Zones"}
                 </button>
@@ -1083,7 +1089,7 @@ export default function AdminPage() {
 
             {migrateMsg && (
               <div className="mb-3">
-                <p className="text-xs text-blue-300">{migrateMsg}</p>
+                <p className="text-xs" style={{ color: '#f0c040' }}>{migrateMsg}</p>
               </div>
             )}
 
@@ -1115,7 +1121,7 @@ export default function AdminPage() {
                               Fan Festival
                             </span>
                           ) : (
-                            <span className="rounded-full bg-blue-500/20 px-2 py-0.5 text-xs font-semibold text-blue-300 whitespace-nowrap">
+                            <span className="rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap" style={{ backgroundColor: '#110f1a', color: '#f0c040' }}>
                               Fan Zone
                             </span>
                           )}
@@ -1139,7 +1145,7 @@ export default function AdminPage() {
                         </td>
                         <td className="py-2 pr-3 text-center text-xs">
                           {fz.active ? (
-                            <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-emerald-300">Sí</span>
+                            <span className="rounded-full px-2 py-0.5" style={{ backgroundColor: '#110f1a', color: '#f0c040' }}>Sí</span>
                           ) : (
                             <span className="rounded-full bg-zinc-700/80 px-2 py-0.5 text-zinc-400">No</span>
                           )}
@@ -1182,7 +1188,7 @@ export default function AdminPage() {
                 <button
                   onClick={exportUsersCSV}
                   disabled={users.length === 0}
-                  style={{ background: "#0a2a1a", border: "1px solid #00ff9d40", color: "#00ff9d" }}
+                  style={{ background: "#110f1a", border: "1px solid #f0c04040", color: "#f0c040" }}
                   className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
                 >
                   Exportar CSV
@@ -1247,12 +1253,13 @@ export default function AdminPage() {
                   }
                 }}
                 disabled={seedingTeams}
-                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition disabled:opacity-50"
+                className="rounded-lg px-4 py-2 text-sm font-semibold transition disabled:opacity-50"
+                style={{ backgroundColor: '#110f1a', color: '#f0c040' }}
               >
                 {seedingTeams ? "Cargando…" : "Cargar equipos mundiales (~500)"}
               </button>
               {teamSeedMsg && (
-                <span className="text-sm text-emerald-300">{teamSeedMsg}</span>
+                <span className="text-sm" style={{ color: '#f0c040' }}>{teamSeedMsg}</span>
               )}
             </div>
           </div>

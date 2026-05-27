@@ -38,7 +38,7 @@ export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
   }
 
   return (
-    <header style={{ background: "#080c14" }} className="sticky top-0 z-50">
+    <header style={{ background: "#09080f" }} className="sticky top-0 z-50">
       <div className="mx-auto grid h-24 max-w-xl grid-cols-3 items-center gap-2 px-4">
         {/* Izquierda: Soy restaurante */}
         <div className="justify-self-start">

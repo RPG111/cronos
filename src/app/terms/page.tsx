@@ -137,19 +137,19 @@ export default function TermsPage() {
   return (
     <>
       <Header />
-      <main style={{ background: "#080c14", minHeight: "100dvh", paddingBottom: "120px" }}>
+      <main style={{ background: "#09080f", minHeight: "100dvh", paddingBottom: "120px" }}>
         <div style={{ maxWidth: "680px", margin: "0 auto", padding: "32px 20px" }}>
-          <h1 style={{ color: "#e8f0ff", fontSize: "26px", fontWeight: 700, marginBottom: "6px" }}>
+          <h1 style={{ color: "#f0f4ff", fontSize: "26px", fontWeight: 700, marginBottom: "6px" }}>
             {c.title}
           </h1>
-          <p style={{ color: "#8899bb", fontSize: "12px", marginBottom: "32px" }}>{c.updated}</p>
+          <p style={{ color: "#8a7a50", fontSize: "12px", marginBottom: "32px" }}>{c.updated}</p>
 
           {c.sections.map((section, i) => (
             <div
               key={i}
               style={{
-                background: "#0a1220",
-                border: "1px solid #142035",
+                background: "#110f1a",
+                border: "1px solid #2a2010",
                 borderRadius: "16px",
                 padding: "20px 24px",
                 marginBottom: "12px",
@@ -157,7 +157,7 @@ export default function TermsPage() {
             >
               <h2
                 style={{
-                  color: "#e63946",
+                  color: "#f0c040",
                   fontSize: "12px",
                   fontWeight: 700,
                   letterSpacing: "1.5px",

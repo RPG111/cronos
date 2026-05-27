@@ -45,10 +45,10 @@ function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" aria-modal="true" role="dialog">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div style={{ position: "relative", zIndex: 10, width: "92%", maxWidth: "448px", borderRadius: "20px", border: "1px solid #142035", background: "#0a1220", padding: "20px", boxShadow: "0 24px 48px rgba(0,0,0,0.6)" }}>
+      <div style={{ position: "relative", zIndex: 10, width: "92%", maxWidth: "448px", borderRadius: "20px", border: "1px solid #2a2010", background: "#110f1a", padding: "20px", boxShadow: "0 24px 48px rgba(0,0,0,0.6)" }}>
         <div style={{ marginBottom: "16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: "#0d1528", border: "1px solid #142035", color: "#8899bb", borderRadius: "8px", padding: "4px 8px", fontSize: "14px", cursor: "pointer" }}>&#x2715;</button>
+          <h3 style={{ fontSize: "18px", fontWeight: 700, color: "#f0f4ff", margin: 0 }}>{title}</h3>
+          <button onClick={onClose} style={{ background: "#150e1e", border: "1px solid #2a2010", color: "#8a7a50", borderRadius: "8px", padding: "4px 8px", fontSize: "14px", cursor: "pointer" }}>&#x2715;</button>
         </div>
         {children}
       </div>
@@ -322,7 +322,7 @@ export default function HomePage() {
   }
 
   return (
-    <main style={{ minHeight: "100dvh", background: "#080c14" }}>
+    <main style={{ minHeight: "100dvh", background: "#09080f" }}>
       <Header
         onOpenLead={() => setLeadOpen(true)}
         isLoggedIn={!!uid}
@@ -332,10 +332,10 @@ export default function HomePage() {
       <RestaurantLead open={leadOpen} onClose={() => setLeadOpen(false)} />
 
       <div style={{ maxWidth: "520px", margin: "0 auto", padding: "24px 16px" }}>
-        <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#e8f0ff", margin: 0 }}>
+        <h2 style={{ fontSize: "26px", fontWeight: 700, color: "#f0f4ff", margin: 0 }}>
           Proximos eventos
         </h2>
-        <p style={{ color: "#8899bb", marginTop: "4px", fontSize: "13px" }}>
+        <p style={{ color: "#8a7a50", marginTop: "4px", fontSize: "13px" }}>
           Elige un lugar para ver tu proximo evento.
         </p>
 
@@ -352,33 +352,33 @@ export default function HomePage() {
 
             return (
               <div key={ev.id} className="card-chrome-wrap" style={{ marginBottom: "12px" }}>
-              <div style={{ background: "#0a1220", borderRadius: "18px", overflow: "hidden" }}>
+              <div style={{ background: "#110f1a", borderRadius: "18px", overflow: "hidden" }}>
                 {/* Top: liga + venue pill */}
                 <div style={{ padding: "14px 14px 8px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#e63946", fontWeight: 700, textTransform: "uppercase" }}>
+                  <div style={{ fontSize: "10px", letterSpacing: "2px", color: "#f0c040", fontWeight: 700, textTransform: "uppercase" }}>
                     {ev.league}
                   </div>
-                  <div style={{ background: "#0d1528", border: "1px solid #142035", borderRadius: "10px", padding: "4px 10px", textAlign: "right" }}>
-                    <div style={{ color: "#ff6b00", fontSize: "12px", fontWeight: 600 }}>{ev.venueName}</div>
-                    <div style={{ color: "#8899bb", fontSize: "10px" }}>{ev.city}</div>
+                  <div style={{ background: "#150e1e", border: "1px solid #2a2010", borderRadius: "10px", padding: "4px 10px", textAlign: "right" }}>
+                    <div style={{ color: "#f0c040", fontSize: "12px", fontWeight: 600 }}>{ev.venueName}</div>
+                    <div style={{ color: "#8a7a50", fontSize: "10px" }}>{ev.city}</div>
                   </div>
                 </div>
 
                 {/* Titulo */}
-                <div style={{ fontSize: "17px", fontWeight: 700, color: "#e8f0ff", padding: "0 14px 10px" }}>
+                <div style={{ fontSize: "17px", fontWeight: 700, color: "#f0f4ff", padding: "0 14px 10px" }}>
                   {ev.title}
                 </div>
 
 
                 {/* Fecha */}
-                <div style={{ fontSize: "11px", color: "#8899bb", padding: "0 14px 8px" }}>
+                <div style={{ fontSize: "11px", color: "#8a7a50", padding: "0 14px 8px" }}>
                   {fmtDateShort(ev.dateISO)}
                 </div>
 
                 {/* Barra de capacidad */}
                 <div style={{ margin: "0 14px 4px", background: "#0d1a2e", borderRadius: "3px", height: "3px" }}>
                   <div style={{
-                    background: "linear-gradient(90deg, #ff6b00, #e63946)",
+                    background: "linear-gradient(90deg, #f0c040, #f0c040)",
                     width: Math.min((c.total / ev.capacity) * 100, 100) + "%",
                     height: "100%",
                     borderRadius: "3px",
@@ -387,18 +387,18 @@ export default function HomePage() {
 
                 {/* Texto capacidad */}
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 14px 10px" }}>
-                  <span style={{ color: "#8899bb", fontSize: "11px" }}>{c.total} / {ev.capacity} lugares</span>
+                  <span style={{ color: "#8a7a50", fontSize: "11px" }}>{c.total} / {ev.capacity} lugares</span>
                   {isFull ? (
-                    <span style={{ color: "#3a5070", fontSize: "11px" }}>Lleno</span>
+                    <span style={{ color: "#4a3d28", fontSize: "11px" }}>Lleno</span>
                   ) : remaining <= 5 ? (
-                    <span style={{ color: "#00ff9d", fontSize: "11px" }}>{remaining} restantes</span>
+                    <span style={{ color: "#f0c040", fontSize: "11px" }}>{remaining} restantes</span>
                   ) : (
-                    <span style={{ color: "#8899bb", fontSize: "11px" }}>Disponible</span>
+                    <span style={{ color: "#8a7a50", fontSize: "11px" }}>Disponible</span>
                   )}
                 </div>
 
                 {/* Divisor */}
-                <div style={{height:'1px', background:'#142035', margin:'8px 14px'}} />
+                <div style={{height:'1px', background:'#2a2010', margin:'8px 14px'}} />
 
                 {/* Contadores de equipos */}
                 {(() => {
@@ -407,13 +407,13 @@ export default function HomePage() {
                   return (
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 32px 1fr", alignItems: "center", padding: "10px 14px" }}>
                       <div style={{ textAlign: "left" }}>
-                        <div style={{ color: "#e8f0ff", fontSize: "12px" }}>{aLabel}</div>
-                        <div style={{ color: "#e63946", fontSize: "22px", fontWeight: 700 }}>{c.a}</div>
+                        <div style={{ color: "#f0f4ff", fontSize: "12px" }}>{aLabel}</div>
+                        <div style={{ color: "#f0c040", fontSize: "22px", fontWeight: 700 }}>{c.a}</div>
                       </div>
-                      <div style={{ textAlign: "center", color: "#8899bb", fontSize: "10px", fontWeight: 700 }}>VS</div>
+                      <div style={{ textAlign: "center", color: "#8a7a50", fontSize: "10px", fontWeight: 700 }}>VS</div>
                       <div style={{ textAlign: "right" }}>
-                        <div style={{ color: "#e8f0ff", fontSize: "12px" }}>{bLabel}</div>
-                        <div style={{ color: "#e63946", fontSize: "22px", fontWeight: 700 }}>{c.b}</div>
+                        <div style={{ color: "#f0f4ff", fontSize: "12px" }}>{bLabel}</div>
+                        <div style={{ color: "#f0c040", fontSize: "22px", fontWeight: 700 }}>{c.b}</div>
                       </div>
                     </div>
                   );
@@ -425,7 +425,7 @@ export default function HomePage() {
                     <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "8px" }}>
                       <button
                         onClick={() => openReserveModal(ev)}
-                        style={{ background: "linear-gradient(135deg, #ff6b00, #e63946)", border: "none", color: "#fff", fontSize: "17px", fontWeight: 800, padding: "12px", borderRadius: "24px", cursor: "pointer", width: "100%" }}
+                        style={{ background: "linear-gradient(135deg, #f0c040, #f0c040)", border: "none", color: "#fff", fontSize: "17px", fontWeight: 800, padding: "12px", borderRadius: "24px", cursor: "pointer", width: "100%" }}
                       >
                         Reservar lugar
                       </button>
@@ -452,7 +452,7 @@ export default function HomePage() {
                           });
                           setQrOpen(true);
                         }}
-                        style={{ background: "linear-gradient(135deg, #ff6b00, #e63946)", border: "none", color: "#fff", fontSize: "15px", fontWeight: 800, padding: "12px 24px", borderRadius: "24px", cursor: "pointer", whiteSpace: "nowrap" }}
+                        style={{ background: "linear-gradient(135deg, #f0c040, #f0c040)", border: "none", color: "#fff", fontSize: "15px", fontWeight: 800, padding: "12px 24px", borderRadius: "24px", cursor: "pointer", whiteSpace: "nowrap" }}
                       >
                         Ver QR
                       </button>
@@ -473,28 +473,28 @@ export default function HomePage() {
         {selected && (
           <div style={{ display: "grid", gap: "16px" }}>
             <div>
-              <label style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8899bb", fontWeight: 700, textTransform: "uppercase", marginBottom: "6px" }}>NOMBRE</label>
+              <label style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8a7a50", fontWeight: 700, textTransform: "uppercase", marginBottom: "6px" }}>NOMBRE</label>
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Tu nombre"
-                     style={{ width: "100%", background: "#0d1528", border: "1px solid #142035", color: "#e8f0ff", borderRadius: "11px", padding: "12px 14px", fontSize: "14px", outline: "none", boxSizing: "border-box" }} />
+                     style={{ width: "100%", background: "#150e1e", border: "1px solid #2a2010", color: "#f0f4ff", borderRadius: "11px", padding: "12px 14px", fontSize: "14px", outline: "none", boxSizing: "border-box" }} />
             </div>
             <div>
-              <label style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8899bb", fontWeight: 700, textTransform: "uppercase", marginBottom: "6px" }}>TELÉFONO</label>
+              <label style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8a7a50", fontWeight: 700, textTransform: "uppercase", marginBottom: "6px" }}>TELÉFONO</label>
               <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 415 555 1234"
-                     style={{ width: "100%", background: "#0d1528", border: "1px solid #142035", color: "#e8f0ff", borderRadius: "11px", padding: "12px 14px", fontSize: "14px", outline: "none", boxSizing: "border-box" }} />
+                     style={{ width: "100%", background: "#150e1e", border: "1px solid #2a2010", color: "#f0f4ff", borderRadius: "11px", padding: "12px 14px", fontSize: "14px", outline: "none", boxSizing: "border-box" }} />
             </div>
 
             <div>
-              <span style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8899bb", fontWeight: 700, textTransform: "uppercase", marginBottom: "8px" }}>BANDO</span>
+              <span style={{ display: "block", fontSize: "10px", letterSpacing: "2px", color: "#8a7a50", fontWeight: 700, textTransform: "uppercase", marginBottom: "8px" }}>BANDO</span>
               {(() => {
                 const aLabel = selected.split?.aLabel || selected.homeTeam || "Local";
                 const bLabel = selected.split?.bLabel || selected.awayTeam || "Visitante";
                 return (
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                    <label style={{ display: "flex", alignItems: "center", gap: "8px", background: "#0d1528", border: "1px solid #142035", color: "#e8f0ff", borderRadius: "11px", padding: "12px", cursor: "pointer" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", background: "#150e1e", border: "1px solid #2a2010", color: "#f0f4ff", borderRadius: "11px", padding: "12px", cursor: "pointer" }}>
                       <input type="radio" name="teamHome" checked={teamChoice === "A"} onChange={() => setTeamChoice("A")} />
                       <span>{aLabel}</span>
                     </label>
-                    <label style={{ display: "flex", alignItems: "center", gap: "8px", background: "#0d1528", border: "1px solid #142035", color: "#e8f0ff", borderRadius: "11px", padding: "12px", cursor: "pointer" }}>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", background: "#150e1e", border: "1px solid #2a2010", color: "#f0f4ff", borderRadius: "11px", padding: "12px", cursor: "pointer" }}>
                       <input type="radio" name="teamHome" checked={teamChoice === "B"} onChange={() => setTeamChoice("B")} />
                       <span>{bLabel}</span>
                     </label>
@@ -504,15 +504,15 @@ export default function HomePage() {
             </div>
 
             <div style={{ display: "flex", gap: "12px", paddingTop: "4px" }}>
-              <button onClick={() => setOpen(false)} disabled={saving} style={{ flex: 1, position: "relative", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#e8f0ff", fontSize: "14px", fontWeight: 600, padding: "12px", borderRadius: "24px", cursor: "pointer", overflow: "hidden", whiteSpace: "nowrap" }}>
+              <button onClick={() => setOpen(false)} disabled={saving} style={{ flex: 1, position: "relative", background: "rgba(192,192,192,0.05)", border: "1px solid rgba(192,192,192,0.2)", color: "#f0f4ff", fontSize: "14px", fontWeight: 600, padding: "12px", borderRadius: "24px", cursor: "pointer", overflow: "hidden", whiteSpace: "nowrap" }}>
                 Cancelar
               </button>
-              <button onClick={confirmReserve} disabled={saving} style={{ flex: 1, background: "linear-gradient(135deg, #ff6b00, #e63946)", color: "#fff", fontSize: "14px", fontWeight: 800, padding: "12px", borderRadius: "24px", border: "none", cursor: "pointer", opacity: saving ? 0.6 : 1 }}>
+              <button onClick={confirmReserve} disabled={saving} style={{ flex: 1, background: "linear-gradient(135deg, #f0c040, #f0c040)", color: "#fff", fontSize: "14px", fontWeight: 800, padding: "12px", borderRadius: "24px", border: "none", cursor: "pointer", opacity: saving ? 0.6 : 1 }}>
                 {saving ? "Guardando..." : "Confirmar reserva"}
               </button>
             </div>
 
-            <p style={{ textAlign: "center", fontSize: "12px", color: "#8899bb" }}>* Te enviaremos tu codigo de reserva por SMS.</p>
+            <p style={{ textAlign: "center", fontSize: "12px", color: "#8a7a50" }}>* Te enviaremos tu codigo de reserva por SMS.</p>
           </div>
         )}
       </Modal>
