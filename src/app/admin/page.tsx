@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
+import { Lock } from "lucide-react";
 
 import {
   getAllFanZones,
@@ -663,9 +664,43 @@ function AttendeesSection({ events }: { events: AdminEvent[] }) {
   );
 }
 
+// ─── Access-Denied Strings ────────────────────────────────────────────────────
+
+const ACCESS_DENIED_STRINGS = {
+  es: {
+    title: "Acceso restringido",
+    subtitle: "No tienes permiso para ver esta página.",
+    button: "Volver al inicio",
+  },
+  pt: {
+    title: "Acesso restrito",
+    subtitle: "Você não tem permissão para ver esta página.",
+    button: "Voltar ao início",
+  },
+  default: {
+    title: "Restricted Access",
+    subtitle: "You don't have permission to view this page.",
+    button: "Back to home",
+  },
+};
+
+function useAccessDeniedStrings() {
+  const [strings, setStrings] = useState(ACCESS_DENIED_STRINGS.default);
+
+  useEffect(() => {
+    const lang = navigator.language ?? "";
+    if (lang.startsWith("es")) setStrings(ACCESS_DENIED_STRINGS.es);
+    else if (lang.startsWith("pt")) setStrings(ACCESS_DENIED_STRINGS.pt);
+    else setStrings(ACCESS_DENIED_STRINGS.default);
+  }, []);
+
+  return strings;
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
+  const t = useAccessDeniedStrings();
   const [uid, setUid] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   // Events list
@@ -903,11 +938,13 @@ export default function AdminPage() {
   if (!hasAccess) {
     return (
       <main className="grid min-h-dvh place-items-center text-white">
-        <div className="rounded-xl border border-white/10 bg-black/60 px-6 py-4 text-center">
-          No tienes acceso a esta página. UID actual: <code>{uid}</code>
-          <div className="mt-2 text-sm text-white/70">
-            (Si eres admin, agrega tu UID a NEXT_PUBLIC_ADMIN_UIDS y reinicia el servidor)
-          </div>
+        <div className="rounded-xl border border-white/10 bg-black/60 px-8 py-6 text-center max-w-sm">
+          <Lock className="mx-auto mb-3 text-white/50" size={32} />
+          <div className="text-xl font-bold mb-2">{t.title}</div>
+          <div className="text-white/70 text-sm mb-4">{t.subtitle}</div>
+          <Link href="/" className="underline text-sm text-white/80">
+            {t.button}
+          </Link>
         </div>
       </main>
     );
