@@ -320,7 +320,7 @@ export default function HomePage() {
   const router = useRouter();
   const [zones, setZones] = useState<FanZone[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tournamentFilter, setTournamentFilter] = useState<"champions_2026" | "world_cup_2026">("champions_2026");
+  const [tournamentFilter, setTournamentFilter] = useState<"champions_2026" | "world_cup_2026">("world_cup_2026");
   const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico" | "bay_area" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<"all" | "fan_festival" | "fan_zone">("all");
@@ -472,7 +472,8 @@ export default function HomePage() {
         {/* ── Sección 2: Selector de torneo ── */}
         <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
           {([
-            { key: "champions_2026", label: "Champions League" },
+            // HIDDEN — restaurar cuando se reactive Champions League
+            // { key: "champions_2026", label: "Champions League" },
             { key: "world_cup_2026", label: "World Cup 2026" },
           ] as const).map(({ key, label }) => {
             const active = tournamentFilter === key;

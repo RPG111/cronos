@@ -14,7 +14,7 @@ type Props = {
   onLogout?: () => Promise<void> | void;
 };
 
-export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
+export default function Header({ onOpenLead: _onOpenLead, isLoggedIn, onLogout }: Props) {
   const router = useRouter();
   const [logged, setLogged] = useState<boolean>(!!isLoggedIn);
   const t = useTranslation();
@@ -41,11 +41,14 @@ export default function Header({ onOpenLead, isLoggedIn, onLogout }: Props) {
     <header style={{ background: "#09080f" }} className="sticky top-0 z-50">
       <div className="mx-auto grid h-24 max-w-xl grid-cols-3 items-center gap-2 px-4">
         {/* Izquierda: Soy restaurante */}
+        {/* HIDDEN — restaurar cuando se reactive el portal de restaurantes
         <div className="justify-self-start">
           <button onClick={() => onOpenLead?.()} className="btn-ghost-cronos" style={{ fontSize: "0.75rem", padding: "6px 12px", whiteSpace: "nowrap" }}>
             {t.header.restaurant}
           </button>
         </div>
+        */}
+        <div className="justify-self-start" />
 
         {/* Centro: logo */}
         <div className="justify-self-center">
