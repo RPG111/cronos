@@ -18,6 +18,8 @@ export type FanZoneType = "fan_festival" | "fan_zone";
 export type FanZoneCountry = "usa" | "canada" | "mexico" | "bay_area";
 export type FanZoneEntry = string; // "Gratuita" | "Requiere registro" | "Ticketed" | etc.
 
+export type FanZoneEntryType = "walk_in" | "registration_required" | "paid";
+
 export type FanZone = {
   id: string;
   tournament?: string;
@@ -30,6 +32,8 @@ export type FanZone = {
   lat: number;
   lng: number;
   entry: FanZoneEntry;
+  entryType?: FanZoneEntryType;
+  price?: string | null;
   datesOpen: string;
   officialUrl: string | null;
   registrationUrl: string | null;

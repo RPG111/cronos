@@ -16,7 +16,7 @@ import {
   type FanZoneCountry,
 } from "@/lib/firestore/fanzones";
 import { seedWorldTeams } from "@/lib/firestore/seedTeams";
-import { seedFanZones, seedNewFanZones, seedCdmxGdlFanZones, seedCanadaFanZones, seedBayAreaNewFanZones, patchFanZones } from "@/lib/firestore/seedFanZones";
+import { seedFanZones, seedNewFanZones, seedCdmxGdlFanZones, seedCanadaFanZones, seedBayAreaNewFanZones, patchFanZones, seedUsaExpansion2026, patchUsaEntryTypes } from "@/lib/firestore/seedFanZones";
 import {
   collection,
   doc,
@@ -729,6 +729,8 @@ export default function AdminPage() {
   const [migrating, setMigrating] = useState(false);
   const [migrateMsg, setMigrateMsg] = useState("");
   const [syncingFZ, setSyncingFZ] = useState(false);
+  const [syncingExpansion, setSyncingExpansion] = useState(false);
+  const [expansionMsg, setExpansionMsg] = useState("");
 
   // Users list
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -1121,8 +1123,35 @@ export default function AdminPage() {
                 >
                   {syncingFZ ? "Sincronizando…" : "🔄 Sincronizar Fan Zones"}
                 </button>
+                <button
+                  disabled={syncingExpansion}
+                  onClick={async () => {
+                    setSyncingExpansion(true);
+                    setExpansionMsg("");
+                    try {
+                      const added = await seedUsaExpansion2026();
+                      const updated = await patchUsaEntryTypes();
+                      setExpansionMsg(`✓ ${added} documentos añadidos · ${updated} actualizados con entryType`);
+                      fetchFanZones();
+                    } catch (e: any) {
+                      setExpansionMsg(`Error: ${e?.message ?? "desconocido"}`);
+                    } finally {
+                      setSyncingExpansion(false);
+                    }
+                  }}
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
+                >
+                  {syncingExpansion ? "Procesando…" : "🇺🇸 USA Expansion + EntryTypes"}
+                </button>
               </div>
             </div>
+
+            {expansionMsg && (
+              <div className="mb-3">
+                <p className="text-xs" style={{ color: '#f0c040' }}>{expansionMsg}</p>
+              </div>
+            )}
 
             {migrateMsg && (
               <div className="mb-3">
