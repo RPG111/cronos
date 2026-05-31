@@ -16,7 +16,7 @@ import {
   type FanZoneCountry,
 } from "@/lib/firestore/fanzones";
 import { seedWorldTeams } from "@/lib/firestore/seedTeams";
-import { seedFanZones, seedNewFanZones, seedCdmxGdlFanZones, seedCanadaFanZones, seedBayAreaNewFanZones, patchFanZones, seedUsaExpansion2026, patchUsaEntryTypes } from "@/lib/firestore/seedFanZones";
+import { seedFanZones, seedNewFanZones, seedCdmxGdlFanZones, seedCanadaFanZones, seedBayAreaNewFanZones, patchFanZones, seedUsaExpansion2026, patchUsaEntryTypes, seedMexicoExpansion2026, patchMexicoEntryTypes, seedCanadaExpansion2026, patchCanadaEntryTypes, seedBayAreaExpansion2026, patchBayAreaEntryTypes } from "@/lib/firestore/seedFanZones";
 import {
   collection,
   doc,
@@ -731,6 +731,12 @@ export default function AdminPage() {
   const [syncingFZ, setSyncingFZ] = useState(false);
   const [syncingExpansion, setSyncingExpansion] = useState(false);
   const [expansionMsg, setExpansionMsg] = useState("");
+  const [syncingMxExpansion, setSyncingMxExpansion] = useState(false);
+  const [mxExpansionMsg, setMxExpansionMsg] = useState("");
+  const [syncingCaExpansion, setSyncingCaExpansion] = useState(false);
+  const [caExpansionMsg, setCaExpansionMsg] = useState("");
+  const [syncingBaExpansion, setSyncingBaExpansion] = useState(false);
+  const [baExpansionMsg, setBaExpansionMsg] = useState("");
 
   // Users list
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -1144,12 +1150,93 @@ export default function AdminPage() {
                 >
                   {syncingExpansion ? "Procesando…" : "🇺🇸 USA Expansion + EntryTypes"}
                 </button>
+                <button
+                  disabled={syncingMxExpansion}
+                  onClick={async () => {
+                    setSyncingMxExpansion(true);
+                    setMxExpansionMsg("");
+                    try {
+                      const added = await seedMexicoExpansion2026();
+                      const updated = await patchMexicoEntryTypes();
+                      setMxExpansionMsg(`✓ ${added} documento añadido · ${updated} actualizados con entryType`);
+                      fetchFanZones();
+                    } catch (e: any) {
+                      setMxExpansionMsg(`Error: ${e?.message ?? "desconocido"}`);
+                    } finally {
+                      setSyncingMxExpansion(false);
+                    }
+                  }}
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
+                >
+                  {syncingMxExpansion ? "Procesando…" : "🇲🇽 México Expansion + EntryTypes"}
+                </button>
+                <button
+                  disabled={syncingCaExpansion}
+                  onClick={async () => {
+                    setSyncingCaExpansion(true);
+                    setCaExpansionMsg("");
+                    try {
+                      const added = await seedCanadaExpansion2026();
+                      const updated = await patchCanadaEntryTypes();
+                      setCaExpansionMsg(`✓ ${added} documentos añadidos · ${updated} actualizados con entryType`);
+                      fetchFanZones();
+                    } catch (e: any) {
+                      setCaExpansionMsg(`Error: ${e?.message ?? "desconocido"}`);
+                    } finally {
+                      setSyncingCaExpansion(false);
+                    }
+                  }}
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
+                >
+                  {syncingCaExpansion ? "Procesando…" : "🇨🇦 Canadá Expansion + EntryTypes"}
+                </button>
+                <button
+                  disabled={syncingBaExpansion}
+                  onClick={async () => {
+                    setSyncingBaExpansion(true);
+                    setBaExpansionMsg("");
+                    try {
+                      const added = await seedBayAreaExpansion2026();
+                      const updated = await patchBayAreaEntryTypes();
+                      setBaExpansionMsg(`✓ ${added} documentos añadidos · ${updated} actualizados con entryType`);
+                      fetchFanZones();
+                    } catch (e: any) {
+                      setBaExpansionMsg(`Error: ${e?.message ?? "desconocido"}`);
+                    } finally {
+                      setSyncingBaExpansion(false);
+                    }
+                  }}
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
+                >
+                  {syncingBaExpansion ? "Procesando…" : "🌉 Bay Area Expansion + EntryTypes"}
+                </button>
               </div>
             </div>
+
+            {caExpansionMsg && (
+              <div className="mb-3">
+                <p className="text-xs" style={{ color: '#f0c040' }}>{caExpansionMsg}</p>
+              </div>
+            )}
+
+            {baExpansionMsg && (
+              <div className="mb-3">
+                <p className="text-xs" style={{ color: '#f0c040' }}>{baExpansionMsg}</p>
+              </div>
+            )}
 
             {expansionMsg && (
               <div className="mb-3">
                 <p className="text-xs" style={{ color: '#f0c040' }}>{expansionMsg}</p>
+              </div>
+            )}
+
+            {mxExpansionMsg && (
+              <div className="mb-3">
+                <p className="text-xs" style={{ color: '#f0c040' }}>{mxExpansionMsg}</p>
               </div>
             )}
 

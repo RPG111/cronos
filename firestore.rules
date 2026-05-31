@@ -2,10 +2,18 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Fan Zones del Mundial — lectura pública, escritura solo desde servidor
+    // Fan Zones del Mundial — lectura pública, escritura solo admins
+    function isAdmin() {
+      return request.auth != null && request.auth.uid in [
+        'rpqa7pCNNhTPgQSosITBpuqiacF2',
+        '0WZdp4lN16hA3wkmaP8L6X9Hg7j1',
+        'zn5mQWpTmLZRcoxbEUOADTUvEy62'
+      ];
+    }
+
     match /wc2026_fanzones/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     // Eventos deportivos — lectura pública

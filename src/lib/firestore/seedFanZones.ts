@@ -2788,3 +2788,502 @@ export async function patchUsaEntryTypes(): Promise<number> {
   console.log(`patchUsaEntryTypes complete — ${ENTRY_TYPE_PATCHES.length} documents patched.`);
   return ENTRY_TYPE_PATCHES.length;
 }
+
+// ─── MÉXICO EXPANSION — Mayo 2026 ─────────────────────────────────────────────
+// 1 nuevo Fan Zone privado: Campo Marte 26 (festival privado con conciertos)
+const MEXICO_EXPANSION_2026: Array<{ id: string } & SeedRow> = [
+  {
+    id: "cdmx-campo-marte",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Campo Marte 26",
+    city: "Ciudad de México",
+    country: "mexico",
+    venue: "Campo Marte",
+    address: "Av. Ejército Nacional, Polanco, Ciudad de México",
+    lat: 19.4326,
+    lng: -99.1964,
+    entry: "Desde $400 pesos por día",
+    entryType: "paid",
+    price: "$400 pesos/día · VIP $1,000/día · Fin de semana desde $1,000 · Semanal desde $2,000",
+    datesOpen: "11 jun – 19 jul 2026 (39 días)",
+    officialUrl: "https://campomarte26.com",
+    registrationUrl: "https://www.ticketmaster.com.mx",
+    notes: "Festival privado no oficial de FIFA. Music Pavilion con 17 conciertos: Parcels, The Avalanches, L'Impératrice, Modeselektor, Polo & Pan, Purple Disco Machine. Gastronomía de las 32 entidades mexicanas rotando semanalmente. Partidos en pantalla gigante por las mañanas y tardes, conciertos por las noches. Patrocinado por Santander. Junto al Auditorio Nacional.",
+    food: "Gastronomía de las 32 entidades mexicanas, cambia cada semana",
+    alcohol: true,
+    amenities: "17 conciertos en vivo, pantallas gigantes para los 104 partidos, gastronomía premium, Music Pavilion",
+    active: true,
+    status: "active",
+  },
+];
+
+export async function seedMexicoExpansion2026(): Promise<number> {
+  await Promise.all(
+    MEXICO_EXPANSION_2026.map(({ id, ...data }) =>
+      setDoc(doc(db, "wc2026_fanzones", id), { ...data, updatedAt: serverTimestamp() })
+    )
+  );
+  console.log(`seedMexicoExpansion2026 complete — ${MEXICO_EXPANSION_2026.length} documents written.`);
+  return MEXICO_EXPANSION_2026.length;
+}
+
+// ─── MÉXICO ENTRY TYPE PATCHES — Mayo 2026 ────────────────────────────────────
+// Agrega entryType: "walk_in" a todos los Fan Zones de México existentes.
+const MEXICO_ENTRY_TYPE_PATCHES: PatchRow[] = [
+  { id: "fan-festival-cdmx",          entryType: "walk_in", notes: "Sin registro previo confirmado. Zona VIP estilo F1 disponible. SIN alcohol en zona general — solo cerveza cero. Única excepción: bar completo en zona VIP." },
+  { id: "fan-festival-monterrey",     entryType: "walk_in", price: "Gratis walk-in · Zona preferente desde $850 pesos · VIP disponible en Ticketmaster" },
+  { id: "fan-festival-guadalajara",   entryType: "walk_in" },
+  { id: "adidas-home-soccer-cdmx",    entryType: "walk_in" },
+  { id: "adidas-home-soccer-gdl",     entryType: "walk_in" },
+  { id: "adidas-home-soccer-mty",     entryType: "walk_in" },
+  { id: "cdmx-chapultepec-cricri",    entryType: "walk_in" },
+  { id: "cdmx-utopia-meyehualco",     entryType: "walk_in" },
+  { id: "cdmx-campos-revolucion",     entryType: "walk_in" },
+  { id: "cdmx-garibaldi",             entryType: "walk_in" },
+  { id: "cdmx-deportivo-galeana",     entryType: "walk_in" },
+  { id: "cdmx-iztapalapa",            entryType: "walk_in" },
+  { id: "cdmx-coyoacan",              entryType: "walk_in" },
+  { id: "cdmx-tlalpan",               entryType: "walk_in" },
+  { id: "cdmx-xochimilco",            entryType: "walk_in" },
+  { id: "cdmx-bombilla",              entryType: "walk_in" },
+  { id: "cdmx-tezozomoc",             entryType: "walk_in" },
+  { id: "cdmx-parque-americas",       entryType: "walk_in" },
+  { id: "cdmx-consolacion",           entryType: "walk_in" },
+  { id: "cdmx-san-mateo-atenco",      entryType: "walk_in" },
+  { id: "cdmx-leandro-valle",         entryType: "walk_in" },
+  { id: "cdmx-unidad-independencia",  entryType: "walk_in" },
+  { id: "cdmx-tlahuac",               entryType: "walk_in" },
+  { id: "cdmx-vivanco",               entryType: "walk_in" },
+  { id: "cdmx-eduardo-molina",        entryType: "walk_in" },
+  { id: "gdl-parque-rojo",            entryType: "walk_in" },
+  { id: "gdl-parque-la-mujer",        entryType: "walk_in" },
+  { id: "gdl-parque-ninas-ninos",     entryType: "walk_in" },
+  { id: "gdl-plaza-las-americas",     entryType: "walk_in" },
+];
+
+export async function patchMexicoEntryTypes(): Promise<number> {
+  await Promise.all(
+    MEXICO_ENTRY_TYPE_PATCHES.map(({ id, ...data }) =>
+      setDoc(
+        doc(db, "wc2026_fanzones", id),
+        { ...data, updatedAt: serverTimestamp() },
+        { merge: true }
+      )
+    )
+  );
+  console.log(`patchMexicoEntryTypes complete — ${MEXICO_ENTRY_TYPE_PATCHES.length} documents patched.`);
+  return MEXICO_ENTRY_TYPE_PATCHES.length;
+}
+
+// ─── CANADÁ EXPANSION — Mayo 2026 ─────────────────────────────────────────────
+// 2 nuevos Fan Zones de Vancouver: Granville Island y Shipyards North Vancouver
+const CANADA_EXPANSION_2026: Array<{ id: string } & SeedRow> = [
+  {
+    id: "canada-granville-island",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Fan Zone Granville Island",
+    city: "Vancouver",
+    country: "canada",
+    venue: "Granville Island Public Market",
+    address: "1661 Duranleau St, Vancouver, BC V6H 3S3",
+    lat: 49.2718,
+    lng: -123.1342,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "Jun 11 – Jul 19 2026 (92 partidos confirmados)",
+    officialUrl: "https://vancouverfwc26.ca",
+    registrationUrl: null,
+    notes: "Transmiten 92 partidos del torneo. Capacidad 1,000 personas. Ambiente artístico e íntimo de Granville Island.",
+    food: "Vendors y restaurantes de Granville Island Public Market",
+    alcohol: true,
+    amenities: "Pantallas gigantes, capacidad 1,000 personas, ambiente artístico waterfront",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "canada-house-north-vancouver",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Canada House — Shipyards North Vancouver",
+    city: "North Vancouver",
+    country: "canada",
+    venue: "The Shipyards",
+    address: "125 Victory Ship Way, North Vancouver, BC V7L 0B1",
+    lat: 49.3098,
+    lng: -123.0784,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "Jun 11 – Jul 19 2026",
+    officialUrl: "https://vancouverfwc26.ca",
+    registrationUrl: null,
+    notes: "Capacidad 5,000 personas. Waterfront con vista a Vancouver. Diferente al FIFA Fan Festival oficial de PNE.",
+    food: "Vendors locales de The Shipyards",
+    alcohol: true,
+    amenities: "Capacidad 5,000, waterfront, vista a Vancouver, pantallas gigantes",
+    active: true,
+    status: "active",
+  },
+];
+
+export async function seedCanadaExpansion2026(): Promise<number> {
+  await Promise.all(
+    CANADA_EXPANSION_2026.map(({ id, ...data }) =>
+      setDoc(doc(db, "wc2026_fanzones", id), { ...data, updatedAt: serverTimestamp() })
+    )
+  );
+  console.log(`seedCanadaExpansion2026 complete — ${CANADA_EXPANSION_2026.length} documents written.`);
+  return CANADA_EXPANSION_2026.length;
+}
+
+// ─── CANADÁ ENTRY TYPE PATCHES — Mayo 2026 ────────────────────────────────────
+const CANADA_ENTRY_TYPE_PATCHES: PatchRow[] = [
+  { id: "canada-vancouver",           entryType: "walk_in",               price: "Gratis GA · Anfiteatro: boletos pagados en Ticketmaster · Lawn desde $44 CAD · Reserved desde $115 CAD" },
+  { id: "canada-toronto",             entryType: "registration_required", price: "Gratis GA con registro · Premium $100–$300 CAD con entrada garantizada" },
+  { id: "adidas-home-soccer-toronto", entryType: "walk_in" },
+];
+
+export async function patchCanadaEntryTypes(): Promise<number> {
+  await Promise.all(
+    CANADA_ENTRY_TYPE_PATCHES.map(({ id, ...data }) =>
+      setDoc(
+        doc(db, "wc2026_fanzones", id),
+        { ...data, updatedAt: serverTimestamp() },
+        { merge: true }
+      )
+    )
+  );
+  console.log(`patchCanadaEntryTypes complete — ${CANADA_ENTRY_TYPE_PATCHES.length} documents patched.`);
+  return CANADA_ENTRY_TYPE_PATCHES.length;
+}
+
+// ─── BAY AREA EXPANSION — Mayo 2026 ──────────────────────────────────────────
+// 12 nuevos Fan Zones: eventos específicos, marchas de fans, Pride House, Oakland
+const BAY_AREA_EXPANSION_2026 = [
+  {
+    id: "ba-alameda-county-fair",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Summer Soccer Celebration — Alameda County Fair",
+    city: "Pleasanton",
+    country: "bay_area",
+    venue: "Alameda County Fairgrounds",
+    address: "4501 Pleasanton Ave, Pleasanton, CA 94566",
+    lat: 37.6524,
+    lng: -121.8747,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "Jun 19 – Jul 11 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Uno de los venues más grandes del Bay Area fuera de SF. Familiar, con espacio amplio y ambiente de feria.",
+    food: "Food vendors de la feria",
+    alcohol: true,
+    amenities: "Pantallas gigantes, espacio familiar amplio, ambiente de feria",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-pleasant-hill",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Downtown Pleasant Hill Community Fan Celebration",
+    city: "Pleasant Hill",
+    country: "bay_area",
+    venue: "Downtown Pleasant Hill",
+    address: "110 Gregory Lane, Pleasant Hill, CA 94523",
+    lat: 37.9477,
+    lng: -122.0608,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "11 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Celebración de apertura del Mundial. Evento comunitario para Contra Costa County.",
+    food: "Vendors locales",
+    alcohol: true,
+    amenities: "Pantallas gigantes, ambiente comunitario",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-east-palo-alto",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "East Palo Alto Community Soccer Watch Party",
+    city: "East Palo Alto",
+    country: "bay_area",
+    venue: "East Palo Alto",
+    address: "East Palo Alto, CA 94303",
+    lat: 37.4680,
+    lng: -122.1411,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "12 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Watch party comunitaria organizada para la comunidad latina de East Palo Alto.",
+    food: "Vendors locales",
+    alcohol: false,
+    amenities: "Pantallas gigantes, evento comunitario latino",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-berkeley-watch-party",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Berkeley Celebrity Watch Party — USA vs Paraguay",
+    city: "Berkeley",
+    country: "bay_area",
+    venue: "Berkeley",
+    address: "Berkeley, CA 94710",
+    lat: 37.8716,
+    lng: -122.2727,
+    entry: "Gratis con RSVP",
+    entryType: "registration_required",
+    datesOpen: "12 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    notes: "Watch party oficial para USA vs Paraguay con apariciones especiales.",
+    food: "Vendors locales",
+    alcohol: true,
+    amenities: "Pantallas gigantes, apariciones especiales",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-cultura-fc-oakland",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Cultura FC — Block15 Jack London Square",
+    city: "Oakland",
+    country: "bay_area",
+    venue: "Block15 Jack London Square",
+    address: "334 Water St, Oakland, CA 94607",
+    lat: 37.7955,
+    lng: -122.2760,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "23–25 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Celebración de fútbol, arte y cultura co-organizada por Oakland Roots y Oakland Soul. Único en su tipo en el Bay Area.",
+    food: "Food vendors locales de Jack London Square",
+    alcohol: true,
+    amenities: "Arte, música, cultura, pantallas gigantes, ambiente único",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-oakland-marriott",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Oakland World Cup Watch Party — Oakland Marriott",
+    city: "Oakland",
+    country: "bay_area",
+    venue: "Oakland Marriott City Center",
+    address: "1001 Broadway, Oakland, CA 94607",
+    lat: 37.8044,
+    lng: -122.2712,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "12 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Watch party para USA vs Paraguay organizado por Oakland Sports Group.",
+    food: "Menú del hotel y vendors",
+    alcohol: true,
+    amenities: "Pantallas gigantes, ambiente de hotel",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-usa-australia-oakland",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "USA vs Australia Watch Party Oakland",
+    city: "Oakland",
+    country: "bay_area",
+    venue: "Oakland",
+    address: "Oakland, CA 94612",
+    lat: 37.8044,
+    lng: -122.2712,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "19 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Watch party oficial para USA vs Australia. Venue exacto por confirmar.",
+    food: "Por confirmar",
+    alcohol: true,
+    amenities: "Pantallas gigantes",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-pride-house-beaux",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Pride House SF — Big Gay Watch Party at Beaux",
+    city: "San Francisco",
+    country: "bay_area",
+    venue: "Beaux",
+    address: "2344 Market St, San Francisco, CA 94114",
+    lat: 37.7632,
+    lng: -122.4348,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "12 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Watch party oficial de Pride House SF para la comunidad LGBTQ+.",
+    food: "Menú del bar",
+    alcohol: true,
+    amenities: "Ambiente LGBTQ+ friendly, pantallas gigantes",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-pride-house-east-cut",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Pride House Fan Zone — The Crossing at East Cut",
+    city: "San Francisco",
+    country: "bay_area",
+    venue: "The Crossing at East Cut",
+    address: "160 Natoma St, San Francisco, CA 94105",
+    lat: 37.7873,
+    lng: -122.3964,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "19 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Watch party oficial de Pride House SF para USA vs Australia.",
+    food: "Vendors locales",
+    alcohol: true,
+    amenities: "Ambiente LGBTQ+ friendly, pantallas gigantes",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-sf-pride-block-party",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Official SF Pride Block Party & Pride House Watch Party",
+    city: "San Francisco",
+    country: "bay_area",
+    venue: "San Francisco Pride",
+    address: "Market St & Beale St, San Francisco, CA 94105",
+    lat: 37.7909,
+    lng: -122.3971,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "25 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Coincide con SF Pride. Watch party oficial con block party incluido.",
+    food: "Vendors del evento Pride",
+    alcohol: true,
+    amenities: "Block party, ambiente Pride, pantallas gigantes",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-fan-march-usa",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Team USA Soccer Fan March — Crane Cove to Thrive City",
+    city: "San Francisco",
+    country: "bay_area",
+    venue: "Crane Cove Park → Thrive City",
+    address: "1201 Illinois St, San Francisco, CA 94107",
+    lat: 37.7574,
+    lng: -122.3870,
+    entry: "Gratis con RSVP",
+    entryType: "registration_required",
+    datesOpen: "12 jun 2026 — 4:30pm",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    notes: "Marcha oficial de fans de Team USA de Crane Cove hasta Thrive City. Sale a las 4:30pm.",
+    food: null,
+    alcohol: false,
+    amenities: "Marcha fan oficial, ambiente de previa del partido",
+    active: true,
+    status: "active",
+  },
+  {
+    id: "ba-fan-march-mexico",
+    tournament: "world_cup_2026",
+    type: "fan_zone",
+    name: "Team Mexico Soccer Fan March — SF",
+    city: "San Francisco",
+    country: "bay_area",
+    venue: "San Francisco → Thrive City",
+    address: "San Francisco, CA 94107",
+    lat: 37.7680,
+    lng: -122.3880,
+    entry: "Gratis",
+    entryType: "walk_in",
+    datesOpen: "18 jun 2026",
+    officialUrl: "https://www.sfbayareafwc26.com/bay-area-events",
+    registrationUrl: null,
+    notes: "Marcha oficial de fans de Team Mexico hacia Thrive City para el partido México vs Corea del Sur.",
+    food: null,
+    alcohol: false,
+    amenities: "Marcha fan oficial, ambiente de previa del partido",
+    active: true,
+    status: "active",
+  },
+];
+
+export async function seedBayAreaExpansion2026(): Promise<number> {
+  await Promise.all(
+    BAY_AREA_EXPANSION_2026.map(({ id, ...data }) =>
+      setDoc(doc(db, "wc2026_fanzones", id), { ...data, updatedAt: serverTimestamp() })
+    )
+  );
+  console.log(`seedBayAreaExpansion2026 complete — ${BAY_AREA_EXPANSION_2026.length} documents written.`);
+  return BAY_AREA_EXPANSION_2026.length;
+}
+
+// ─── BAY AREA ENTRY TYPE PATCHES — Mayo 2026 ─────────────────────────────────
+// Agrega entryType a los 20 Fan Zones Bay Area existentes.
+const BAY_AREA_ENTRY_TYPE_PATCHES: PatchRow[] = [
+  { id: "fan-zone-thrive-city-sf",       entryType: "walk_in" },
+  { id: "fan-zone-san-pedro-square-sj",  entryType: "registration_required", registrationUrl: "https://www.sfbayareafwc26.com/bay-area-events" },
+  { id: "sf-china-basin",                entryType: "walk_in" },
+  { id: "sf-pier39",                     entryType: "walk_in" },
+  { id: "oak-raimondi-park",             entryType: "registration_required", registrationUrl: "https://ticketleap.com" },
+  { id: "ba-spark-social-sf",            entryType: "walk_in" },
+  { id: "ba-treasure-island-gold-bar",   entryType: "registration_required", registrationUrl: "https://ticketfairy.com" },
+  { id: "ba-walnut-creek-lesher",        entryType: "registration_required" },
+  { id: "ba-richmond-red-oak",           entryType: "walk_in" },
+  { id: "ba-richmond-east-brother",      entryType: "walk_in" },
+  { id: "ba-san-carlos-wheeler",         entryType: "walk_in" },
+  { id: "ba-redwood-city-courthouse",    entryType: "walk_in" },
+  { id: "ba-san-mateo-central-park",     entryType: "walk_in" },
+  { id: "ba-santana-row",                entryType: "walk_in" },
+  { id: "ba-morgan-hill",                entryType: "walk_in" },
+  { id: "ba-milpitas",                   entryType: "walk_in" },
+  { id: "ba-santa-cruz-boardwalk",       entryType: "walk_in" },
+  { id: "ba-downtown-oakland",           entryType: "walk_in" },
+  { id: "ba-jackson-playground-sf",      entryType: "walk_in" },
+  { id: "ba-team-australia-alameda",     entryType: "walk_in" },
+];
+
+export async function patchBayAreaEntryTypes(): Promise<number> {
+  await Promise.all(
+    BAY_AREA_ENTRY_TYPE_PATCHES.map(({ id, ...data }) =>
+      setDoc(
+        doc(db, "wc2026_fanzones", id),
+        { ...data, updatedAt: serverTimestamp() },
+        { merge: true }
+      )
+    )
+  );
+  console.log(`patchBayAreaEntryTypes complete — ${BAY_AREA_ENTRY_TYPE_PATCHES.length} documents patched.`);
+  return BAY_AREA_ENTRY_TYPE_PATCHES.length;
+}
