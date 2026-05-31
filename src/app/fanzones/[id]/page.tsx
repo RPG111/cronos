@@ -23,7 +23,13 @@ const COUNTRY_FLAG: Record<string, string> = {
   usa: "🇺🇸",
   canada: "🇨🇦",
   mexico: "🇲🇽",
+  bay_area: "🇺🇸",
 };
+
+function formatCountry(country: string, t: ReturnType<typeof useTranslation>): string {
+  if (country === "bay_area") return "Bay Area";
+  return t.home.countries[country as keyof typeof t.home.countries] ?? country;
+}
 
 function TypeBadge({ type, t }: { type: FanZone["type"]; t: ReturnType<typeof useTranslation> }) {
   if (type === "fan_festival") {
@@ -224,7 +230,7 @@ export default function FanZoneDetailPage() {
             {/* Ciudad + país */}
             <div style={{ fontSize: "14px", color: "#8a7a50", marginBottom: "20px" }}>
               {COUNTRY_FLAG[zone.country]} {zone.city},{" "}
-              {t.home.countries[zone.country as keyof typeof t.home.countries] ?? zone.country}
+              {formatCountry(zone.country, t)}
             </div>
 
             {/* Mapa embed */}

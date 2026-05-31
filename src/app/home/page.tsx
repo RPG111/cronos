@@ -31,6 +31,11 @@ const COUNTRY_FLAG: Record<string, string> = {
 
 const COUNTRY_ORDER = ["usa", "canada", "mexico"];
 
+function formatCountry(country: string, t: ReturnType<typeof useTranslation>): string {
+  if (country === "bay_area") return "Bay Area";
+  return t.home.countries[country as keyof typeof t.home.countries] ?? country;
+}
+
 // ── Countdown ────────────────────────────────────────────────────────────────
 
 const WC_START = new Date("2026-06-11T00:00:00Z").getTime();
@@ -116,14 +121,7 @@ function FanZoneCard({
       ? distanceKm(userLat, userLng, zone.lat, zone.lng)
       : null;
 
-  const registrationLabel =
-    zone.entry.toLowerCase().includes("registro") || zone.entry.toLowerCase().includes("register")
-      ? t.home.register
-      : t.home.moreInfo;
-
-  const countryName = zone.country === "bay_area"
-    ? (t.home.countries["usa"] ?? "EE.UU.")
-    : (t.home.countries[zone.country as keyof typeof t.home.countries] ?? zone.country);
+  const countryName = formatCountry(zone.country, t);
 
   return (
     <div
@@ -238,9 +236,9 @@ function FanZoneCard({
 
         {/* Botones */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-          {zone.registrationUrl && (
+          {(zone.registrationUrl || zone.officialUrl) && (
             <a
-              href={zone.registrationUrl}
+              href={zone.registrationUrl ?? zone.officialUrl ?? undefined}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
@@ -255,7 +253,7 @@ function FanZoneCard({
                 whiteSpace: "nowrap",
               }}
             >
-              {registrationLabel}
+              {zone.registrationUrl ? t.home.registerHere : t.home.moreInfo}
             </a>
           )}
           <a
@@ -277,37 +275,6 @@ function FanZoneCard({
           >
             {t.home.howToGet}
           </a>
-          {zone.registrationUrl ? (
-            <a
-              href={zone.registrationUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                color: "#ffffff",
-                fontSize: "11px",
-                textDecoration: "underline",
-                padding: "4px 0",
-              }}
-            >
-              {t.home.registerHere}
-            </a>
-          ) : zone.officialUrl ? (
-            <a
-              href={zone.officialUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                color: "#8a7a50",
-                fontSize: "11px",
-                textDecoration: "underline",
-                padding: "4px 0",
-              }}
-            >
-              {t.home.officialSite}
-            </a>
-          ) : null}
         </div>
       </div>
     </div>
