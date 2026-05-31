@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import LayoutWithLead from "@/components/LayoutWithLead";
 import AuthInit from "@/components/AuthInit";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "Cronos",
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <AuthInit />
         <LayoutWithLead>{children}</LayoutWithLead>
+        <Analytics />
       </body>
     </html>
   );
