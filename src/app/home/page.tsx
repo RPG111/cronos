@@ -29,11 +29,17 @@ const COUNTRY_FLAG: Record<string, string> = {
   bay_area: "🇺🇸",
 };
 
-const COUNTRY_ORDER = ["usa", "canada", "mexico"];
-
 function formatCountry(country: string, t: ReturnType<typeof useTranslation>): string {
   if (country === "bay_area") return "Bay Area";
   return t.home.countries[country as keyof typeof t.home.countries] ?? country;
+}
+
+// ── Date helpers ─────────────────────────────────────────────────────────────
+
+function isoFromToday(offsetDays: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
 // ── Countdown ────────────────────────────────────────────────────────────────
@@ -288,10 +294,8 @@ export default function HomePage() {
   const [zones, setZones] = useState<FanZone[]>([]);
   const [loading, setLoading] = useState(true);
   const [tournamentFilter, setTournamentFilter] = useState<"champions_2026" | "world_cup_2026">("world_cup_2026");
-  const [countryFilter, setCountryFilter] = useState<"usa" | "canada" | "mexico" | "bay_area" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<"all" | "fan_festival" | "fan_zone">("all");
-  const [tooltip, setTooltip] = useState<"fan_festival" | "fan_zone" | null>(null);
+  const [dateFilter, setDateFilter] = useState<string | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [leadOpen, setLeadOpen] = useState(false);
@@ -337,23 +341,18 @@ export default function HomePage() {
           distanceKm(userLat, userLng, b.lat, b.lng)
       );
     }
-    return [...zones].sort((a, b) => {
-      const ci =
-        COUNTRY_ORDER.indexOf(a.country) - COUNTRY_ORDER.indexOf(b.country);
-      if (ci !== 0) return ci;
-      return a.city.localeCompare(b.city);
-    });
+    return [...zones].sort((a, b) => a.city.localeCompare(b.city));
   }, [zones, userLat, userLng]);
 
-  // Filtro por torneo + país + tipo + búsqueda
+  // Filtro por torneo + fecha + búsqueda
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return sorted.filter((z) => {
       const zt = z.tournament ?? "world_cup_2026";
       if (zt !== tournamentFilter) return false;
-      if (tournamentFilter === "world_cup_2026") {
-        if (countryFilter !== null && z.country !== countryFilter) return false;
-        if (typeFilter !== "all" && z.type !== typeFilter) return false;
+      if (dateFilter) {
+        if (!z.startDate || !z.endDate) return false;
+        if (dateFilter < z.startDate || dateFilter > z.endDate) return false;
       }
       if (q) {
         const haystack = `${z.name} ${z.city} ${z.venue}`.toLowerCase();
@@ -361,7 +360,7 @@ export default function HomePage() {
       }
       return true;
     });
-  }, [sorted, countryFilter, typeFilter, searchQuery, tournamentFilter]);
+  }, [sorted, dateFilter, searchQuery, tournamentFilter]);
 
   async function handleToggleSave(id: string) {
     if (!uid) { alert(t.home.loginToSave); return; }
@@ -449,8 +448,7 @@ export default function HomePage() {
                 <button
                   onClick={() => {
                     setTournamentFilter(key);
-                    setTypeFilter("all");
-                    setCountryFilter(null);
+                    setDateFilter(null);
                     setSearchQuery("");
                   }}
                   style={active ? {
@@ -496,11 +494,7 @@ export default function HomePage() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => {
-              const val = e.target.value;
-              setSearchQuery(val);
-              if (val.trim()) setCountryFilter(null);
-            }}
+            onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={t.home.searchPlaceholder}
             className="fz-search"
             style={{
@@ -538,183 +532,76 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Filtros de tipo y país — solo para World Cup */}
-        {tournamentFilter === "world_cup_2026" && <>
-        <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap", position: "relative" }}>
-
-          {/* Overlay para cerrar tooltip al tocar fuera */}
-          {tooltip && (
-            <div
-              onClick={() => setTooltip(null)}
-              style={{ position: "fixed", inset: 0, zIndex: 90 }}
-            />
-          )}
-
-          {/* Todos */}
-          <button
-            onClick={() => setTypeFilter("all")}
+        {/* Filtro por fecha */}
+        <style>{`.fz-date::-webkit-calendar-picker-indicator { filter: invert(0.4) sepia(1) hue-rotate(180deg); cursor: pointer; }`}</style>
+        <div style={{ marginBottom: "16px" }}>
+          {/* Chips rápidos */}
+          <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+            {(["Hoy", "Mañana"] as const).map((label, i) => {
+              const iso = isoFromToday(i);
+              const active = dateFilter === iso;
+              return (
+                <button
+                  key={label}
+                  onClick={() => setDateFilter(active ? null : iso)}
+                  style={{
+                    background: active ? "#f0c040" : "#110f1a",
+                    border: `1px solid ${active ? "#f0c040" : "#2a2010"}`,
+                    color: active ? "#111" : "#8a7a50",
+                    borderRadius: "20px",
+                    padding: "7px 16px",
+                    fontSize: "13px",
+                    fontWeight: active ? 700 : 400,
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+            {dateFilter && (
+              <button
+                onClick={() => setDateFilter(null)}
+                aria-label="Limpiar filtro de fecha"
+                style={{
+                  background: "none",
+                  border: "1px solid #2a2010",
+                  color: "#6677aa",
+                  borderRadius: "20px",
+                  padding: "7px 12px",
+                  fontSize: "13px",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  marginLeft: "auto",
+                }}
+              >
+                ✕ Limpiar
+              </button>
+            )}
+          </div>
+          {/* Selector de fecha — abre picker nativo en iOS/Android */}
+          <input
+            type="date"
+            min="2026-06-11"
+            max="2026-07-19"
+            value={dateFilter ?? ""}
+            onChange={(e) => setDateFilter(e.target.value || null)}
+            className="fz-date"
             style={{
-              background: typeFilter === "all" ? "#f0c040" : "#110f1a",
-              border: `1px solid ${typeFilter === "all" ? "#f0c040" : "#2a2010"}`,
-              color: typeFilter === "all" ? "#fff" : "#8a7a50",
-              borderRadius: "20px",
-              padding: "7px 16px",
-              fontSize: "13px",
-              fontWeight: typeFilter === "all" ? 700 : 400,
+              width: "100%",
+              background: "#110f1a",
+              border: `1px solid ${dateFilter ? "#f0c040" : "#2a2010"}`,
+              color: dateFilter ? "#f0c040" : "#4a5a7a",
+              borderRadius: "12px",
+              padding: "10px 14px",
+              fontSize: "14px",
+              outline: "none",
+              boxSizing: "border-box",
               cursor: "pointer",
-              whiteSpace: "nowrap",
             }}
-          >
-            {t.home.filterAll}
-          </button>
-
-          {/* Fan Festival */}
-          <div style={{ position: "relative", zIndex: tooltip === "fan_festival" ? 100 : "auto" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <button
-                onClick={() => setTypeFilter("fan_festival")}
-                style={{
-                  background: typeFilter === "fan_festival" ? "#f0c040" : "#110f1a",
-                  border: `1px solid ${typeFilter === "fan_festival" ? "#f0c040" : "#2a2010"}`,
-                  color: typeFilter === "fan_festival" ? "#fff" : "#8a7a50",
-                  borderRadius: "20px",
-                  padding: "7px 16px",
-                  fontSize: "13px",
-                  fontWeight: typeFilter === "fan_festival" ? 700 : 400,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {t.home.filterFanFestival}
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setTooltip(tooltip === "fan_festival" ? null : "fan_festival"); }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#6677aa",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                  padding: "2px",
-                  lineHeight: 1,
-                  flexShrink: 0,
-                }}
-                aria-label={t.home.ariaInfoFestival}
-              >
-                ⓘ
-              </button>
-            </div>
-            {tooltip === "fan_festival" && (
-              <div style={{
-                position: "absolute",
-                top: "calc(100% + 8px)",
-                left: 0,
-                zIndex: 100,
-                background: "#0e1a2e",
-                border: "1px solid #3d2f18",
-                borderRadius: "12px",
-                padding: "12px 14px",
-                fontSize: "12px",
-                color: "#c8d8f0",
-                lineHeight: 1.5,
-                width: "240px",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-              }}>
-                {t.home.tooltipFanFestival}
-              </div>
-            )}
-          </div>
-
-          {/* Fan Zone */}
-          <div style={{ position: "relative", zIndex: tooltip === "fan_zone" ? 100 : "auto" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-              <button
-                onClick={() => setTypeFilter("fan_zone")}
-                style={{
-                  background: typeFilter === "fan_zone" ? "#f0c040" : "#110f1a",
-                  border: `1px solid ${typeFilter === "fan_zone" ? "#f0c040" : "#2a2010"}`,
-                  color: typeFilter === "fan_zone" ? "#fff" : "#8a7a50",
-                  borderRadius: "20px",
-                  padding: "7px 16px",
-                  fontSize: "13px",
-                  fontWeight: typeFilter === "fan_zone" ? 700 : 400,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {t.home.filterFanZone}
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); setTooltip(tooltip === "fan_zone" ? null : "fan_zone"); }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#6677aa",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                  padding: "2px",
-                  lineHeight: 1,
-                  flexShrink: 0,
-                }}
-                aria-label={t.home.ariaInfoZone}
-              >
-                ⓘ
-              </button>
-            </div>
-            {tooltip === "fan_zone" && (
-              <div style={{
-                position: "absolute",
-                top: "calc(100% + 8px)",
-                left: 0,
-                zIndex: 100,
-                background: "#0e1a2e",
-                border: "1px solid #3d2f18",
-                borderRadius: "12px",
-                padding: "12px 14px",
-                fontSize: "12px",
-                color: "#c8d8f0",
-                lineHeight: 1.5,
-                width: "240px",
-                boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-              }}>
-                {t.home.tooltipFanZone}
-              </div>
-            )}
-          </div>
-
+          />
         </div>
-
-        {/* Fila 2: filtro por país */}
-        <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-          {([
-            { key: "mexico",   label: t.home.countryMexico },
-            { key: "usa",      label: t.home.countryUSA },
-            { key: "canada",   label: t.home.countryCanada },
-            { key: "bay_area", label: "🌉 Bay Area" },
-          ] as const).map(({ key, label }) => {
-            const active = countryFilter === key;
-            return (
-              <button
-                key={key}
-                onClick={() => { setCountryFilter(key); setSearchQuery(""); }}
-                style={{
-                  background: active ? "#f0c040" : "#110f1a",
-                  border: `1px solid ${active ? "#f0c040" : "#2a2010"}`,
-                  color: active ? "#fff" : "#8a7a50",
-                  borderRadius: "20px",
-                  padding: "7px 16px",
-                  fontSize: "13px",
-                  fontWeight: active ? 700 : 400,
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-        </>}
 
         {loading ? (
           <div style={{ color: "#8a7a50", fontSize: "13px", textAlign: "center", paddingTop: "40px" }}>

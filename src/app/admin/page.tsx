@@ -16,7 +16,7 @@ import {
   type FanZoneCountry,
 } from "@/lib/firestore/fanzones";
 import { seedWorldTeams } from "@/lib/firestore/seedTeams";
-import { seedFanZones, seedNewFanZones, seedCdmxGdlFanZones, seedCanadaFanZones, seedBayAreaNewFanZones, patchFanZones, seedUsaExpansion2026, patchUsaEntryTypes, seedMexicoExpansion2026, patchMexicoEntryTypes, seedCanadaExpansion2026, patchCanadaEntryTypes, seedBayAreaExpansion2026, patchBayAreaEntryTypes } from "@/lib/firestore/seedFanZones";
+import { seedFanZones, seedNewFanZones, seedBayAreaNewFanZones, patchFanZones, seedBayAreaExpansion2026, patchBayAreaEntryTypes, deleteChampionsSplashThrive, listNonBayAreaFanZones, deleteNonBayAreaFanZones } from "@/lib/firestore/seedFanZones";
 import {
   collection,
   doc,
@@ -729,14 +729,14 @@ export default function AdminPage() {
   const [migrating, setMigrating] = useState(false);
   const [migrateMsg, setMigrateMsg] = useState("");
   const [syncingFZ, setSyncingFZ] = useState(false);
-  const [syncingExpansion, setSyncingExpansion] = useState(false);
-  const [expansionMsg, setExpansionMsg] = useState("");
-  const [syncingMxExpansion, setSyncingMxExpansion] = useState(false);
-  const [mxExpansionMsg, setMxExpansionMsg] = useState("");
-  const [syncingCaExpansion, setSyncingCaExpansion] = useState(false);
-  const [caExpansionMsg, setCaExpansionMsg] = useState("");
   const [syncingBaExpansion, setSyncingBaExpansion] = useState(false);
   const [baExpansionMsg, setBaExpansionMsg] = useState("");
+  const [deletingChampions, setDeletingChampions] = useState(false);
+  const [championsMsg, setChampionsMsg] = useState("");
+  const [listingNonBa, setListingNonBa] = useState(false);
+  const [nonBaList, setNonBaList] = useState<Array<{ id: string; name: string; country: string }> | null>(null);
+  const [deletingNonBa, setDeletingNonBa] = useState(false);
+  const [nonBaDeleteMsg, setNonBaDeleteMsg] = useState("");
 
   // Users list
   const [users, setUsers] = useState<AppUser[]>([]);
@@ -1112,8 +1112,6 @@ export default function AdminPage() {
                     try {
                       await seedFanZones();
                       await seedNewFanZones();
-                      await seedCdmxGdlFanZones();
-                      await seedCanadaFanZones();
                       await seedBayAreaNewFanZones();
                       await patchFanZones();
                       alert("Fan Zones sincronizados correctamente");
@@ -1128,69 +1126,6 @@ export default function AdminPage() {
                   style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
                 >
                   {syncingFZ ? "Sincronizando…" : "🔄 Sincronizar Fan Zones"}
-                </button>
-                <button
-                  disabled={syncingExpansion}
-                  onClick={async () => {
-                    setSyncingExpansion(true);
-                    setExpansionMsg("");
-                    try {
-                      const added = await seedUsaExpansion2026();
-                      const updated = await patchUsaEntryTypes();
-                      setExpansionMsg(`✓ ${added} documentos añadidos · ${updated} actualizados con entryType`);
-                      fetchFanZones();
-                    } catch (e: any) {
-                      setExpansionMsg(`Error: ${e?.message ?? "desconocido"}`);
-                    } finally {
-                      setSyncingExpansion(false);
-                    }
-                  }}
-                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
-                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
-                >
-                  {syncingExpansion ? "Procesando…" : "🇺🇸 USA Expansion + EntryTypes"}
-                </button>
-                <button
-                  disabled={syncingMxExpansion}
-                  onClick={async () => {
-                    setSyncingMxExpansion(true);
-                    setMxExpansionMsg("");
-                    try {
-                      const added = await seedMexicoExpansion2026();
-                      const updated = await patchMexicoEntryTypes();
-                      setMxExpansionMsg(`✓ ${added} documento añadido · ${updated} actualizados con entryType`);
-                      fetchFanZones();
-                    } catch (e: any) {
-                      setMxExpansionMsg(`Error: ${e?.message ?? "desconocido"}`);
-                    } finally {
-                      setSyncingMxExpansion(false);
-                    }
-                  }}
-                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
-                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
-                >
-                  {syncingMxExpansion ? "Procesando…" : "🇲🇽 México Expansion + EntryTypes"}
-                </button>
-                <button
-                  disabled={syncingCaExpansion}
-                  onClick={async () => {
-                    setSyncingCaExpansion(true);
-                    setCaExpansionMsg("");
-                    try {
-                      const added = await seedCanadaExpansion2026();
-                      const updated = await patchCanadaEntryTypes();
-                      setCaExpansionMsg(`✓ ${added} documentos añadidos · ${updated} actualizados con entryType`);
-                      fetchFanZones();
-                    } catch (e: any) {
-                      setCaExpansionMsg(`Error: ${e?.message ?? "desconocido"}`);
-                    } finally {
-                      setSyncingCaExpansion(false);
-                    }
-                  }}
-                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
-                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
-                >
-                  {syncingCaExpansion ? "Procesando…" : "🇨🇦 Canadá Expansion + EntryTypes"}
                 </button>
                 <button
                   disabled={syncingBaExpansion}
@@ -1213,14 +1148,49 @@ export default function AdminPage() {
                 >
                   {syncingBaExpansion ? "Procesando…" : "🌉 Bay Area Expansion + EntryTypes"}
                 </button>
+                <button
+                  disabled={deletingChampions}
+                  onClick={async () => {
+                    if (!confirm("¿Eliminar permanentemente champions-splash-thrive de Firestore?")) return;
+                    setDeletingChampions(true);
+                    setChampionsMsg("");
+                    try {
+                      await deleteChampionsSplashThrive();
+                      setChampionsMsg("✓ champions-splash-thrive eliminado");
+                      fetchFanZones();
+                    } catch (e: any) {
+                      setChampionsMsg(`Error: ${e?.message ?? "desconocido"}`);
+                    } finally {
+                      setDeletingChampions(false);
+                    }
+                  }}
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                  style={{ border: '1px solid #3a1010', backgroundColor: '#1a0808', color: '#f04040' }}
+                >
+                  {deletingChampions ? "Eliminando…" : "🗑 Borrar champions-splash-thrive"}
+                </button>
+                <button
+                  disabled={listingNonBa}
+                  onClick={async () => {
+                    setListingNonBa(true);
+                    setNonBaList(null);
+                    setNonBaDeleteMsg("");
+                    try {
+                      const list = await listNonBayAreaFanZones();
+                      setNonBaList(list);
+                    } catch (e: any) {
+                      setNonBaDeleteMsg(`Error al listar: ${e?.message ?? "desconocido"}`);
+                    } finally {
+                      setListingNonBa(false);
+                    }
+                  }}
+                  className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                  style={{ border: '1px solid #2a2010', backgroundColor: '#110f1a', color: '#f0c040' }}
+                >
+                  {listingNonBa ? "Consultando…" : "🔍 Listar fuera del Bay Area"}
+                </button>
               </div>
             </div>
-
-            {caExpansionMsg && (
-              <div className="mb-3">
-                <p className="text-xs" style={{ color: '#f0c040' }}>{caExpansionMsg}</p>
-              </div>
-            )}
 
             {baExpansionMsg && (
               <div className="mb-3">
@@ -1228,15 +1198,56 @@ export default function AdminPage() {
               </div>
             )}
 
-            {expansionMsg && (
+            {championsMsg && (
               <div className="mb-3">
-                <p className="text-xs" style={{ color: '#f0c040' }}>{expansionMsg}</p>
+                <p className="text-xs" style={{ color: championsMsg.startsWith("Error") ? '#f04040' : '#40c040' }}>{championsMsg}</p>
               </div>
             )}
 
-            {mxExpansionMsg && (
+            {nonBaList !== null && (
+              <div className="mb-3 rounded-lg p-3" style={{ border: '1px solid #2a2010', backgroundColor: '#0d0b14' }}>
+                <p className="text-xs font-semibold mb-2" style={{ color: '#f0c040' }}>
+                  Fuera del Bay Area ({nonBaList.length} documentos):
+                </p>
+                {nonBaList.length === 0 ? (
+                  <p className="text-xs text-zinc-400">Ninguno — ya está todo limpio.</p>
+                ) : (
+                  <>
+                    <ul className="text-xs text-zinc-300 space-y-0.5 mb-3 max-h-40 overflow-y-auto">
+                      {nonBaList.map((z) => (
+                        <li key={z.id}><span className="text-zinc-500">{z.country}</span> · <span className="font-mono">{z.id}</span> · {z.name}</li>
+                      ))}
+                    </ul>
+                    <button
+                      disabled={deletingNonBa}
+                      onClick={async () => {
+                        if (!confirm(`¿Eliminar permanentemente ${nonBaList.length} documentos fuera del Bay Area? Esta acción es irreversible.`)) return;
+                        setDeletingNonBa(true);
+                        setNonBaDeleteMsg("");
+                        try {
+                          const deleted = await deleteNonBayAreaFanZones();
+                          setNonBaDeleteMsg(`✓ ${deleted.length} documentos eliminados`);
+                          setNonBaList(null);
+                          fetchFanZones();
+                        } catch (e: any) {
+                          setNonBaDeleteMsg(`Error: ${e?.message ?? "desconocido"}`);
+                        } finally {
+                          setDeletingNonBa(false);
+                        }
+                      }}
+                      className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+                      style={{ border: '1px solid #3a1010', backgroundColor: '#1a0808', color: '#f04040' }}
+                    >
+                      {deletingNonBa ? "Eliminando…" : `🗑 Confirmar: borrar ${nonBaList.length} documentos`}
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+
+            {nonBaDeleteMsg && (
               <div className="mb-3">
-                <p className="text-xs" style={{ color: '#f0c040' }}>{mxExpansionMsg}</p>
+                <p className="text-xs" style={{ color: nonBaDeleteMsg.startsWith("Error") ? '#f04040' : '#40c040' }}>{nonBaDeleteMsg}</p>
               </div>
             )}
 
