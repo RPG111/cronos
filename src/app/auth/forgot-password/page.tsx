@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { auth } from "@/lib/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
+import { useTranslation } from "@/lib/i18n";
 
 const labelStyle: React.CSSProperties = {
   display: "block",
@@ -28,6 +29,7 @@ const inputStyle: React.CSSProperties = {
 };
 
 export default function ForgotPasswordPage() {
+  const t = useTranslation();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -36,7 +38,7 @@ export default function ForgotPasswordPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
-    if (!email.trim()) { setErrorMsg("El email es obligatorio."); return; }
+    if (!email.trim()) { setErrorMsg(t.auth.emailRequired); return; }
     try {
       setLoading(true);
       await sendPasswordResetEmail(auth, email.trim());
@@ -44,11 +46,11 @@ export default function ForgotPasswordPage() {
     } catch (err: any) {
       const code = err?.code ?? "";
       if (code === "auth/user-not-found" || code === "auth/invalid-credential") {
-        setErrorMsg("No existe una cuenta con este email.");
+        setErrorMsg(t.auth.errResetNoAccount);
       } else if (code === "auth/invalid-email") {
-        setErrorMsg("Email inválido.");
+        setErrorMsg(t.auth.errResetInvalidEmail);
       } else {
-        setErrorMsg("Error al enviar el email. Intenta de nuevo.");
+        setErrorMsg(t.auth.errResetDefault);
       }
     } finally {
       setLoading(false);
@@ -65,7 +67,6 @@ export default function ForgotPasswordPage() {
       justifyContent: "center",
       background: "#09080f",
     }}>
-      {/* Fondo */}
       <img
         src="/images/stadium.jpg"
         alt=""
@@ -80,7 +81,6 @@ export default function ForgotPasswordPage() {
       />
       <div style={{ position: "absolute", inset: 0, background: "rgba(8,12,20,0.85)" }} />
 
-      {/* Card */}
       <div style={{
         position: "relative",
         zIndex: 10,
@@ -91,7 +91,6 @@ export default function ForgotPasswordPage() {
         maxWidth: "420px",
         width: "92%",
       }}>
-        {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "6px" }}>
           <span className="logo-cronos select-none" style={{ fontSize: "32px" }} />
         </div>
@@ -103,7 +102,7 @@ export default function ForgotPasswordPage() {
           fontWeight: 700,
           margin: "0 0 6px",
         }}>
-          Restablecer contraseña
+          {t.auth.forgotPasswordTitle}
         </h1>
         <p style={{
           textAlign: "center",
@@ -111,7 +110,7 @@ export default function ForgotPasswordPage() {
           fontSize: "13px",
           marginBottom: "28px",
         }}>
-          Te enviaremos un email con instrucciones
+          {t.auth.forgotPasswordSubtitle}
         </p>
 
         {sent ? (
@@ -124,7 +123,7 @@ export default function ForgotPasswordPage() {
               color: "#f0c040",
               fontSize: "14px",
             }}>
-              ✓ Revisa tu bandeja de entrada y sigue las instrucciones.
+              {t.auth.resetSentSuccess}
             </div>
             <a
               href="/auth/login"
@@ -135,13 +134,13 @@ export default function ForgotPasswordPage() {
                 fontWeight: 600,
               }}
             >
-              ← Volver al login
+              {t.auth.backToLoginArrow}
             </a>
           </div>
         ) : (
           <form onSubmit={handleSubmit} style={{ display: "grid", gap: "18px" }}>
             <div>
-              <label style={labelStyle}>Email</label>
+              <label style={labelStyle}>{t.auth.email}</label>
               <input
                 type="email"
                 value={email}
@@ -182,7 +181,7 @@ export default function ForgotPasswordPage() {
                 opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? "Enviando…" : "Enviar instrucciones"}
+              {loading ? t.auth.sending : t.auth.sendInstructions}
             </button>
 
             <a
@@ -194,7 +193,7 @@ export default function ForgotPasswordPage() {
                 textDecoration: "none",
               }}
             >
-              ← Volver al login
+              {t.auth.backToLoginArrow}
             </a>
           </form>
         )}

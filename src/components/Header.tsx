@@ -33,7 +33,7 @@ export default function Header({ onOpenLead: _onOpenLead, isLoggedIn, onLogout }
       router.push("/auth/login");
     } catch (e) {
       console.error(e);
-      alert("No se pudo cerrar sesión.");
+      alert(t.auth.logoutError);
     }
   }
 

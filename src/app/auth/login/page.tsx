@@ -8,6 +8,7 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
 } from "firebase/auth";
+import { useTranslation, type Translations } from "@/lib/i18n";
 
 const labelStyle: React.CSSProperties = {
   display: "block",
@@ -37,36 +38,31 @@ function phoneToFakeEmail(phone: string): string {
   return `${digits}@cronos.phone`;
 }
 
-function authErrorToSpanish(code: string, mode: "email" | "phone" = "email"): string {
+function authLoginError(code: string, mode: "email" | "phone", t: Translations): string {
   switch (code) {
     case "auth/user-not-found":
     case "auth/invalid-credential":
-      return mode === "phone"
-        ? "No existe una cuenta con este teléfono"
-        : "No existe una cuenta con este email";
+      return mode === "phone" ? t.auth.errNoAccountPhone : t.auth.errNoAccountEmail;
     case "auth/wrong-password":
-      return "Contraseña incorrecta";
+      return t.auth.errWrongPassword;
     case "auth/invalid-email":
-      return mode === "phone"
-        ? "Número de teléfono inválido"
-        : "Email inválido";
+      return mode === "phone" ? t.auth.errInvalidPhone : t.auth.errInvalidEmail;
     case "auth/too-many-requests":
-      return "Demasiados intentos. Intenta más tarde";
+      return t.auth.errTooManyRequests;
     default:
-      return "Error al iniciar sesión. Verifica tus datos.";
+      return t.auth.errLoginDefault;
   }
 }
 
 export default function LoginPage() {
   const router = useRouter();
+  const t = useTranslation();
   const [mode, setMode] = useState<"email" | "phone">("email");
 
-  // Email mode
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // Phone mode
   const [phone, setPhone] = useState("");
   const [phonePassword, setPhonePassword] = useState("");
   const [showPhonePassword, setShowPhonePassword] = useState(false);
@@ -84,14 +80,14 @@ export default function LoginPage() {
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
-    if (!email.trim()) { setErrorMsg("El email es obligatorio."); return; }
-    if (!password)     { setErrorMsg("La contraseña es obligatoria."); return; }
+    if (!email.trim()) { setErrorMsg(t.auth.emailRequired); return; }
+    if (!password)     { setErrorMsg(t.auth.passwordRequired); return; }
     try {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email.trim(), password);
       router.replace("/home");
     } catch (err: any) {
-      setErrorMsg(authErrorToSpanish(err?.code ?? "", "email"));
+      setErrorMsg(authLoginError(err?.code ?? "", "email", t));
     } finally {
       setLoading(false);
     }
@@ -100,15 +96,15 @@ export default function LoginPage() {
   async function handlePhoneLogin(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
-    if (!phone.trim())    { setErrorMsg("El teléfono es obligatorio."); return; }
-    if (!phonePassword)   { setErrorMsg("La contraseña es obligatoria."); return; }
+    if (!phone.trim())  { setErrorMsg(t.auth.phoneRequired); return; }
+    if (!phonePassword) { setErrorMsg(t.auth.passwordRequired); return; }
     try {
       setLoading(true);
       const fakeEmail = phoneToFakeEmail(phone.trim());
       await signInWithEmailAndPassword(auth, fakeEmail, phonePassword);
       router.replace("/home");
     } catch (err: any) {
-      setErrorMsg(authErrorToSpanish(err?.code ?? "", "phone"));
+      setErrorMsg(authLoginError(err?.code ?? "", "phone", t));
     } finally {
       setLoading(false);
     }
@@ -129,7 +125,6 @@ export default function LoginPage() {
       justifyContent: "center",
       background: "#09080f",
     }}>
-      {/* Fondo */}
       <img
         src="/images/stadium.jpg"
         alt=""
@@ -144,7 +139,6 @@ export default function LoginPage() {
       />
       <div style={{ position: "absolute", inset: 0, background: "rgba(8,12,20,0.85)" }} />
 
-      {/* Card */}
       <div style={{
         position: "relative",
         zIndex: 10,
@@ -155,12 +149,10 @@ export default function LoginPage() {
         maxWidth: "420px",
         width: "92%",
       }}>
-        {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: "6px" }}>
           <span className="logo-cronos select-none" style={{ fontSize: "32px" }} />
         </div>
 
-        {/* Subtítulo */}
         <p style={{
           textAlign: "center",
           color: "#8a7a50",
@@ -169,10 +161,9 @@ export default function LoginPage() {
           textTransform: "uppercase",
           marginBottom: "20px",
         }}>
-          eventos deportivos · bay area
+          {t.auth.tagline}
         </p>
 
-        {/* Toggle email / phone */}
         <div style={{
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
@@ -200,7 +191,7 @@ export default function LoginPage() {
                 transition: "all 0.15s",
               }}
             >
-              {m === "email" ? "📧 Con correo" : "📱 Con teléfono"}
+              {m === "email" ? `📧 ${t.auth.withEmail}` : `📱 ${t.auth.withPhone}`}
             </button>
           ))}
         </div>
@@ -209,7 +200,7 @@ export default function LoginPage() {
         {mode === "email" && (
           <form onSubmit={handleEmailLogin} style={{ display: "grid", gap: "18px" }}>
             <div>
-              <label style={labelStyle}>Email</label>
+              <label style={labelStyle}>{t.auth.email}</label>
               <input
                 type="email"
                 value={email}
@@ -221,13 +212,13 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Contraseña</label>
+              <label style={labelStyle}>{t.auth.password}</label>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Tu contraseña"
+                  placeholder={t.auth.yourPassword}
                   style={{ ...inputStyle, paddingRight: "44px" }}
                   autoComplete="current-password"
                 />
@@ -247,7 +238,7 @@ export default function LoginPage() {
                     padding: "4px",
                   }}
                 >
-                  {showPassword ? "Ocultar" : "Ver"}
+                  {showPassword ? t.auth.hide : t.auth.show}
                 </button>
               </div>
             </div>
@@ -270,20 +261,20 @@ export default function LoginPage() {
                 opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? "Ingresando…" : "Iniciar sesión"}
+              {loading ? t.auth.signingIn : t.auth.login}
             </button>
 
             <a
               href="/auth/forgot-password"
               style={{ color: "#8a7a50", fontSize: "13px", textAlign: "center", textDecoration: "none" }}
             >
-              ¿Olvidaste tu contraseña?
+              {t.auth.forgotPassword}
             </a>
 
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
-              ¿No tienes cuenta?{" "}
+              {t.auth.noAccount}{" "}
               <a href="/auth/register" style={{ color: "#f0c040", textDecoration: "none" }}>
-                Regístrate aquí
+                {t.auth.registerHere}
               </a>
             </p>
           </form>
@@ -293,7 +284,7 @@ export default function LoginPage() {
         {mode === "phone" && (
           <form onSubmit={handlePhoneLogin} style={{ display: "grid", gap: "18px" }}>
             <div>
-              <label style={labelStyle}>Teléfono</label>
+              <label style={labelStyle}>{t.auth.phone}</label>
               <input
                 type="tel"
                 value={phone}
@@ -305,13 +296,13 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label style={labelStyle}>Contraseña</label>
+              <label style={labelStyle}>{t.auth.password}</label>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPhonePassword ? "text" : "password"}
                   value={phonePassword}
                   onChange={(e) => setPhonePassword(e.target.value)}
-                  placeholder="Tu contraseña"
+                  placeholder={t.auth.yourPassword}
                   style={{ ...inputStyle, paddingRight: "44px" }}
                   autoComplete="current-password"
                 />
@@ -331,7 +322,7 @@ export default function LoginPage() {
                     padding: "4px",
                   }}
                 >
-                  {showPhonePassword ? "Ocultar" : "Ver"}
+                  {showPhonePassword ? t.auth.hide : t.auth.show}
                 </button>
               </div>
             </div>
@@ -354,13 +345,13 @@ export default function LoginPage() {
                 opacity: loading ? 0.7 : 1,
               }}
             >
-              {loading ? "Ingresando…" : "Iniciar sesión"}
+              {loading ? t.auth.signingIn : t.auth.login}
             </button>
 
             <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
-              ¿No tienes cuenta?{" "}
+              {t.auth.noAccount}{" "}
               <a href="/auth/register" style={{ color: "#f0c040", textDecoration: "none" }}>
-                Regístrate aquí
+                {t.auth.registerHere}
               </a>
             </p>
           </form>

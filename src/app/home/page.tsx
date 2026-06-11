@@ -1,7 +1,7 @@
 // src/app/home/page.tsx
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { app as firebaseApp } from "../../lib/firebase";
@@ -34,6 +34,14 @@ function isoFromToday(offsetDays: number): string {
   const d = new Date();
   d.setDate(d.getDate() + offsetDays);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatDateShort(iso: string, lang: string): string {
+  const [, m, d] = iso.split("-").map(Number);
+  const monthsEs = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  const monthsEn = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const months = lang === "en" ? monthsEn : monthsEs;
+  return lang === "en" ? `${months[m-1]} ${d}` : `${d} ${months[m-1]}`;
 }
 
 // ── Countdown ────────────────────────────────────────────────────────────────
@@ -195,24 +203,24 @@ function FanZoneCard({
         {zone.status === "coming_soon" ? (
           <div style={{ display: "flex", marginBottom: "10px" }}>
             <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(30,60,120,0.4)", border: "1px solid rgba(100,150,255,0.25)", color: "#8aabdd", whiteSpace: "nowrap" }}>
-              🔜 Próximamente
+              {t.home.comingSoon}
             </span>
           </div>
         ) : (zone.food || zone.alcohol != null || zone.entry) && (
           <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
             {zone.food && (
               <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#c8d8f0", whiteSpace: "nowrap" }}>
-                🍔 Comida disponible
+                {t.home.foodAvailable}
               </span>
             )}
             {zone.alcohol === true && (
               <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#c8d8f0", whiteSpace: "nowrap" }}>
-                🍺 Alcohol disponible
+                {t.home.alcoholAvailable}
               </span>
             )}
             {zone.alcohol === false && (
               <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#c8d8f0", whiteSpace: "nowrap" }}>
-                🚫 Sin alcohol
+                {t.home.noAlcohol}
               </span>
             )}
             {zone.entry && (() => {
@@ -221,10 +229,10 @@ function FanZoneCard({
               const isRegistro = e.includes("registro") || e.includes("rsvp") || e.includes("ticket");
               const priceMatch = zone.entry.match(/\$[\d,.]+/);
               let label: string;
-              if (priceMatch) label = `📋 Requiere registro · ${priceMatch[0]}`;
-              else if (isGratis && isRegistro) label = "📋 Gratis · Requiere registro";
-              else if (isGratis) label = "💰 Gratis · Walk-in";
-              else label = `📋 Requiere registro`;
+              if (priceMatch) label = t.home.entryRegistrationPrice + priceMatch[0];
+              else if (isGratis && isRegistro) label = t.home.entryFreeRegistration;
+              else if (isGratis) label = t.home.entryFreeWalkIn;
+              else label = t.home.entryRegistration;
               return (
                 <span style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "20px", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "#c8d8f0", whiteSpace: "nowrap" }}>
                   {label}
@@ -295,9 +303,11 @@ export default function HomePage() {
   const [leadOpen, setLeadOpen] = useState(false);
 
   const { userLat, userLng } = useGeoStore();
+  const { lang } = useLangStore();
   const countdown = useCountdown();
   const [mounted, setMounted] = useState(false);
   const t = useTranslation();
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => setMounted(true), []);
 
@@ -527,74 +537,97 @@ export default function HomePage() {
         </div>
 
         {/* Filtro por fecha */}
-        <style>{`.fz-date::-webkit-calendar-picker-indicator { filter: invert(0.4) sepia(1) hue-rotate(180deg); cursor: pointer; }`}</style>
-        <div style={{ marginBottom: "16px" }}>
-          {/* Chips rápidos */}
-          <div style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
-            {(["Hoy", "Mañana"] as const).map((label, i) => {
-              const iso = isoFromToday(i);
-              const active = dateFilter === iso;
-              return (
-                <button
-                  key={label}
-                  onClick={() => setDateFilter(active ? null : iso)}
-                  style={{
-                    background: active ? "#f0c040" : "#110f1a",
-                    border: `1px solid ${active ? "#f0c040" : "#2a2010"}`,
-                    color: active ? "#111" : "#8a7a50",
-                    borderRadius: "20px",
-                    padding: "7px 16px",
-                    fontSize: "13px",
-                    fontWeight: active ? 700 : 400,
-                    cursor: "pointer",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-            {dateFilter && (
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center", marginBottom: "16px" }}>
+          {/* Chips Hoy / Mañana */}
+          {[t.home.today, t.home.tomorrow].map((label, i) => {
+            const iso = isoFromToday(i);
+            const active = dateFilter === iso;
+            return (
               <button
-                onClick={() => setDateFilter(null)}
-                aria-label="Limpiar filtro de fecha"
+                key={i}
+                onClick={() => setDateFilter(active ? null : iso)}
                 style={{
-                  background: "none",
-                  border: "1px solid #2a2010",
-                  color: "#6677aa",
+                  background: active ? "#f0c040" : "#110f1a",
+                  border: `1px solid ${active ? "#f0c040" : "#2a2010"}`,
+                  color: active ? "#111" : "#8a7a50",
                   borderRadius: "20px",
-                  padding: "7px 12px",
+                  padding: "7px 16px",
                   fontSize: "13px",
+                  fontWeight: active ? 700 : 400,
                   cursor: "pointer",
                   whiteSpace: "nowrap",
-                  marginLeft: "auto",
                 }}
               >
-                ✕ Limpiar
+                {label}
               </button>
-            )}
-          </div>
-          {/* Selector de fecha — abre picker nativo en iOS/Android */}
-          <input
-            type="date"
-            min="2026-06-11"
-            max="2026-07-19"
-            value={dateFilter ?? ""}
-            onChange={(e) => setDateFilter(e.target.value || null)}
-            className="fz-date"
-            style={{
-              width: "100%",
-              background: "#110f1a",
-              border: `1px solid ${dateFilter ? "#f0c040" : "#2a2010"}`,
-              color: dateFilter ? "#f0c040" : "#4a5a7a",
-              borderRadius: "12px",
-              padding: "10px 14px",
-              fontSize: "14px",
-              outline: "none",
-              boxSizing: "border-box",
-              cursor: "pointer",
-            }}
-          />
+            );
+          })}
+
+          {/* Chip date picker — overlay transparente activa picker nativo en iOS */}
+          {(() => {
+            const todayIso = isoFromToday(0);
+            const tomorrowIso = isoFromToday(1);
+            const isCustom = dateFilter !== null && dateFilter !== todayIso && dateFilter !== tomorrowIso;
+            const btnLabel = isCustom ? `📅 ${formatDateShort(dateFilter!, lang)}` : `📅 ${t.home.pickDate}`;
+            return (
+              <>
+                <div style={{ position: "relative", display: "inline-block" }}>
+                  <button
+                    type="button"
+                    style={{
+                      background: isCustom ? "#f0c040" : "#110f1a",
+                      border: `1px solid ${isCustom ? "#f0c040" : "#2a2010"}`,
+                      color: isCustom ? "#111" : "#8a7a50",
+                      borderRadius: "20px",
+                      padding: "7px 16px",
+                      fontSize: "13px",
+                      fontWeight: isCustom ? 700 : 400,
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                      display: "block",
+                    }}
+                  >
+                    {btnLabel}
+                  </button>
+                  <input
+                    ref={dateInputRef}
+                    type="date"
+                    min="2026-06-11"
+                    max="2026-07-19"
+                    value={dateFilter ?? ""}
+                    onChange={(e) => setDateFilter(e.target.value || null)}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      opacity: 0,
+                      width: "100%",
+                      height: "100%",
+                      cursor: "pointer",
+                      zIndex: 1,
+                    }}
+                  />
+                </div>
+                {isCustom && (
+                  <button
+                    onClick={() => setDateFilter(null)}
+                    aria-label={t.home.clearFilter}
+                    style={{
+                      background: "none",
+                      border: "1px solid #2a2010",
+                      color: "#6677aa",
+                      borderRadius: "20px",
+                      padding: "7px 12px",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    ✕
+                  </button>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {loading ? (

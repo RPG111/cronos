@@ -287,28 +287,26 @@ export default function FanZoneDetailPage() {
             {(zone.alcohol != null || zone.food || zone.amenities) && (
               <div style={{ marginBottom: "16px" }}>
                 <div style={{ fontSize: "13px", fontWeight: 700, color: "#8a7a50", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "10px" }}>
-                  {lang === "en" ? "What to expect?" : "¿Qué encontrarás?"}
+                  {t.detail.whatToExpect}
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                   {zone.food && (
                     <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🍔 {lang === "en" ? "Food" : "Comida"}</div>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🍔 {t.detail.food}</div>
                       <div style={{ fontSize: "13px", color: "#8a7a50", lineHeight: 1.5 }}>{zone.food}</div>
                     </div>
                   )}
                   {zone.alcohol != null && (
                     <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🍺 {lang === "en" ? "Drinks" : "Bebidas"}</div>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🍺 {t.detail.drinks}</div>
                       <div style={{ fontSize: "13px", color: "#8a7a50", lineHeight: 1.5 }}>
-                        {zone.alcohol
-                          ? (lang === "en" ? "Alcoholic beverages available" : "Bebidas alcohólicas disponibles")
-                          : (lang === "en" ? "Alcohol-free event" : "Evento sin alcohol")}
+                        {zone.alcohol ? t.detail.alcoholicAvailable : t.detail.alcoholFree}
                       </div>
                     </div>
                   )}
                   {zone.amenities && (
                     <div style={{ padding: "10px 14px", borderRadius: "10px", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🪩 {lang === "en" ? "Amenities" : "Amenidades"}</div>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "#c8d8f0", marginBottom: "4px" }}>🪩 {t.detail.amenities}</div>
                       <div style={{ fontSize: "13px", color: "#8a7a50", lineHeight: 1.5 }}>{zone.amenities}</div>
                     </div>
                   )}

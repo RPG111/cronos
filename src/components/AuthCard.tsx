@@ -8,7 +8,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import TeamsAutocomplete from "@/components/TeamsAutocomplete";
-import { useLangStore } from "@/lib/store";
+import { useTranslation, type Translations } from "@/lib/i18n";
 
 const labelStyle: React.CSSProperties = {
   display: "block",
@@ -38,30 +38,26 @@ function phoneToFakeEmail(phone: string): string {
   return `${digits}@cronos.phone`;
 }
 
-function authErrorToSpanish(code: string, mode: "email" | "phone" = "email"): string {
+function authRegisterError(code: string, mode: "email" | "phone", t: Translations): string {
   switch (code) {
     case "auth/email-already-in-use":
-      return mode === "phone"
-        ? "Ya existe una cuenta con este teléfono"
-        : "Ya existe una cuenta con este email";
+      return mode === "phone" ? t.auth.errAccountExistsPhone : t.auth.errAccountExistsEmail;
     case "auth/weak-password":
-      return "La contraseña debe tener al menos 6 caracteres";
+      return t.auth.errWeakPassword;
     case "auth/invalid-email":
-      return mode === "phone"
-        ? "Número de teléfono inválido"
-        : "Email inválido";
+      return mode === "phone" ? t.auth.errInvalidPhone : t.auth.errInvalidEmail;
     case "auth/too-many-requests":
-      return "Demasiados intentos. Intenta más tarde";
+      return t.auth.errTooManyRequests;
     default:
-      return "Error al crear la cuenta. Intenta de nuevo.";
+      return t.auth.errRegisterDefault;
   }
 }
 
 export default function AuthCard({ type: _type }: { type: "login" | "register" }) {
   const router = useRouter();
+  const t = useTranslation();
   const [mode, setMode] = useState<"email" | "phone">("email");
 
-  // Email mode state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,7 +66,6 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
   const [showConfirm, setShowConfirm] = useState(false);
   const [favoriteTeam, setFavoriteTeam] = useState("");
 
-  // Phone mode state
   const [phoneName, setPhoneName] = useState("");
   const [phone, setPhone] = useState("");
   const [phoneTeam, setPhoneTeam] = useState("");
@@ -79,7 +74,6 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
   const [showPhonePassword, setShowPhonePassword] = useState(false);
   const [showPhoneConfirm, setShowPhoneConfirm] = useState(false);
 
-  // Shared state
   const [city, setCity] = useState("");
   const [marketingConsent, setMarketingConsent] = useState(false);
 
@@ -95,15 +89,14 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
 
   function resetErrors() { setErrorMsg(null); }
 
-  // EMAIL submit
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     resetErrors();
-    if (!name.trim())            { setErrorMsg("El nombre es obligatorio."); return; }
-    if (!email.trim())           { setErrorMsg("El email es obligatorio."); return; }
-    if (!password)               { setErrorMsg("La contraseña es obligatoria."); return; }
-    if (password.length < 6)     { setErrorMsg("La contraseña debe tener al menos 6 caracteres."); return; }
-    if (password !== confirmPassword) { setErrorMsg("Las contraseñas no coinciden."); return; }
+    if (!name.trim())            { setErrorMsg(t.auth.nameRequired); return; }
+    if (!email.trim())           { setErrorMsg(t.auth.emailRequired); return; }
+    if (!password)               { setErrorMsg(t.auth.passwordRequired); return; }
+    if (password.length < 6)     { setErrorMsg(t.auth.errWeakPassword); return; }
+    if (password !== confirmPassword) { setErrorMsg(t.auth.passwordMatch); return; }
     try {
       setLoading(true);
       const result = await createUserWithEmailAndPassword(auth, email.trim(), password);
@@ -118,26 +111,25 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
       }, { merge: true });
       router.replace("/home");
     } catch (err: any) {
-      setErrorMsg(authErrorToSpanish(err?.code ?? "", "email"));
+      setErrorMsg(authRegisterError(err?.code ?? "", "email", t));
     } finally {
       setLoading(false);
     }
   }
 
-  // PHONE submit
   async function handlePhoneSubmit(e: React.FormEvent) {
     e.preventDefault();
     resetErrors();
-    if (!phoneName.trim())       { setErrorMsg("El nombre es obligatorio."); return; }
+    if (!phoneName.trim())       { setErrorMsg(t.auth.nameRequired); return; }
     const rawPhone = phone.trim();
-    if (!rawPhone)               { setErrorMsg("El teléfono es obligatorio."); return; }
+    if (!rawPhone)               { setErrorMsg(t.auth.phoneRequired); return; }
     if (rawPhone.replace(/\D/g, "").length < 10) {
-      setErrorMsg("Escribe tu teléfono con código de país, ej. +1 415 555 1234");
+      setErrorMsg(t.auth.phoneWithCountryCode);
       return;
     }
-    if (!phonePassword)          { setErrorMsg("La contraseña es obligatoria."); return; }
-    if (phonePassword.length < 6){ setErrorMsg("La contraseña debe tener al menos 6 caracteres."); return; }
-    if (phonePassword !== phoneConfirmPassword) { setErrorMsg("Las contraseñas no coinciden."); return; }
+    if (!phonePassword)          { setErrorMsg(t.auth.passwordRequired); return; }
+    if (phonePassword.length < 6){ setErrorMsg(t.auth.errWeakPassword); return; }
+    if (phonePassword !== phoneConfirmPassword) { setErrorMsg(t.auth.passwordMatch); return; }
     try {
       setLoading(true);
       const fakeEmail = phoneToFakeEmail(rawPhone);
@@ -153,7 +145,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
       }, { merge: true });
       router.replace("/home");
     } catch (err: any) {
-      setErrorMsg(authErrorToSpanish(err?.code ?? "", "phone"));
+      setErrorMsg(authRegisterError(err?.code ?? "", "phone", t));
     } finally {
       setLoading(false);
     }
@@ -173,12 +165,10 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
       maxWidth: "420px",
       width: "92%",
     }}>
-      {/* Logo */}
       <div style={{ textAlign: "center", marginBottom: "6px" }}>
         <span className="logo-cronos select-none" style={{ fontSize: "32px" }} />
       </div>
 
-      {/* Subtítulo */}
       <p style={{
         textAlign: "center",
         color: "#8a7a50",
@@ -187,10 +177,9 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
         textTransform: "uppercase",
         marginBottom: "20px",
       }}>
-        Eventos deportivos · Bay Area
+        {t.auth.tagline}
       </p>
 
-      {/* Toggle email / phone */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
@@ -218,7 +207,7 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
               transition: "all 0.15s",
             }}
           >
-            {m === "email" ? "📧 Con correo" : "📱 Con teléfono"}
+            {m === "email" ? `📧 ${t.auth.withEmail}` : `📱 ${t.auth.withPhone}`}
           </button>
         ))}
       </div>
@@ -227,82 +216,82 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
       {mode === "email" && (
         <form onSubmit={handleEmailSubmit} style={{ display: "grid", gap: "16px" }}>
           <div>
-            <label style={labelStyle}>Nombre completo</label>
+            <label style={labelStyle}>{t.auth.fullName}</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              placeholder="Tu nombre" style={inputStyle} autoComplete="name" />
+              placeholder={t.auth.yourName} style={inputStyle} autoComplete="name" />
           </div>
 
           <div>
-            <label style={labelStyle}>Email</label>
+            <label style={labelStyle}>{t.auth.email}</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
               placeholder="tu@email.com" style={inputStyle} autoComplete="email" />
           </div>
 
           <div>
-            <label style={labelStyle}>Contraseña</label>
+            <label style={labelStyle}>{t.auth.password}</label>
             <div style={{ position: "relative" }}>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder={t.auth.passwordMin}
                 style={{ ...inputStyle, paddingRight: "44px" }}
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowPassword((v) => !v)}
                 style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a3d28", fontSize: "13px", padding: "4px" }}>
-                {showPassword ? "Ocultar" : "Ver"}
+                {showPassword ? t.auth.hide : t.auth.show}
               </button>
             </div>
           </div>
 
           <div>
-            <label style={labelStyle}>Confirmar contraseña</label>
+            <label style={labelStyle}>{t.auth.confirmPassword}</label>
             <div style={{ position: "relative" }}>
               <input
                 type={showConfirm ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repite tu contraseña"
+                placeholder={t.auth.yourPassword}
                 style={{ ...inputStyle, paddingRight: "44px" }}
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowConfirm((v) => !v)}
                 style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a3d28", fontSize: "13px", padding: "4px" }}>
-                {showConfirm ? "Ocultar" : "Ver"}
+                {showConfirm ? t.auth.hide : t.auth.show}
               </button>
             </div>
           </div>
 
           <div>
-            <label style={labelStyle}>Equipo favorito <span style={{ color: "#4a3d28", fontWeight: 400 }}>(opcional)</span></label>
+            <label style={labelStyle}>{t.auth.favoriteTeam} <span style={{ color: "#4a3d28", fontWeight: 400 }}>{t.auth.optional}</span></label>
             <TeamsAutocomplete
               value={favoriteTeam}
               onChange={setFavoriteTeam}
-              placeholder="Ej. América, Chivas, Barcelona..."
+              placeholder={t.auth.favoriteTeamPlaceholder}
             />
           </div>
 
           <div>
-            <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#4a3d28", fontWeight: 400 }}>(opcional)</span></label>
+            <label style={labelStyle}>{t.auth.cityLabel} <span style={{ color: "#4a3d28", fontWeight: 400 }}>{t.auth.optional}</span></label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="Ej. San Francisco, Oakland, San Jose..."
+              placeholder={t.auth.citySuggestion}
               style={inputStyle}
               autoComplete="address-level2"
             />
           </div>
 
-          <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} />
+          <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} t={t} />
 
           {errorMsg && <ErrorBox msg={errorMsg} />}
 
-          <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
+          <SubmitButton loading={loading} label={t.auth.register} loadingLabel={t.auth.creatingAccount} disabled={!marketingConsent} />
           <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
-            ¿Ya tienes cuenta?{" "}
-            <a href="/auth/login" style={{ color: "#f0c040", textDecoration: "none" }}>Inicia sesión aquí</a>
+            {t.auth.hasAccount}{" "}
+            <a href="/auth/login" style={{ color: "#f0c040", textDecoration: "none" }}>{t.auth.loginHere}</a>
           </p>
         </form>
       )}
@@ -311,13 +300,13 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
       {mode === "phone" && (
         <form onSubmit={handlePhoneSubmit} style={{ display: "grid", gap: "16px" }}>
           <div>
-            <label style={labelStyle}>Nombre completo</label>
+            <label style={labelStyle}>{t.auth.fullName}</label>
             <input type="text" value={phoneName} onChange={(e) => setPhoneName(e.target.value)}
-              placeholder="Tu nombre" style={inputStyle} autoComplete="name" />
+              placeholder={t.auth.yourName} style={inputStyle} autoComplete="name" />
           </div>
 
           <div>
-            <label style={labelStyle}>Teléfono</label>
+            <label style={labelStyle}>{t.auth.phone}</label>
             <input
               type="tel"
               value={phone}
@@ -329,70 +318,70 @@ export default function AuthCard({ type: _type }: { type: "login" | "register" }
           </div>
 
           <div>
-            <label style={labelStyle}>Contraseña</label>
+            <label style={labelStyle}>{t.auth.password}</label>
             <div style={{ position: "relative" }}>
               <input
                 type={showPhonePassword ? "text" : "password"}
                 value={phonePassword}
                 onChange={(e) => setPhonePassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder={t.auth.passwordMin}
                 style={{ ...inputStyle, paddingRight: "44px" }}
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowPhonePassword((v) => !v)}
                 style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a3d28", fontSize: "13px", padding: "4px" }}>
-                {showPhonePassword ? "Ocultar" : "Ver"}
+                {showPhonePassword ? t.auth.hide : t.auth.show}
               </button>
             </div>
           </div>
 
           <div>
-            <label style={labelStyle}>Confirmar contraseña</label>
+            <label style={labelStyle}>{t.auth.confirmPassword}</label>
             <div style={{ position: "relative" }}>
               <input
                 type={showPhoneConfirm ? "text" : "password"}
                 value={phoneConfirmPassword}
                 onChange={(e) => setPhoneConfirmPassword(e.target.value)}
-                placeholder="Repite tu contraseña"
+                placeholder={t.auth.yourPassword}
                 style={{ ...inputStyle, paddingRight: "44px" }}
                 autoComplete="new-password"
               />
               <button type="button" onClick={() => setShowPhoneConfirm((v) => !v)}
                 style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#4a3d28", fontSize: "13px", padding: "4px" }}>
-                {showPhoneConfirm ? "Ocultar" : "Ver"}
+                {showPhoneConfirm ? t.auth.hide : t.auth.show}
               </button>
             </div>
           </div>
 
           <div>
-            <label style={labelStyle}>Equipo favorito <span style={{ color: "#4a3d28", fontWeight: 400 }}>(opcional)</span></label>
+            <label style={labelStyle}>{t.auth.favoriteTeam} <span style={{ color: "#4a3d28", fontWeight: 400 }}>{t.auth.optional}</span></label>
             <TeamsAutocomplete
               value={phoneTeam}
               onChange={setPhoneTeam}
-              placeholder="Ej. América, Chivas, Barcelona..."
+              placeholder={t.auth.favoriteTeamPlaceholder}
             />
           </div>
 
           <div>
-            <label style={labelStyle}>¿En qué ciudad vives? <span style={{ color: "#4a3d28", fontWeight: 400 }}>(opcional)</span></label>
+            <label style={labelStyle}>{t.auth.cityLabel} <span style={{ color: "#4a3d28", fontWeight: 400 }}>{t.auth.optional}</span></label>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="Ej. San Francisco, Oakland, San Jose..."
+              placeholder={t.auth.citySuggestion}
               style={inputStyle}
               autoComplete="address-level2"
             />
           </div>
 
-          <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} />
+          <ConsentCheckbox checked={marketingConsent} onChange={setMarketingConsent} t={t} />
 
           {errorMsg && <ErrorBox msg={errorMsg} />}
 
-          <SubmitButton loading={loading} label="Registrarse" loadingLabel="Creando cuenta…" disabled={!marketingConsent} />
+          <SubmitButton loading={loading} label={t.auth.register} loadingLabel={t.auth.creatingAccount} disabled={!marketingConsent} />
           <p style={{ textAlign: "center", fontSize: "13px", color: "#8a9ab0", margin: 0 }}>
-            ¿Ya tienes cuenta?{" "}
-            <a href="/auth/login" style={{ color: "#f0c040", textDecoration: "none" }}>Inicia sesión aquí</a>
+            {t.auth.hasAccount}{" "}
+            <a href="/auth/login" style={{ color: "#f0c040", textDecoration: "none" }}>{t.auth.loginHere}</a>
           </p>
         </form>
       )}
@@ -440,9 +429,7 @@ function SubmitButton({ loading, label, loadingLabel, disabled }: { loading: boo
   );
 }
 
-function ConsentCheckbox({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
-  const { lang } = useLangStore();
-  const isEs = lang === "es";
+function ConsentCheckbox({ checked, onChange, t }: { checked: boolean; onChange: (v: boolean) => void; t: Translations }) {
   return (
     <label style={{ display: "flex", gap: "10px", alignItems: "flex-start", cursor: "pointer" }}>
       <input
@@ -452,13 +439,13 @@ function ConsentCheckbox({ checked, onChange }: { checked: boolean; onChange: (v
         style={{ marginTop: "2px", accentColor: "#f0c040", flexShrink: 0, width: "16px", height: "16px" }}
       />
       <span style={{ fontSize: "12px", color: "#8a7a50", lineHeight: "1.6" }}>
-        {isEs ? "He leído y acepto la " : "I have read and agree to the "}
+        {t.auth.consentPre}
         <a href="/privacy" style={{ color: "#f0c040", textDecoration: "none" }}>
-          {isEs ? "Política de Privacidad" : "Privacy Policy"}
+          {t.auth.privacyPolicy}
         </a>
-        {isEs ? " y los " : " and "}
+        {t.auth.consentMid}
         <a href="/terms" style={{ color: "#f0c040", textDecoration: "none" }}>
-          {isEs ? "Términos y Condiciones" : "Terms and Conditions"}
+          {t.auth.termsAndConditions}
         </a>
       </span>
     </label>
