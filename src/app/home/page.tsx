@@ -188,14 +188,14 @@ function FanZoneCard({
         {/* Fechas */}
         <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "10px" }}>
           <span style={{ fontSize: "12px", color: "#8a7a50" }}>
-            📅 {translateField(zone.datesOpen, lang)}
+            📅 {lang === "en" && zone.datesOpenEn ? zone.datesOpenEn : translateField(zone.datesOpen, lang)}
           </span>
         </div>
 
         {/* Notas */}
-        {zone.notes && (
+        {(zone.notes || zone.notesEn) && (
           <div style={{ fontSize: "11px", color: "#ffffff", fontStyle: "italic", marginBottom: "10px" }}>
-            {translateField(zone.notes, lang)}
+            {lang === "en" && zone.notesEn ? zone.notesEn : translateField(zone.notes ?? "", lang)}
           </div>
         )}
 

@@ -36,6 +36,9 @@ const db = admin.firestore();
 const now = admin.firestore.FieldValue.serverTimestamp();
 
 // ── Venues nuevos ─────────────────────────────────────────────────────────────
+// BILINGUAL RULE: every new venue MUST include both Spanish and English field variants:
+//   notesEn, foodEn, amenitiesEn, datesOpenEn (and priceEn if price is set).
+// After adding a venue, run: node scripts/translate-fanzones.mjs (add the entry there too).
 const venues = [
   {
     id: "ba-cines-amc",
