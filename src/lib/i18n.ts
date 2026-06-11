@@ -14,7 +14,7 @@ export const translations = {
     },
     home: {
       bannerTitle: "Encuentra dónde ver el Mundial 2026 cerca de ti.",
-      bannerSubtitle: "Fan Zones y Fan Festivals oficiales en USA, Canadá y México.",
+      bannerSubtitle: "Fan Zones y Watch Parties oficiales en el Bay Area",
       countdownLabel: "⏱ Faltan",
       countdownUnits: { days: "d", hours: "h", mins: "m", secs: "s" },
       filterAll: "Todos",
@@ -127,7 +127,7 @@ export const translations = {
     home: {
       bannerTitle: "Find where to watch the 2026 World Cup near you.",
       bannerSubtitle:
-        "Official Fan Zones and Fan Festivals in the USA, Canada and Mexico.",
+        "Official Fan Zones and Watch Parties in the Bay Area",
       countdownLabel: "⏱ Time left",
       countdownUnits: { days: "d", hours: "h", mins: "m", secs: "s" },
       filterAll: "All",

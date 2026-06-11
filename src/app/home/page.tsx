@@ -22,12 +22,6 @@ import { Star } from "lucide-react";
 
 // ── Country helpers ──────────────────────────────────────────────────────────
 
-const COUNTRY_FLAG: Record<string, string> = {
-  usa: "🇺🇸",
-  canada: "🇨🇦",
-  mexico: "🇲🇽",
-  bay_area: "🇺🇸",
-};
 
 function formatCountry(country: string, t: ReturnType<typeof useTranslation>): string {
   if (country === "bay_area") return "Bay Area";
@@ -161,7 +155,7 @@ function FanZoneCard({
         {/* Ciudad + país + distancia */}
         <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: "6px", marginBottom: "8px" }}>
           <span style={{ fontSize: "13px", color: "#8a7a50" }}>
-            {COUNTRY_FLAG[zone.country]} {zone.city}, {countryName}
+            {zone.city}, {countryName}
           </span>
           {dist != null && (
             <span style={{
