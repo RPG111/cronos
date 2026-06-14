@@ -25,7 +25,7 @@ const content = {
       },
       {
         title: "4. Premio del bracket (NO PURCHASE NECESSARY)",
-        body: "NO ES NECESARIO REALIZAR UNA COMPRA PARA PARTICIPAR O GANAR. El premio del bracket del Mundial Cronos Sports consiste en una tarjeta de regalo o premio en efectivo equivalente de $200 USD fijo, patrocinado íntegramente por Cronos Sports. El ganador se determinará por mayor puntuación acumulada en las predicciones del torneo según las reglas publicadas. Cronos Sports se reserva el derecho de modificar el monto del premio hasta la fecha de inicio del torneo. Void where prohibited by law.",
+        body: "NO ES NECESARIO REALIZAR UNA COMPRA PARA PARTICIPAR O GANAR. El premio del bracket del Mundial Cronos Sports consiste en una tarjeta de regalo o premio en efectivo equivalente de $150 USD fijo, patrocinado íntegramente por Cronos Sports. El ganador se determinará por mayor puntuación acumulada en las predicciones del torneo según las reglas publicadas. Cronos Sports se reserva el derecho de modificar el monto del premio hasta la fecha de inicio del torneo. Void where prohibited by law.",
       },
       {
         title: "5. Cambios de fechas y eventos",
@@ -83,7 +83,7 @@ const content = {
       },
       {
         title: "4. Bracket prize (NO PURCHASE NECESSARY)",
-        body: "NO PURCHASE NECESSARY TO ENTER OR WIN. The Cronos Sports World Cup bracket prize consists of a gift card or equivalent cash prize of $200 USD fixed, sponsored entirely by Cronos Sports. The winner will be determined by the highest cumulative score in tournament predictions according to the published rules. Cronos Sports reserves the right to modify the prize amount until the tournament start date. Void where prohibited by law.",
+        body: "NO PURCHASE NECESSARY TO ENTER OR WIN. The Cronos Sports World Cup bracket prize consists of a gift card or equivalent cash prize of $150 USD fixed, sponsored entirely by Cronos Sports. The winner will be determined by the highest cumulative score in tournament predictions according to the published rules. Cronos Sports reserves the right to modify the prize amount until the tournament start date. Void where prohibited by law.",
       },
       {
         title: "5. Date and event changes",

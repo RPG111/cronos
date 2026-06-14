@@ -39,7 +39,7 @@ export interface BracketConfig {
   status: "closed" | "open" | "locked" | "finished";
   opensAt: Timestamp | null;
   locksAt: Timestamp | null;  // kickoff del primer partido de R32
-  prize: string;              // "$200"
+  prize: string;              // "$150"
 }
 
 export const ROUND_POINTS: Record<BracketRound, number> = {

@@ -147,13 +147,13 @@ async function run() {
     status: "closed",
     opensAt: null,
     locksAt: null,
-    prize: "$200",
+    prize: "$150",
   };
   if (configSnap.exists) {
     console.log("  ↺ config (ya existe — sin cambios para preservar status)");
   } else {
     await configRef.set(configData);
-    console.log("  ✓ config  →  status=closed, prize=$200");
+    console.log("  ✓ config  →  status=closed, prize=$150");
   }
 
   // 3. Verificación en vivo

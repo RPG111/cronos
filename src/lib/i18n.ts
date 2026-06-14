@@ -175,7 +175,7 @@ export const translations = {
     },
     bracket: {
       title: "Bracket Challenge",
-      prize: "$200",
+      prize: "$150",
       prizeLabel: "Premio",
       howItWorks: "Cómo funciona",
       howItWorksText: "Predice toda la fase eliminatoria antes del primer partido. Gana puntos por cada acierto. El participante con más puntos al final se lleva el premio.",
@@ -395,7 +395,7 @@ export const translations = {
     },
     bracket: {
       title: "Bracket Challenge",
-      prize: "$200",
+      prize: "$150",
       prizeLabel: "Prize",
       howItWorks: "How it works",
       howItWorksText: "Predict the entire knockout stage before the first match. Earn points for each correct pick. The participant with the most points at the end wins the prize.",
