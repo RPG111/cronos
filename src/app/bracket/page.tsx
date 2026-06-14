@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import { app as firebaseApp } from "@/lib/firebase";
-import { getBracketMatches, getBracketConfig, getUserPick } from "@/lib/firestore/bracket";
+import { getBracketMatches, getBracketConfig, getUserPick, getAllPicks } from "@/lib/firestore/bracket";
 import type { BracketMatch, BracketConfig, BracketPick } from "@/lib/firestore/bracket";
 import { useTranslation } from "@/lib/i18n";
 import BottomNav from "@/components/BottomNav";
@@ -12,6 +12,7 @@ import Header from "@/components/Header";
 import BracketTeaser from "@/components/bracket/BracketTeaser";
 import BracketWizard from "@/components/bracket/BracketWizard";
 import BracketReadOnly from "@/components/bracket/BracketReadOnly";
+import BracketLeaderboard from "@/components/bracket/BracketLeaderboard";
 
 type PageState = "loading" | "ready";
 
@@ -26,6 +27,7 @@ export default function BracketPage() {
   const [pick, setPick] = useState<BracketPick | null>(null);
   const [pickLoading, setPickLoading] = useState(true);
   const [userName, setUserName] = useState<string>("");
+  const [allPicks, setAllPicks] = useState<BracketPick[]>([]);
 
   // Auth listener
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function BracketPage() {
     load().catch(console.error);
   }, []);
 
-  // Load user's picks when user and config are known
+  // Load user's own pick when user and config are known
   useEffect(() => {
     if (!config) return;
     if (config.status === "closed") { setPickLoading(false); return; }
@@ -57,6 +59,13 @@ export default function BracketPage() {
     setUserName(user.displayName ?? user.email ?? "");
   }, [user, config]);
 
+  // Load all picks for leaderboard when bracket is locked/finished
+  useEffect(() => {
+    const s = config?.status;
+    if (s !== "locked" && s !== "finished") return;
+    getAllPicks().then(setAllPicks).catch(console.error);
+  }, [config]);
+
   if (pageState === "loading") {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#060a10" }}>
@@ -67,7 +76,7 @@ export default function BracketPage() {
 
   const status = config?.status ?? "closed";
 
-  // Redirect unauthenticated users away from open bracket
+  // Unauthenticated users visiting an open bracket
   if (status === "open" && !user) {
     return (
       <div className="min-h-screen flex flex-col" style={{ background: "#060a10" }}>
@@ -97,7 +106,7 @@ export default function BracketPage() {
 
         {status === "open" && user && (
           pickLoading
-            ? <div className="flex-1 flex items-center justify-center py-20"><div className="text-sm" style={{ color: "#8a7a50" }}>{t.profile.loading}</div></div>
+            ? <div className="flex items-center justify-center py-20"><div className="text-sm" style={{ color: "#8a7a50" }}>{t.profile.loading}</div></div>
             : <BracketWizard
                 matches={matches}
                 initialPick={pick}
@@ -107,11 +116,23 @@ export default function BracketPage() {
         )}
 
         {(status === "locked" || status === "finished") && (
-          <BracketReadOnly
-            matches={matches}
-            pick={pick}
-            isFinished={status === "finished"}
-          />
+          <div className="flex flex-col gap-6 pb-28">
+            <BracketReadOnly
+              matches={matches}
+              pick={pick}
+              isFinished={status === "finished"}
+            />
+            <div
+              className="mx-4 border-t"
+              style={{ borderColor: "rgba(255,255,255,0.08)" }}
+            />
+            <BracketLeaderboard
+              matches={matches}
+              allPicks={allPicks}
+              currentUserId={user?.uid ?? null}
+              isFinished={status === "finished"}
+            />
+          </div>
         )}
       </main>
       <BottomNav />

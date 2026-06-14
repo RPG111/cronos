@@ -6,6 +6,7 @@ import {
   getDoc,
   getDocs,
   setDoc,
+  updateDoc,
   serverTimestamp,
   type Timestamp,
 } from "firebase/firestore";
@@ -95,8 +96,41 @@ export async function saveUserPick(
   });
 }
 
-// Para el leaderboard futuro — solo admins pueden leer esta colección completa
 export async function getAllPicks(): Promise<BracketPick[]> {
   const snap = await getDocs(collection(db, PICKS_COL));
   return snap.docs.map((d) => d.data() as BracketPick);
+}
+
+// ── Admin-only operations ──────────────────────────────────────────────────────
+
+// Sets match result, propagates winner to next match via feedsInto,
+// and places the loser in "third" for sf-1/sf-2.
+export async function setMatchResult(
+  matchId: string,
+  winner: string,
+  scoreA: number,
+  scoreB: number
+): Promise<void> {
+  const snap = await getDoc(doc(db, MATCHES_COL, matchId));
+  if (!snap.exists()) throw new Error(`Match ${matchId} not found`);
+  const match = { id: snap.id, ...snap.data() } as BracketMatch;
+  const loser = match.teamA === winner ? match.teamB : match.teamA;
+
+  await updateDoc(doc(db, MATCHES_COL, matchId), { winner, scoreA, scoreB });
+
+  if (match.feedsInto) {
+    const field = match.feedsInto.slot === "A" ? "teamA" : "teamB";
+    await updateDoc(doc(db, MATCHES_COL, match.feedsInto.matchId), { [field]: winner });
+  }
+
+  if ((matchId === "sf-1" || matchId === "sf-2") && loser) {
+    const field = matchId === "sf-1" ? "teamA" : "teamB";
+    await updateDoc(doc(db, MATCHES_COL, "third"), { [field]: loser });
+  }
+}
+
+export async function updateBracketConfigStatus(
+  status: BracketConfig["status"]
+): Promise<void> {
+  await updateDoc(doc(db, CONFIG_COL, "config"), { status });
 }
