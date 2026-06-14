@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, User, Map } from "lucide-react";
+import { Home, User, Map, Trophy } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 
 export default function BottomNav() {
@@ -13,6 +13,7 @@ export default function BottomNav() {
   const links = [
     { href: "/map", label: t.nav.map, icon: Map },
     { href: "/home", label: t.nav.home, icon: Home },
+    { href: "/bracket", label: t.nav.bracket, icon: Trophy },
     { href: "/profile", label: t.nav.profile, icon: User },
   ];
 
