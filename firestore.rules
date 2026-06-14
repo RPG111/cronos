@@ -27,9 +27,9 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Picks del bracket — cada usuario lee/escribe solo su propio documento (docId == uid)
+    // Picks del bracket — cualquier usuario autenticado puede leer (para el leaderboard)
     match /wc2026_bracket_picks/{userId} {
-      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 

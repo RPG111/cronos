@@ -15,6 +15,13 @@ import {
   type FanZoneType,
   type FanZoneCountry,
 } from "@/lib/firestore/fanzones";
+import {
+  getBracketMatches,
+  getBracketConfig,
+  setMatchResult,
+  updateBracketConfigStatus,
+} from "@/lib/firestore/bracket";
+import type { BracketMatch, BracketConfig } from "@/lib/firestore/bracket";
 import { seedWorldTeams } from "@/lib/firestore/seedTeams";
 import { seedFanZones, seedNewFanZones, seedBayAreaNewFanZones, patchFanZones, seedBayAreaExpansion2026, patchBayAreaEntryTypes, deleteChampionsSplashThrive, listNonBayAreaFanZones, deleteNonBayAreaFanZones } from "@/lib/firestore/seedFanZones";
 import {
@@ -660,6 +667,254 @@ function AttendeesSection({ events }: { events: AdminEvent[] }) {
           </table>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Bracket Admin Section ───────────────────────────────────────────────────
+
+const BRACKET_ROUND_ORDER = ["r32", "r16", "qf", "sf", "third", "final"] as const;
+const BRACKET_ROUND_LABELS: Record<string, string> = {
+  r32: "Ronda de 32", r16: "Octavos", qf: "Cuartos",
+  sf: "Semifinales", third: "Tercer lugar", final: "Final",
+};
+
+type ResultForm = { winner: string; scoreA: string; scoreB: string };
+
+function BracketAdminSection() {
+  const [matches, setMatches] = useState<BracketMatch[]>([]);
+  const [config, setConfig] = useState<BracketConfig | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [forms, setForms] = useState<Record<string, ResultForm>>({});
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [statusBusy, setStatusBusy] = useState(false);
+
+  async function fetchBracketData() {
+    setLoading(true);
+    setMsg("");
+    try {
+      const [cfg, mts] = await Promise.all([getBracketConfig(), getBracketMatches()]);
+      setConfig(cfg);
+      setMatches(mts);
+      const init: Record<string, ResultForm> = {};
+      for (const m of mts) {
+        init[m.id] = {
+          winner: m.winner ?? "",
+          scoreA: m.scoreA != null ? String(m.scoreA) : "",
+          scoreB: m.scoreB != null ? String(m.scoreB) : "",
+        };
+      }
+      setForms(init);
+    } catch (e: any) {
+      setMsg(`Error cargando: ${e?.message ?? "desconocido"}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function saveResult(matchId: string) {
+    const f = forms[matchId];
+    if (!f?.winner) { setMsg("Selecciona un ganador antes de guardar."); return; }
+    setSavingId(matchId);
+    setMsg("");
+    try {
+      await setMatchResult(matchId, f.winner, Number(f.scoreA) || 0, Number(f.scoreB) || 0);
+      setMsg(`✓ Resultado guardado: ${matchId} → ${f.winner}`);
+      await fetchBracketData();
+    } catch (e: any) {
+      setMsg(`Error: ${e?.message ?? "desconocido"}`);
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  async function changeStatus(status: BracketConfig["status"]) {
+    if (!confirm(`¿Cambiar config.status a "${status}"?`)) return;
+    setStatusBusy(true);
+    setMsg("");
+    try {
+      await updateBracketConfigStatus(status);
+      setConfig((c) => c ? { ...c, status } : null);
+      setMsg(`✓ Status → ${status}`);
+    } catch (e: any) {
+      setMsg(`Error: ${e?.message ?? "desconocido"}`);
+    } finally {
+      setStatusBusy(false);
+    }
+  }
+
+  function setForm(matchId: string, patch: Partial<ResultForm>) {
+    setForms((p) => ({ ...p, [matchId]: { ...p[matchId], ...patch } }));
+  }
+
+  const inp = "rounded-lg border border-white/10 bg-zinc-800/70 px-2 py-1 text-xs text-white outline-none";
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-black/50 p-4">
+      {/* Header */}
+      <div className="mb-3 flex items-center justify-between">
+        <span className="font-semibold text-white/90">Bracket — Resultados</span>
+        <button
+          onClick={fetchBracketData}
+          disabled={loading}
+          className="rounded-lg border border-white/15 bg-zinc-800 px-3 py-1 text-xs text-white hover:bg-zinc-700 transition disabled:opacity-50"
+        >
+          {loading ? "Cargando…" : "↺ Cargar"}
+        </button>
+      </div>
+
+      {/* Status control */}
+      {config && (
+        <div
+          className="mb-4 rounded-lg p-3 flex items-center gap-3 flex-wrap"
+          style={{ background: "rgba(240,192,64,0.07)", border: "1px solid rgba(240,192,64,0.2)" }}
+        >
+          <span className="text-xs text-zinc-400">Status:</span>
+          <span
+            className="rounded-full px-2 py-0.5 text-xs font-semibold"
+            style={{ background: "#110f1a", color: "#f0c040" }}
+          >
+            {config.status}
+          </span>
+          {config.status === "closed" && (
+            <button onClick={() => changeStatus("open")} disabled={statusBusy}
+              className="rounded-lg px-3 py-1 text-xs font-semibold transition disabled:opacity-50"
+              style={{ background: "#f0c040", color: "#060a10" }}>
+              Abrir →
+            </button>
+          )}
+          {config.status === "open" && (
+            <button onClick={() => changeStatus("locked")} disabled={statusBusy}
+              className="rounded-lg px-3 py-1 text-xs font-semibold transition disabled:opacity-50"
+              style={{ background: "#f0c040", color: "#060a10" }}>
+              Bloquear →
+            </button>
+          )}
+          {config.status === "locked" && (
+            <button onClick={() => changeStatus("finished")} disabled={statusBusy}
+              className="rounded-lg px-3 py-1 text-xs font-semibold transition disabled:opacity-50"
+              style={{ background: "#f0c040", color: "#060a10" }}>
+              Finalizar →
+            </button>
+          )}
+          {config.status !== "closed" && (
+            <button onClick={() => changeStatus("closed")} disabled={statusBusy}
+              className="rounded-lg px-3 py-1 text-xs transition disabled:opacity-50"
+              style={{ border: "1px solid #3a1010", background: "#1a0808", color: "#f04040" }}>
+              ← Cerrar
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Message */}
+      {msg && (
+        <p className="mb-3 text-xs" style={{ color: msg.startsWith("Error") ? "#f04040" : "#40c040" }}>
+          {msg}
+        </p>
+      )}
+
+      {matches.length === 0 && !loading && (
+        <p className="text-sm text-zinc-400">Usa "↺ Cargar" para ver los partidos.</p>
+      )}
+
+      {/* Match list grouped by round */}
+      {BRACKET_ROUND_ORDER.map((round) => {
+        const roundMatches = matches
+          .filter((m) => m.round === round)
+          .sort((a, b) => a.matchNumber - b.matchNumber);
+        if (!roundMatches.length) return null;
+
+        return (
+          <div key={round} className="mb-5">
+            <h3
+              className="text-xs font-semibold uppercase tracking-widest mb-2"
+              style={{ color: "#a0905a" }}
+            >
+              {BRACKET_ROUND_LABELS[round]}
+            </h3>
+            <div className="flex flex-col gap-2">
+              {roundMatches.map((m) => {
+                const f = forms[m.id] ?? { winner: "", scoreA: "", scoreB: "" };
+                const isSaving = savingId === m.id;
+                const hasTeams = m.teamA && m.teamB;
+
+                return (
+                  <div
+                    key={m.id}
+                    className="rounded-lg p-3 flex flex-col gap-2"
+                    style={{
+                      background: m.winner
+                        ? "rgba(240,192,64,0.05)"
+                        : "rgba(255,255,255,0.03)",
+                      border: m.winner
+                        ? "1px solid rgba(240,192,64,0.2)"
+                        : "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    {/* Teams row */}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-xs text-zinc-600 w-14">{m.id}</span>
+                      <span className="text-sm text-white">{m.teamA ?? <span className="text-zinc-600">TBD</span>}</span>
+                      <span className="text-xs text-zinc-600">vs</span>
+                      <span className="text-sm text-white">{m.teamB ?? <span className="text-zinc-600">TBD</span>}</span>
+                      {m.winner && (
+                        <span
+                          className="ml-auto rounded-full px-2 py-0.5 text-xs font-semibold"
+                          style={{ background: "rgba(240,192,64,0.15)", color: "#f0c040" }}
+                        >
+                          ✓ {m.winner} {m.scoreA}–{m.scoreB}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Result inputs */}
+                    {hasTeams && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <select
+                          value={f.winner}
+                          onChange={(e) => setForm(m.id, { winner: e.target.value })}
+                          className={inp + " flex-1 min-w-[120px]"}
+                        >
+                          <option value="">— Ganador —</option>
+                          <option value={m.teamA!}>{m.teamA}</option>
+                          <option value={m.teamB!}>{m.teamB}</option>
+                        </select>
+                        <input
+                          type="number" min={0} max={20} placeholder="A"
+                          value={f.scoreA}
+                          onChange={(e) => setForm(m.id, { scoreA: e.target.value })}
+                          className={inp + " w-14 text-center"}
+                        />
+                        <span className="text-zinc-600 text-xs">–</span>
+                        <input
+                          type="number" min={0} max={20} placeholder="B"
+                          value={f.scoreB}
+                          onChange={(e) => setForm(m.id, { scoreB: e.target.value })}
+                          className={inp + " w-14 text-center"}
+                        />
+                        <button
+                          onClick={() => saveResult(m.id)}
+                          disabled={isSaving || !f.winner}
+                          className="rounded-lg px-3 py-1 text-xs font-semibold transition disabled:opacity-50"
+                          style={{ background: "#f0c040", color: "#060a10" }}
+                        >
+                          {isSaving ? "…" : "Guardar"}
+                        </button>
+                      </div>
+                    )}
+
+                    {!hasTeams && (
+                      <p className="text-xs text-zinc-600">Equipos pendientes de definir</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1396,6 +1651,9 @@ export default function AdminPage() {
               </div>
             )}
           </div>
+
+          {/* ── Bracket — Resultados ── */}
+          <BracketAdminSection />
 
           {/* ── Equipos — Seed ── */}
           <div className="rounded-xl border border-white/10 bg-black/50 p-4">
