@@ -16,6 +16,23 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Bracket Challenge — partidos y config: lectura pública, escritura solo admins
+    match /wc2026_bracket_matches/{matchId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /wc2026_bracket_config/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Picks del bracket — cada usuario lee/escribe solo su propio documento (docId == uid)
+    match /wc2026_bracket_picks/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
     // Eventos deportivos — lectura pública
     match /events/{eventId} {
       allow read: if true;
