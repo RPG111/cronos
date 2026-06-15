@@ -223,6 +223,9 @@ export const translations = {
       leaderboardEmpty: "Aún no hay participantes.",
       leaderboardWinner: "🏆 Ganador del premio",
       leaderboardTiebreak: "Desempate por marcador",
+      heroTitle: "Predice el Mundial y gana",
+      heroSub: "Se abre el 27 de junio",
+      heroBtn: "Entrar",
     },
   },
   en: {
@@ -443,6 +446,9 @@ export const translations = {
       leaderboardEmpty: "No participants yet.",
       leaderboardWinner: "🏆 Prize winner",
       leaderboardTiebreak: "Tiebreaker by final score",
+      heroTitle: "Predict the World Cup and win",
+      heroSub: "Opens June 27",
+      heroBtn: "Enter",
     },
   },
 };
