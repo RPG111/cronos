@@ -13,11 +13,13 @@ import {
   distanceKm,
   type FanZone,
 } from "../../lib/firestore/fanzones";
+import { getBracketConfig, type BracketConfig } from "../../lib/firestore/bracket";
 import { useGeoStore, useLangStore } from "../../lib/store";
 import { useTranslation, translateField, type Translations } from "../../lib/i18n";
 import BottomNav from "../../components/BottomNav";
 import Header from "@/components/Header";
 import RestaurantLead from "@/components/RestaurantLead";
+import BracketHeroBanner from "@/components/bracket/BracketHeroBanner";
 import { Star } from "lucide-react";
 
 // ── Country helpers ──────────────────────────────────────────────────────────
@@ -295,12 +297,12 @@ export default function HomePage() {
   const router = useRouter();
   const [zones, setZones] = useState<FanZone[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tournamentFilter, setTournamentFilter] = useState<"champions_2026" | "world_cup_2026">("world_cup_2026");
   const [searchQuery, setSearchQuery] = useState("");
   const [dateFilter, setDateFilter] = useState<string | null>(null);
   const [uid, setUid] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [leadOpen, setLeadOpen] = useState(false);
+  const [bracketConfig, setBracketConfig] = useState<BracketConfig | null | undefined>(undefined);
 
   const { userLat, userLng } = useGeoStore();
   const { lang } = useLangStore();
@@ -325,6 +327,13 @@ export default function HomePage() {
         setSavedIds(new Set());
       }
     });
+  }, []);
+
+  // Cargar bracket config para el hero banner
+  useEffect(() => {
+    getBracketConfig()
+      .then(setBracketConfig)
+      .catch(() => setBracketConfig(null));
   }, []);
 
   // Cargar fan zones una vez
@@ -353,7 +362,7 @@ export default function HomePage() {
     const q = searchQuery.trim().toLowerCase();
     return sorted.filter((z) => {
       const zt = z.tournament ?? "world_cup_2026";
-      if (zt !== tournamentFilter) return false;
+      if (zt !== "world_cup_2026") return false;
       if (dateFilter) {
         if (!z.startDate || !z.endDate) return false;
         if (dateFilter < z.startDate || dateFilter > z.endDate) return false;
@@ -364,7 +373,7 @@ export default function HomePage() {
       }
       return true;
     });
-  }, [sorted, dateFilter, searchQuery, tournamentFilter]);
+  }, [sorted, dateFilter, searchQuery]);
 
   async function handleToggleSave(id: string) {
     if (!uid) { alert(t.home.loginToSave); return; }
@@ -403,6 +412,13 @@ export default function HomePage() {
 
       <div style={{ maxWidth: "520px", margin: "0 auto", padding: "24px 16px" }}>
 
+        {/* ── Bracket Hero Banner ── */}
+        {bracketConfig !== undefined &&
+          bracketConfig !== null &&
+          bracketConfig.status !== "finished" && (
+            <BracketHeroBanner />
+          )}
+
         {/* ── Sección 1: Banner ── */}
         <div style={{ marginBottom: "28px" }}>
           <h2 style={{ fontSize: "22px", fontWeight: 700, color: "#f0f4ff", margin: 0, lineHeight: 1.3 }}>
@@ -437,57 +453,6 @@ export default function HomePage() {
             </div>
           )}
 
-        </div>
-
-        {/* ── Sección 2: Selector de torneo ── */}
-        <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
-          {([
-            // HIDDEN — restaurar cuando se reactive Champions League
-            // { key: "champions_2026", label: "Champions League" },
-            { key: "world_cup_2026", label: "World Cup 2026" },
-          ] as const).map(({ key, label }) => {
-            const active = tournamentFilter === key;
-            return (
-              <div key={key} className="card-chrome-wrap" style={{ borderRadius: "20px", flex: 1 }}>
-                <button
-                  onClick={() => {
-                    setTournamentFilter(key);
-                    setDateFilter(null);
-                    setSearchQuery("");
-                  }}
-                  style={active ? {
-                    background: "#110f1a",
-                    borderRadius: "20px",
-                    padding: "11px 28px",
-                    fontSize: "15px",
-                    fontWeight: 700,
-                    color: "#f0c040",
-                    border: "none",
-                    cursor: "pointer",
-                    width: "100%",
-                  } : {
-                    background: "#09080f",
-                    borderRadius: "20px",
-                    padding: "11px 28px",
-                    fontSize: "15px",
-                    fontWeight: 500,
-                    color: "#8a7a50",
-                    border: "none",
-                    cursor: "pointer",
-                    width: "100%",
-                  }}
-                >
-                  <span style={{
-                    color: "#ffffff",
-                    fontWeight: 700,
-                    ...(active ? {} : { opacity: 0.6 }),
-                  }}>
-                    {label}
-                  </span>
-                </button>
-              </div>
-            );
-          })}
         </div>
 
         {/* ── Sección 3: Filtros + Lista ── */}
