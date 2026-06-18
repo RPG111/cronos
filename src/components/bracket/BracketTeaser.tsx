@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Trophy } from "lucide-react";
+import { Trophy, Info } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 
 interface Props {
@@ -76,6 +76,24 @@ export default function BracketTeaser({ isLoggedIn }: Props) {
           ))}
         </div>
       </div>
+
+      {/* Disclaimer de elegibilidad */}
+      {(() => {
+        const parts = b.eligibilityText.split("{prize}");
+        return (
+          <div
+            className="w-full max-w-sm rounded-2xl p-4 flex gap-3"
+            style={{ background: "rgba(240,192,64,0.06)", border: "1px solid rgba(240,192,64,0.3)" }}
+          >
+            <Info size={15} style={{ color: "#f0c040", flexShrink: 0, marginTop: 2 }} />
+            <p className="text-xs leading-relaxed" style={{ color: "#b09a68" }}>
+              {parts[0]}
+              <span style={{ color: "#f0c040", fontWeight: 600 }}>{b.prize}</span>
+              {parts[1]}
+            </p>
+          </div>
+        );
+      })()}
 
       {/* CTA */}
       <div className="w-full max-w-sm">

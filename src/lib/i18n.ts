@@ -226,6 +226,7 @@ export const translations = {
       heroTitle: "Predice el Mundial y gana",
       heroSub: "Se abre el 27 de junio",
       heroBtn: "Entrar",
+      eligibilityText: "📍 Solo para residentes del Bay Area. El premio de {prize} se debe recoger en persona. Si participas desde fuera del Bay Area y ganas, no podrás reclamar el premio.",
     },
   },
   en: {
@@ -449,6 +450,7 @@ export const translations = {
       heroTitle: "Predict the World Cup and win",
       heroSub: "Opens June 27",
       heroBtn: "Enter",
+      eligibilityText: "📍 Bay Area residents only. The {prize} prize must be picked up in person. If you participate from outside the Bay Area and win, you won't be able to claim the prize.",
     },
   },
 };
